@@ -11,16 +11,28 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 class LoginController extends GetxController {
-  Rx<TextEditingController> phoneNumberController = TextEditingController().obs;
-  RxString countryCode = "+1".obs;
+  late TextEditingController phoneNumberController;
+  RxString countryCode = "+212".obs;
 
   Rx<GlobalKey<FormState>> formKey = GlobalKey<FormState>().obs;
+
+  @override
+  void onInit() {
+    phoneNumberController = TextEditingController();
+    super.onInit();
+  }
+
+  @override
+  void onClose() {
+    phoneNumberController.dispose();
+    super.onClose();
+  }
 
   Future<void> sendCode() async {
     ShowToastDialog.showLoader("Please wait");
     await FirebaseAuth.instance
         .verifyPhoneNumber(
-      phoneNumber: countryCode + phoneNumberController.value.text,
+      phoneNumber: countryCode + phoneNumberController.text,
       verificationCompleted: (PhoneAuthCredential credential) {},
       verificationFailed: (FirebaseAuthException e) {
         debugPrint("FirebaseAuthException--->${e.message}");
@@ -35,7 +47,7 @@ class LoginController extends GetxController {
         ShowToastDialog.closeLoader();
         Get.to(const OtpScreen(), arguments: {
           "countryCode": countryCode.value,
-          "phoneNumber": phoneNumberController.value.text,
+          "phoneNumber": phoneNumberController.text,
           "verificationId": verificationId,
         });
       },
@@ -44,7 +56,8 @@ class LoginController extends GetxController {
         .catchError((error) {
       debugPrint("catchError--->$error");
       ShowToastDialog.closeLoader();
-      ShowToastDialog.showToast("You have try many time please send otp after some time");
+      ShowToastDialog.showToast(
+          "You have try many time please send otp after some time");
     });
   }
 
@@ -62,7 +75,8 @@ class LoginController extends GetxController {
       final credential = GoogleAuthProvider.credential(
         idToken: googleAuth.idToken,
       );
-      final userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+      final userCredential =
+          await FirebaseAuth.instance.signInWithCredential(credential);
 
       return userCredential;
     } catch (e) {
@@ -74,7 +88,8 @@ class LoginController extends GetxController {
   Future<Map<String, dynamic>?> signInWithApple() async {
     try {
       // Request credential for the currently signed in Apple account.
-      AuthorizationCredentialAppleID appleCredential = await SignInWithApple.getAppleIDCredential(
+      AuthorizationCredentialAppleID appleCredential =
+          await SignInWithApple.getAppleIDCredential(
         scopes: [
           AppleIDAuthorizationScopes.email,
           AppleIDAuthorizationScopes.fullName,
@@ -83,12 +98,18 @@ class LoginController extends GetxController {
       print(appleCredential);
 
       // Create an `OAuthCredential` from the credential returned by Apple.
-      final oauthCredential = OAuthProvider("apple.com").credential(idToken: appleCredential.identityToken, accessToken: appleCredential.authorizationCode);
+      final oauthCredential = OAuthProvider("apple.com").credential(
+          idToken: appleCredential.identityToken,
+          accessToken: appleCredential.authorizationCode);
 
       // Sign in the user with Firebase. If the nonce we generated earlier does
       // not match the nonce in `appleCredential.identityToken`, sign in will fail.
-      UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(oauthCredential);
-      return {"appleCredential": appleCredential, "userCredential": userCredential};
+      UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithCredential(oauthCredential);
+      return {
+        "appleCredential": appleCredential,
+        "userCredential": userCredential
+      };
     } catch (e) {
       debugPrint(e.toString());
     }
@@ -96,9 +117,11 @@ class LoginController extends GetxController {
   }
 
   String generateNonce([int length = 32]) {
-    const charset = '0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._';
+    const charset =
+        '0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._';
     final random = Random.secure();
-    return List.generate(length, (_) => charset[random.nextInt(charset.length)]).join();
+    return List.generate(length, (_) => charset[random.nextInt(charset.length)])
+        .join();
   }
 
   /// Returns the sha256 hash of [input] in hex notation.

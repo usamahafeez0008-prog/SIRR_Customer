@@ -9,7 +9,7 @@ class AppColors {
   static const Color moroccoText = Color(0xFF1A1A1A);
 
   static Color darksecondprimary = Color(0xFF1D7041); //0xff000000
-  static Color lightsecondprimary = Color(0xff000000);
+  static Color lightsecondprimary = Color(0xFF1D7041);
 
   static const Color background = Color(0xffFFFFFF);
   static const Color darkBackground = Color(0xff191B1A);

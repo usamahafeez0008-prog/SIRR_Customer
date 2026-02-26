@@ -14,7 +14,7 @@ import 'package:customer/themes/app_colors.dart';
 import 'package:customer/themes/responsive.dart';
 import 'package:customer/ui/chat_screen/FullScreenImageViewer.dart';
 import 'package:customer/ui/chat_screen/FullScreenVideoViewer.dart';
-import 'package:customer/ui/dashboard_screen.dart';
+import 'package:customer/ui/auth_screen/dummay_screen.dart';
 import 'package:customer/utils/DarkThemeProvider.dart';
 import 'package:customer/utils/fire_store_utils.dart';
 import 'package:flutter/cupertino.dart';
@@ -38,7 +38,17 @@ class ChatScreens extends StatefulWidget {
   final String? driverProfileImage;
   final String? token;
 
-  const ChatScreens({Key? key, this.orderId, this.customerId, this.customerName, this.driverName, this.driverId, this.customerProfileImage, this.driverProfileImage, this.token}) : super(key: key);
+  const ChatScreens(
+      {Key? key,
+      this.orderId,
+      this.customerId,
+      this.customerName,
+      this.driverName,
+      this.driverId,
+      this.customerProfileImage,
+      this.driverProfileImage,
+      this.token})
+      : super(key: key);
 
   @override
   State<ChatScreens> createState() => _ChatScreensState();
@@ -55,7 +65,8 @@ class _ChatScreensState extends State<ChatScreens> {
   }
 
   Future<void> setSeen() async {
-    FireStoreUtils.setDriverChatSeen(orderId: widget.orderId ?? '', driverId: widget.driverId ?? '');
+    FireStoreUtils.setDriverChatSeen(
+        orderId: widget.orderId ?? '', driverId: widget.driverId ?? '');
   }
 
   @override
@@ -67,7 +78,8 @@ class _ChatScreensState extends State<ChatScreens> {
   Future<void> startRecording() async {
     if (await record?.hasPermission() == true) {
       final dir = await getTemporaryDirectory();
-      recordedFilePath = '${dir.path}/voice_${DateTime.now().millisecondsSinceEpoch}.m4a';
+      recordedFilePath =
+          '${dir.path}/voice_${DateTime.now().millisecondsSinceEpoch}.m4a';
       await record?.start(
           const RecordConfig(
             encoder: AudioEncoder.aacLc,
@@ -100,10 +112,14 @@ class _ChatScreensState extends State<ChatScreens> {
     return Scaffold(
       appBar: AppBar(
         elevation: 2,
-        title: Text("${widget.driverName.toString()}\n#${widget.orderId.toString()}", maxLines: 2, style: GoogleFonts.poppins(color: Colors.white, fontSize: 14)),
+        title: Text(
+            "${widget.driverName.toString()}\n#${widget.orderId.toString()}",
+            maxLines: 2,
+            style: GoogleFonts.poppins(color: Colors.white, fontSize: 14)),
         leading: InkWell(
             onTap: () {
-              Get.offAll(DashBoardScreen());
+              // Get.offAll(DashBoardScreen());
+              Get.offAll(const DummayScreen());
             },
             child: const Icon(
               Icons.arrow_back,
@@ -119,10 +135,16 @@ class _ChatScreensState extends State<ChatScreens> {
                   FocusScope.of(context).unfocus();
                 },
                 child: StreamBuilder<QuerySnapshot>(
-                    stream: FirebaseFirestore.instance.collection(CollectionName.chat).doc(widget.orderId).collection("thread").orderBy('createdAt', descending: true).snapshots(),
+                    stream: FirebaseFirestore.instance
+                        .collection(CollectionName.chat)
+                        .doc(widget.orderId)
+                        .collection("thread")
+                        .orderBy('createdAt', descending: true)
+                        .snapshots(),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Constant.loader(isDarkTheme: themeChange.getThem());
+                        return Constant.loader(
+                            isDarkTheme: themeChange.getThem());
                       }
                       if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                         return SizedBox();
@@ -132,8 +154,13 @@ class _ChatScreensState extends State<ChatScreens> {
                           reverse: true,
                           itemCount: docs.length,
                           itemBuilder: (context, index) {
-                            ConversationModel inboxModel = ConversationModel.fromJson(docs[index].data() as Map<String, dynamic>);
-                            return chatItemView(inboxModel.senderId == FireStoreUtils.getCurrentUid(), inboxModel);
+                            ConversationModel inboxModel =
+                                ConversationModel.fromJson(
+                                    docs[index].data() as Map<String, dynamic>);
+                            return chatItemView(
+                                inboxModel.senderId ==
+                                    FireStoreUtils.getCurrentUid(),
+                                inboxModel);
                           });
                     }),
               ),
@@ -149,12 +176,15 @@ class _ChatScreensState extends State<ChatScreens> {
                     keyboardType: TextInputType.text,
                     textCapitalization: TextCapitalization.sentences,
                     controller: _messageController,
-                    cursorColor: themeChange.getThem() ? AppColors.darksecondprimary : AppColors.lightsecondprimary,
+                    cursorColor: themeChange.getThem()
+                        ? AppColors.darksecondprimary
+                        : AppColors.lightsecondprimary,
                     decoration: InputDecoration(
                         contentPadding: const EdgeInsets.only(left: 10),
                         filled: true,
                         disabledBorder: OutlineInputBorder(
-                          borderRadius: const BorderRadius.all(Radius.circular(30)),
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(30)),
                           borderSide: BorderSide(
                               color: isStartRecording == true
                                   ? themeChange.getThem()
@@ -166,11 +196,17 @@ class _ChatScreensState extends State<ChatScreens> {
                               width: isStartRecording == true ? 3 : 1),
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderRadius: const BorderRadius.all(Radius.circular(30)),
-                          borderSide: BorderSide(color: themeChange.getThem() ? AppColors.darksecondprimary : AppColors.lightsecondprimary, width: isStartRecording == true ? 3 : 1),
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(30)),
+                          borderSide: BorderSide(
+                              color: themeChange.getThem()
+                                  ? AppColors.darksecondprimary
+                                  : AppColors.lightsecondprimary,
+                              width: isStartRecording == true ? 3 : 1),
                         ),
                         enabledBorder: OutlineInputBorder(
-                          borderRadius: const BorderRadius.all(Radius.circular(30)),
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(30)),
                           borderSide: BorderSide(
                               color: isStartRecording == true
                                   ? themeChange.getThem()
@@ -182,14 +218,18 @@ class _ChatScreensState extends State<ChatScreens> {
                               width: isStartRecording == true ? 3 : 1),
                         ),
                         errorBorder: OutlineInputBorder(
-                          borderRadius: const BorderRadius.all(Radius.circular(30)),
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(30)),
                           borderSide: BorderSide(
-                            color: themeChange.getThem() ? AppColors.darkTextFieldBorder : AppColors.textFieldBorder,
+                            color: themeChange.getThem()
+                                ? AppColors.darkTextFieldBorder
+                                : AppColors.textFieldBorder,
                             width: isStartRecording == true ? 3 : 1,
                           ),
                         ),
                         border: OutlineInputBorder(
-                          borderRadius: const BorderRadius.all(Radius.circular(30)),
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(30)),
                           borderSide: BorderSide(
                             color: isStartRecording == true
                                 ? themeChange.getThem()
@@ -215,9 +255,13 @@ class _ChatScreensState extends State<ChatScreens> {
                                 final path = await stopRecording();
                                 if (path != null) {
                                   ShowToastDialog.showLoader("Please wait");
-                                  String? url = await Constant().uploadVoiceMessage(path);
-                                  final duration = await player.setFilePath(path);
-                                  _sendMessage(_messageController.text, Url(url: url), '', 'voice', voiceTimer: duration?.inSeconds);
+                                  String? url =
+                                      await Constant().uploadVoiceMessage(path);
+                                  final duration =
+                                      await player.setFilePath(path);
+                                  _sendMessage(_messageController.text,
+                                      Url(url: url), '', 'voice',
+                                      voiceTimer: duration?.inSeconds);
                                   ShowToastDialog.closeLoader();
                                   _messageController.clear();
                                   setState(() {});
@@ -235,15 +279,19 @@ class _ChatScreensState extends State<ChatScreens> {
                             IconButton(
                               onPressed: () async {
                                 if (_messageController.text.isNotEmpty) {
-                                  _sendMessage(_messageController.text, null, '', 'text');
+                                  _sendMessage(_messageController.text, null,
+                                      '', 'text');
                                   _messageController.clear();
                                 } else {
-                                  ShowToastDialog.showToast("Please enter text".tr);
+                                  ShowToastDialog.showToast(
+                                      "Please enter text".tr);
                                 }
                               },
                               icon: Icon(
                                 Icons.send_rounded,
-                                color: themeChange.getThem() ? AppColors.darksecondprimary : AppColors.lightsecondprimary,
+                                color: themeChange.getThem()
+                                    ? AppColors.darksecondprimary
+                                    : AppColors.lightsecondprimary,
                               ),
                             ),
                           ],
@@ -261,9 +309,13 @@ class _ChatScreensState extends State<ChatScreens> {
                                       ? AppColors.background
                                       : AppColors.darkTextFieldBorder),
                         ),
-                        hintText: isStartRecording == true ? 'Start Recording...'.tr : 'Start typing ...'.tr,
+                        hintText: isStartRecording == true
+                            ? 'Start Recording...'.tr
+                            : 'Start typing ...'.tr,
                         hintStyle: TextStyle(
-                            fontWeight: isStartRecording == true ? FontWeight.bold : FontWeight.w600,
+                            fontWeight: isStartRecording == true
+                                ? FontWeight.bold
+                                : FontWeight.w600,
                             color: isStartRecording == true
                                 ? themeChange.getThem()
                                     ? AppColors.darksecondprimary
@@ -303,14 +355,21 @@ class _ChatScreensState extends State<ChatScreens> {
                       data.messageType == "text"
                           ? Container(
                               decoration: BoxDecoration(
-                                color: themeChange.getThem() ? AppColors.darksecondprimary : AppColors.lightsecondprimary,
-                                borderRadius: const BorderRadius.only(topLeft: Radius.circular(10), topRight: Radius.circular(10), bottomLeft: Radius.circular(10)),
+                                color: themeChange.getThem()
+                                    ? AppColors.darksecondprimary
+                                    : AppColors.lightsecondprimary,
+                                borderRadius: const BorderRadius.only(
+                                    topLeft: Radius.circular(10),
+                                    topRight: Radius.circular(10),
+                                    bottomLeft: Radius.circular(10)),
                               ),
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 10),
                               child: Text(
                                 data.message.toString(),
                                 style: TextStyle(
-                                    color: data.senderId == FireStoreUtils.getCurrentUid()
+                                    color: data.senderId ==
+                                            FireStoreUtils.getCurrentUid()
                                         ? themeChange.getThem()
                                             ? Colors.black
                                             : Colors.white
@@ -319,10 +378,16 @@ class _ChatScreensState extends State<ChatScreens> {
                             )
                           : Container(
                               decoration: BoxDecoration(
-                                color: themeChange.getThem() ? AppColors.darksecondprimary : AppColors.lightsecondprimary,
-                                borderRadius: const BorderRadius.only(topLeft: Radius.circular(10), topRight: Radius.circular(10), bottomLeft: Radius.circular(10)),
+                                color: themeChange.getThem()
+                                    ? AppColors.darksecondprimary
+                                    : AppColors.lightsecondprimary,
+                                borderRadius: const BorderRadius.only(
+                                    topLeft: Radius.circular(10),
+                                    topRight: Radius.circular(10),
+                                    bottomLeft: Radius.circular(10)),
                               ),
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 10),
                               child: data.messageType == "image"
                                   ? ConstrainedBox(
                                       constraints: const BoxConstraints(
@@ -330,24 +395,36 @@ class _ChatScreensState extends State<ChatScreens> {
                                         maxWidth: 200,
                                       ),
                                       child: ClipRRect(
-                                        borderRadius: const BorderRadius.only(topLeft: Radius.circular(10), topRight: Radius.circular(10), bottomLeft: Radius.circular(10)),
-                                        child: Stack(alignment: Alignment.center, children: [
-                                          GestureDetector(
-                                            onTap: () {
-                                              Get.to(FullScreenImageViewer(
-                                                imageUrl: data.url!.url,
-                                              ));
-                                            },
-                                            child: Hero(
-                                              tag: data.url!.url,
-                                              child: CachedNetworkImage(
-                                                imageUrl: data.url!.url,
-                                                placeholder: (context, url) => Constant.loader(isDarkTheme: themeChange.getThem()),
-                                                errorWidget: (context, url, error) => const Icon(Icons.error),
+                                        borderRadius: const BorderRadius.only(
+                                            topLeft: Radius.circular(10),
+                                            topRight: Radius.circular(10),
+                                            bottomLeft: Radius.circular(10)),
+                                        child: Stack(
+                                            alignment: Alignment.center,
+                                            children: [
+                                              GestureDetector(
+                                                onTap: () {
+                                                  Get.to(FullScreenImageViewer(
+                                                    imageUrl: data.url!.url,
+                                                  ));
+                                                },
+                                                child: Hero(
+                                                  tag: data.url!.url,
+                                                  child: CachedNetworkImage(
+                                                    imageUrl: data.url!.url,
+                                                    placeholder: (context,
+                                                            url) =>
+                                                        Constant.loader(
+                                                            isDarkTheme:
+                                                                themeChange
+                                                                    .getThem()),
+                                                    errorWidget: (context, url,
+                                                            error) =>
+                                                        const Icon(Icons.error),
+                                                  ),
+                                                ),
                                               ),
-                                            ),
-                                          ),
-                                        ]),
+                                            ]),
                                       ))
                                   : data.messageType == "voice"
                                       ? VoiceBubble(
@@ -379,8 +456,10 @@ class _ChatScreensState extends State<ChatScreens> {
                             width: Responsive.width(5, context),
                             imageUrl: widget.customerProfileImage ?? '',
                             fit: BoxFit.cover,
-                            placeholder: (context, url) => Constant.loader(isDarkTheme: themeChange.getThem()),
-                            errorWidget: (context, url, error) => Image.network(Constant.userPlaceHolder),
+                            placeholder: (context, url) => Constant.loader(
+                                isDarkTheme: themeChange.getThem()),
+                            errorWidget: (context, url, error) =>
+                                Image.network(Constant.userPlaceHolder),
                           ),
                         ),
                       ),
@@ -391,11 +470,23 @@ class _ChatScreensState extends State<ChatScreens> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      Text(Constant.dateAndTimeFormatTimestamp(data.createdAt), style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.w400)),
+                      Text(Constant.dateAndTimeFormatTimestamp(data.createdAt),
+                          style: GoogleFonts.poppins(
+                              fontSize: 10, fontWeight: FontWeight.w400)),
                       SizedBox(width: 5),
                       data.seen == true
-                          ? Text("✓✓", style: GoogleFonts.poppins(fontSize: 10, color: themeChange.getThem() ? AppColors.darksecondprimary : AppColors.lightsecondprimary, fontWeight: FontWeight.w400))
-                          : Text("✓", style: GoogleFonts.poppins(fontSize: 10, color: AppColors.subTitleColor, fontWeight: FontWeight.w400)),
+                          ? Text("✓✓",
+                              style: GoogleFonts.poppins(
+                                  fontSize: 10,
+                                  color: themeChange.getThem()
+                                      ? AppColors.darksecondprimary
+                                      : AppColors.lightsecondprimary,
+                                  fontWeight: FontWeight.w400))
+                          : Text("✓",
+                              style: GoogleFonts.poppins(
+                                  fontSize: 10,
+                                  color: AppColors.subTitleColor,
+                                  fontWeight: FontWeight.w400)),
                     ],
                   ),
                 ],
@@ -417,18 +508,26 @@ class _ChatScreensState extends State<ChatScreens> {
                           width: Responsive.width(5, context),
                           imageUrl: widget.driverProfileImage ?? '',
                           fit: BoxFit.cover,
-                          placeholder: (context, url) => Constant.loader(isDarkTheme: themeChange.getThem()),
-                          errorWidget: (context, url, error) => Image.network(Constant.userPlaceHolder),
+                          placeholder: (context, url) => Constant.loader(
+                              isDarkTheme: themeChange.getThem()),
+                          errorWidget: (context, url, error) =>
+                              Image.network(Constant.userPlaceHolder),
                         ),
                       ),
                     ),
                     data.messageType == "text"
                         ? Container(
                             decoration: BoxDecoration(
-                              borderRadius: const BorderRadius.only(topLeft: Radius.circular(10), topRight: Radius.circular(10), bottomRight: Radius.circular(10)),
-                              color: themeChange.getThem() ? AppColors.darkTextFieldBorder : AppColors.onBoarding,
+                              borderRadius: const BorderRadius.only(
+                                  topLeft: Radius.circular(10),
+                                  topRight: Radius.circular(10),
+                                  bottomRight: Radius.circular(10)),
+                              color: themeChange.getThem()
+                                  ? AppColors.darkTextFieldBorder
+                                  : AppColors.onBoarding,
                             ),
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 10),
                             child: Text(
                               data.message.toString(),
                               style: GoogleFonts.poppins(color: Colors.black),
@@ -436,10 +535,16 @@ class _ChatScreensState extends State<ChatScreens> {
                           )
                         : Container(
                             decoration: BoxDecoration(
-                              borderRadius: const BorderRadius.only(topLeft: Radius.circular(10), topRight: Radius.circular(10), bottomRight: Radius.circular(10)),
-                              color: themeChange.getThem() ? AppColors.darkTextFieldBorder : AppColors.onBoarding,
+                              borderRadius: const BorderRadius.only(
+                                  topLeft: Radius.circular(10),
+                                  topRight: Radius.circular(10),
+                                  bottomRight: Radius.circular(10)),
+                              color: themeChange.getThem()
+                                  ? AppColors.darkTextFieldBorder
+                                  : AppColors.onBoarding,
                             ),
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 10),
                             child: data.messageType == "image"
                                 ? ConstrainedBox(
                                     constraints: const BoxConstraints(
@@ -447,24 +552,35 @@ class _ChatScreensState extends State<ChatScreens> {
                                       maxWidth: 200,
                                     ),
                                     child: ClipRRect(
-                                      borderRadius: const BorderRadius.only(topLeft: Radius.circular(10), topRight: Radius.circular(10), bottomRight: Radius.circular(10)),
-                                      child: Stack(alignment: Alignment.center, children: [
-                                        GestureDetector(
-                                          onTap: () {
-                                            Get.to(FullScreenImageViewer(
-                                              imageUrl: data.url!.url,
-                                            ));
-                                          },
-                                          child: Hero(
-                                            tag: data.url!.url,
-                                            child: CachedNetworkImage(
-                                              imageUrl: data.url!.url,
-                                              placeholder: (context, url) => Constant.loader(isDarkTheme: themeChange.getThem()),
-                                              errorWidget: (context, url, error) => const Icon(Icons.error),
+                                      borderRadius: const BorderRadius.only(
+                                          topLeft: Radius.circular(10),
+                                          topRight: Radius.circular(10),
+                                          bottomRight: Radius.circular(10)),
+                                      child: Stack(
+                                          alignment: Alignment.center,
+                                          children: [
+                                            GestureDetector(
+                                              onTap: () {
+                                                Get.to(FullScreenImageViewer(
+                                                  imageUrl: data.url!.url,
+                                                ));
+                                              },
+                                              child: Hero(
+                                                tag: data.url!.url,
+                                                child: CachedNetworkImage(
+                                                  imageUrl: data.url!.url,
+                                                  placeholder: (context, url) =>
+                                                      Constant.loader(
+                                                          isDarkTheme:
+                                                              themeChange
+                                                                  .getThem()),
+                                                  errorWidget: (context, url,
+                                                          error) =>
+                                                      const Icon(Icons.error),
+                                                ),
+                                              ),
                                             ),
-                                          ),
-                                        ),
-                                      ]),
+                                          ]),
                                     ))
                                 : data.messageType == "voice"
                                     ? VoiceBubble(
@@ -494,7 +610,9 @@ class _ChatScreensState extends State<ChatScreens> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(Constant.dateAndTimeFormatTimestamp(data.createdAt), style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.w400)),
+                    Text(Constant.dateAndTimeFormatTimestamp(data.createdAt),
+                        style: GoogleFonts.poppins(
+                            fontSize: 10, fontWeight: FontWeight.w400)),
                   ],
                 ),
               ],
@@ -502,7 +620,9 @@ class _ChatScreensState extends State<ChatScreens> {
     );
   }
 
-  Future<void> _sendMessage(String message, Url? url, String videoThumbnail, String messageType, {int? voiceTimer}) async {
+  Future<void> _sendMessage(
+      String message, Url? url, String videoThumbnail, String messageType,
+      {int? voiceTimer}) async {
     List<String> senderReceiverId = [widget.driverId!, widget.customerId!];
     InboxModel inboxModel = InboxModel(
         senderReceiverId: senderReceiverId,
@@ -572,9 +692,11 @@ class _ChatScreensState extends State<ChatScreens> {
           isDefaultAction: false,
           onPressed: () async {
             Get.back();
-            XFile? image = await _imagePicker.pickImage(source: ImageSource.gallery);
+            XFile? image =
+                await _imagePicker.pickImage(source: ImageSource.gallery);
             if (image != null) {
-              Url url = await Constant().uploadChatImageToFireStorage(File(image.path));
+              Url url = await Constant()
+                  .uploadChatImageToFireStorage(File(image.path));
               _sendMessage('', url, '', 'image');
             }
           },
@@ -584,11 +706,14 @@ class _ChatScreensState extends State<ChatScreens> {
           isDefaultAction: false,
           onPressed: () async {
             Navigator.pop(context);
-            XFile? galleryVideo = await _imagePicker.pickVideo(source: ImageSource.gallery);
+            XFile? galleryVideo =
+                await _imagePicker.pickVideo(source: ImageSource.gallery);
             if (galleryVideo != null) {
-              ChatVideoContainer? videoContainer = await Constant().uploadChatVideoToFireStorage(File(galleryVideo.path));
+              ChatVideoContainer? videoContainer = await Constant()
+                  .uploadChatVideoToFireStorage(File(galleryVideo.path));
               if (videoContainer != null) {
-                _sendMessage('', videoContainer.videoUrl, videoContainer.thumbnailUrl, 'video');
+                _sendMessage('', videoContainer.videoUrl,
+                    videoContainer.thumbnailUrl, 'video');
               } else {
                 ShowToastDialog.showToast("Message sent failed");
               }
@@ -600,9 +725,11 @@ class _ChatScreensState extends State<ChatScreens> {
           isDestructiveAction: false,
           onPressed: () async {
             Navigator.pop(context);
-            XFile? image = await _imagePicker.pickImage(source: ImageSource.camera);
+            XFile? image =
+                await _imagePicker.pickImage(source: ImageSource.camera);
             if (image != null) {
-              Url url = await Constant().uploadChatImageToFireStorage(File(image.path));
+              Url url = await Constant()
+                  .uploadChatImageToFireStorage(File(image.path));
               _sendMessage('', url, '', 'image');
             }
           },
@@ -612,11 +739,14 @@ class _ChatScreensState extends State<ChatScreens> {
           isDestructiveAction: false,
           onPressed: () async {
             Navigator.pop(context);
-            XFile? recordedVideo = await _imagePicker.pickVideo(source: ImageSource.camera);
+            XFile? recordedVideo =
+                await _imagePicker.pickVideo(source: ImageSource.camera);
             if (recordedVideo != null) {
-              ChatVideoContainer? videoContainer = await Constant().uploadChatVideoToFireStorage(File(recordedVideo.path));
+              ChatVideoContainer? videoContainer = await Constant()
+                  .uploadChatVideoToFireStorage(File(recordedVideo.path));
               if (videoContainer != null) {
-                _sendMessage('', videoContainer.videoUrl, videoContainer.thumbnailUrl, 'video');
+                _sendMessage('', videoContainer.videoUrl,
+                    videoContainer.thumbnailUrl, 'video');
               } else {
                 ShowToastDialog.showToast("Message sent failed");
               }
@@ -642,7 +772,11 @@ class VoiceBubble extends StatefulWidget {
   final bool? isme;
   final String url;
   final int durationSec;
-  const VoiceBubble({super.key, required this.isme, required this.url, required this.durationSec});
+  const VoiceBubble(
+      {super.key,
+      required this.isme,
+      required this.url,
+      required this.durationSec});
 
   @override
   State<VoiceBubble> createState() => _VoiceBubbleState();
@@ -663,7 +797,8 @@ class _VoiceBubbleState extends State<VoiceBubble> {
     player.playerStateStream.listen((state) {
       final processingState = state.processingState;
       setState(() => isPlaying = state.playing);
-      if (processingState == ProcessingState.loading || processingState == ProcessingState.buffering) {
+      if (processingState == ProcessingState.loading ||
+          processingState == ProcessingState.buffering) {
         setState(() => isLoading = true);
       }
       if (processingState == ProcessingState.ready) {
@@ -698,10 +833,12 @@ class _VoiceBubbleState extends State<VoiceBubble> {
           icon: isLoading == true
               ? CircleAvatar(
                   radius: 20,
-                  backgroundColor: themeChange.getThem() ? Colors.black : Colors.white,
+                  backgroundColor:
+                      themeChange.getThem() ? Colors.black : Colors.white,
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: Constant.loader(strokeWidth: 2, isDarkTheme: themeChange.getThem()),
+                    child: Constant.loader(
+                        strokeWidth: 2, isDarkTheme: themeChange.getThem()),
                   ))
               : isPlaying
                   ? CircleAvatar(

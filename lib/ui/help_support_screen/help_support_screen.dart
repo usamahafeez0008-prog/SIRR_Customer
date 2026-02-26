@@ -15,7 +15,7 @@ import 'package:customer/themes/responsive.dart';
 import 'package:customer/ui/chat_screen/FullScreenImageViewer.dart';
 import 'package:customer/ui/chat_screen/FullScreenVideoViewer.dart';
 import 'package:customer/ui/chat_screen/chat_screen.dart';
-import 'package:customer/ui/dashboard_screen.dart';
+import 'package:customer/ui/auth_screen/dummay_screen.dart';
 import 'package:customer/utils/DarkThemeProvider.dart';
 import 'package:customer/utils/fire_store_utils.dart';
 import 'package:flutter/cupertino.dart';
@@ -36,7 +36,13 @@ class HelpSupportScreen extends StatefulWidget {
   final String? token;
   final bool? isShowAppbar;
 
-  const HelpSupportScreen({super.key, this.isShowAppbar, this.userId, this.userName, this.userProfileImage, this.token});
+  const HelpSupportScreen(
+      {super.key,
+      this.isShowAppbar,
+      this.userId,
+      this.userName,
+      this.userProfileImage,
+      this.token});
 
   @override
   State<HelpSupportScreen> createState() => _HelpSupportScreenState();
@@ -56,7 +62,8 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
   Future<void> startRecording() async {
     if (await record?.hasPermission() == true) {
       final dir = await getTemporaryDirectory();
-      recordedFilePath = '${dir.path}/voice_${DateTime.now().millisecondsSinceEpoch}.m4a';
+      recordedFilePath =
+          '${dir.path}/voice_${DateTime.now().millisecondsSinceEpoch}.m4a';
       await record?.start(
           const RecordConfig(
             encoder: AudioEncoder.aacLc,
@@ -71,7 +78,8 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
   Future<void> setSeen() async {
     // await Preferences.setString(Preferences.notificationPlayload, '');
     FireStoreUtils.setSeen();
-    await FireStoreUtils.getUserProfile(FireStoreUtils.getCurrentUid()).then((value) {
+    await FireStoreUtils.getUserProfile(FireStoreUtils.getCurrentUid())
+        .then((value) {
       if (value?.id != null) {
         userModel = value!;
       }
@@ -106,10 +114,14 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
       appBar: widget.isShowAppbar == true
           ? AppBar(
               elevation: 2,
-              title: Text('Help & Support'.tr, maxLines: 2, style: GoogleFonts.poppins(color: Colors.white, fontSize: 14)),
+              title: Text('Help & Support'.tr,
+                  maxLines: 2,
+                  style:
+                      GoogleFonts.poppins(color: Colors.white, fontSize: 14)),
               leading: InkWell(
                   onTap: () {
-                    Get.offAll(DashBoardScreen());
+                    // Get.offAll(DashBoardScreen());
+                    Get.offAll(const DummayScreen());
                   },
                   child: const Icon(
                     Icons.arrow_back,
@@ -126,10 +138,16 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                   FocusScope.of(context).unfocus();
                 },
                 child: StreamBuilder<QuerySnapshot>(
-                    stream: FirebaseFirestore.instance.collection(CollectionName.chat).doc(FireStoreUtils.getCurrentUid()).collection("thread").orderBy('createdAt', descending: true).snapshots(),
+                    stream: FirebaseFirestore.instance
+                        .collection(CollectionName.chat)
+                        .doc(FireStoreUtils.getCurrentUid())
+                        .collection("thread")
+                        .orderBy('createdAt', descending: true)
+                        .snapshots(),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Constant.loader(isDarkTheme: themeChange.getThem());
+                        return Constant.loader(
+                            isDarkTheme: themeChange.getThem());
                       }
                       if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                         return SizedBox();
@@ -139,8 +157,13 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                           reverse: true,
                           itemCount: docs.length,
                           itemBuilder: (context, index) {
-                            ConversationModel inboxModel = ConversationModel.fromJson(docs[index].data() as Map<String, dynamic>);
-                            return chatItemView(inboxModel.senderId == FireStoreUtils.getCurrentUid(), inboxModel);
+                            ConversationModel inboxModel =
+                                ConversationModel.fromJson(
+                                    docs[index].data() as Map<String, dynamic>);
+                            return chatItemView(
+                                inboxModel.senderId ==
+                                    FireStoreUtils.getCurrentUid(),
+                                inboxModel);
                           });
                     }),
               ),
@@ -155,13 +178,16 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                     textInputAction: TextInputAction.send,
                     keyboardType: TextInputType.text,
                     textCapitalization: TextCapitalization.sentences,
-                    cursorColor: themeChange.getThem() ? AppColors.darksecondprimary : AppColors.lightsecondprimary,
+                    cursorColor: themeChange.getThem()
+                        ? AppColors.darksecondprimary
+                        : AppColors.lightsecondprimary,
                     controller: _messageController,
                     decoration: InputDecoration(
                         contentPadding: const EdgeInsets.only(left: 10),
                         filled: true,
                         disabledBorder: OutlineInputBorder(
-                          borderRadius: const BorderRadius.all(Radius.circular(30)),
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(30)),
                           borderSide: BorderSide(
                               color: isStartRecording == true
                                   ? themeChange.getThem()
@@ -173,11 +199,17 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                               width: 1),
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderRadius: const BorderRadius.all(Radius.circular(30)),
-                          borderSide: BorderSide(color: themeChange.getThem() ? AppColors.darksecondprimary : AppColors.lightsecondprimary, width: 1),
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(30)),
+                          borderSide: BorderSide(
+                              color: themeChange.getThem()
+                                  ? AppColors.darksecondprimary
+                                  : AppColors.lightsecondprimary,
+                              width: 1),
                         ),
                         enabledBorder: OutlineInputBorder(
-                          borderRadius: const BorderRadius.all(Radius.circular(30)),
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(30)),
                           borderSide: BorderSide(
                               color: isStartRecording == true
                                   ? themeChange.getThem()
@@ -189,7 +221,8 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                               width: 1),
                         ),
                         errorBorder: OutlineInputBorder(
-                          borderRadius: const BorderRadius.all(Radius.circular(30)),
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(30)),
                           borderSide: BorderSide(
                               color: isStartRecording == true
                                   ? themeChange.getThem()
@@ -201,7 +234,8 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                               width: 1),
                         ),
                         border: OutlineInputBorder(
-                          borderRadius: const BorderRadius.all(Radius.circular(30)),
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(30)),
                           borderSide: BorderSide(
                               color: isStartRecording == true
                                   ? themeChange.getThem()
@@ -226,9 +260,13 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                                 final path = await stopRecording();
                                 if (path != null) {
                                   ShowToastDialog.showLoader("Please wait");
-                                  String? url = await Constant().uploadVoiceMessage(path);
-                                  final duration = await player.setFilePath(path);
-                                  _sendMessage(_messageController.text, Url(url: url), '', 'voice', voiceTimer: duration?.inSeconds);
+                                  String? url =
+                                      await Constant().uploadVoiceMessage(path);
+                                  final duration =
+                                      await player.setFilePath(path);
+                                  _sendMessage(_messageController.text,
+                                      Url(url: url), '', 'voice',
+                                      voiceTimer: duration?.inSeconds);
                                   ShowToastDialog.closeLoader();
                                   _messageController.clear();
                                   setState(() {});
@@ -246,16 +284,20 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                             IconButton(
                                 onPressed: () async {
                                   if (_messageController.text.isNotEmpty) {
-                                    _sendMessage(_messageController.text, null, '', 'text');
+                                    _sendMessage(_messageController.text, null,
+                                        '', 'text');
                                     _messageController.clear();
                                     setState(() {});
                                   } else {
-                                    ShowToastDialog.showToast("Please enter text".tr);
+                                    ShowToastDialog.showToast(
+                                        "Please enter text".tr);
                                   }
                                 },
                                 icon: Icon(
                                   Icons.send_rounded,
-                                  color: themeChange.getThem() ? AppColors.darksecondprimary : AppColors.lightsecondprimary,
+                                  color: themeChange.getThem()
+                                      ? AppColors.darksecondprimary
+                                      : AppColors.lightsecondprimary,
                                 )),
                           ],
                         ),
@@ -272,9 +314,13 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                                       ? AppColors.background
                                       : AppColors.darkTextFieldBorder),
                         ),
-                        hintText: isStartRecording == true ? 'Start Recording...'.tr : 'Start typing ...'.tr,
+                        hintText: isStartRecording == true
+                            ? 'Start Recording...'.tr
+                            : 'Start typing ...'.tr,
                         hintStyle: TextStyle(
-                            fontWeight: isStartRecording == true ? FontWeight.bold : FontWeight.w600,
+                            fontWeight: isStartRecording == true
+                                ? FontWeight.bold
+                                : FontWeight.w600,
                             color: isStartRecording == true
                                 ? themeChange.getThem()
                                     ? AppColors.darksecondprimary
@@ -315,14 +361,21 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                       data.messageType == "text"
                           ? Container(
                               decoration: BoxDecoration(
-                                color: themeChange.getThem() ? AppColors.darksecondprimary : AppColors.lightsecondprimary,
-                                borderRadius: const BorderRadius.only(topLeft: Radius.circular(10), topRight: Radius.circular(10), bottomLeft: Radius.circular(10)),
+                                color: themeChange.getThem()
+                                    ? AppColors.darksecondprimary
+                                    : AppColors.lightsecondprimary,
+                                borderRadius: const BorderRadius.only(
+                                    topLeft: Radius.circular(10),
+                                    topRight: Radius.circular(10),
+                                    bottomLeft: Radius.circular(10)),
                               ),
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 10),
                               child: Text(
                                 data.message.toString(),
                                 style: TextStyle(
-                                    color: data.senderId == FireStoreUtils.getCurrentUid()
+                                    color: data.senderId ==
+                                            FireStoreUtils.getCurrentUid()
                                         ? themeChange.getThem()
                                             ? Colors.black
                                             : Colors.white
@@ -331,10 +384,16 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                             )
                           : Container(
                               decoration: BoxDecoration(
-                                color: themeChange.getThem() ? AppColors.darksecondprimary : AppColors.lightsecondprimary,
-                                borderRadius: const BorderRadius.only(topLeft: Radius.circular(10), topRight: Radius.circular(10), bottomLeft: Radius.circular(10)),
+                                color: themeChange.getThem()
+                                    ? AppColors.darksecondprimary
+                                    : AppColors.lightsecondprimary,
+                                borderRadius: const BorderRadius.only(
+                                    topLeft: Radius.circular(10),
+                                    topRight: Radius.circular(10),
+                                    bottomLeft: Radius.circular(10)),
                               ),
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 10),
                               child: data.messageType == "image"
                                   ? ConstrainedBox(
                                       constraints: const BoxConstraints(
@@ -342,24 +401,36 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                                         maxWidth: 200,
                                       ),
                                       child: ClipRRect(
-                                        borderRadius: const BorderRadius.only(topLeft: Radius.circular(10), topRight: Radius.circular(10), bottomLeft: Radius.circular(10)),
-                                        child: Stack(alignment: Alignment.center, children: [
-                                          GestureDetector(
-                                            onTap: () {
-                                              Get.to(FullScreenImageViewer(
-                                                imageUrl: data.url!.url,
-                                              ));
-                                            },
-                                            child: Hero(
-                                              tag: data.url!.url,
-                                              child: CachedNetworkImage(
-                                                imageUrl: data.url!.url,
-                                                placeholder: (context, url) => Constant.loader(isDarkTheme: themeChange.getThem()),
-                                                errorWidget: (context, url, error) => const Icon(Icons.error),
+                                        borderRadius: const BorderRadius.only(
+                                            topLeft: Radius.circular(10),
+                                            topRight: Radius.circular(10),
+                                            bottomLeft: Radius.circular(10)),
+                                        child: Stack(
+                                            alignment: Alignment.center,
+                                            children: [
+                                              GestureDetector(
+                                                onTap: () {
+                                                  Get.to(FullScreenImageViewer(
+                                                    imageUrl: data.url!.url,
+                                                  ));
+                                                },
+                                                child: Hero(
+                                                  tag: data.url!.url,
+                                                  child: CachedNetworkImage(
+                                                    imageUrl: data.url!.url,
+                                                    placeholder: (context,
+                                                            url) =>
+                                                        Constant.loader(
+                                                            isDarkTheme:
+                                                                themeChange
+                                                                    .getThem()),
+                                                    errorWidget: (context, url,
+                                                            error) =>
+                                                        const Icon(Icons.error),
+                                                  ),
+                                                ),
                                               ),
-                                            ),
-                                          ),
-                                        ]),
+                                            ]),
                                       ))
                                   : data.messageType == "voice"
                                       ? VoiceBubble(
@@ -381,18 +452,38 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                                               ));
                                             },
                                             child: ClipRRect(
-                                              borderRadius: const BorderRadius.only(topLeft: Radius.circular(10), topRight: Radius.circular(10), bottomLeft: Radius.circular(10)),
-                                              child: Stack(alignment: Alignment.center, children: [
-                                                Hero(
-                                                  tag: data.url!.url,
-                                                  child: CachedNetworkImage(
-                                                    imageUrl: data.videoThumbnail ?? '',
-                                                    placeholder: (context, url) => Constant.loader(isDarkTheme: themeChange.getThem()),
-                                                    errorWidget: (context, url, error) => const Icon(Icons.error),
-                                                  ),
-                                                ),
-                                                Icon(Icons.play_arrow, size: 40)
-                                              ]),
+                                              borderRadius:
+                                                  const BorderRadius.only(
+                                                      topLeft:
+                                                          Radius.circular(10),
+                                                      topRight:
+                                                          Radius.circular(10),
+                                                      bottomLeft:
+                                                          Radius.circular(10)),
+                                              child: Stack(
+                                                  alignment: Alignment.center,
+                                                  children: [
+                                                    Hero(
+                                                      tag: data.url!.url,
+                                                      child: CachedNetworkImage(
+                                                        imageUrl:
+                                                            data.videoThumbnail ??
+                                                                '',
+                                                        placeholder: (context,
+                                                                url) =>
+                                                            Constant.loader(
+                                                                isDarkTheme:
+                                                                    themeChange
+                                                                        .getThem()),
+                                                        errorWidget: (context,
+                                                                url, error) =>
+                                                            const Icon(
+                                                                Icons.error),
+                                                      ),
+                                                    ),
+                                                    Icon(Icons.play_arrow,
+                                                        size: 40)
+                                                  ]),
                                             ),
                                           )),
                             ),
@@ -405,8 +496,10 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                             width: Responsive.width(5, context),
                             imageUrl: userModel.profilePic.toString(),
                             fit: BoxFit.cover,
-                            placeholder: (context, url) => Constant.loader(isDarkTheme: themeChange.getThem()),
-                            errorWidget: (context, url, error) => Image.network(Constant.userPlaceHolder),
+                            placeholder: (context, url) => Constant.loader(
+                                isDarkTheme: themeChange.getThem()),
+                            errorWidget: (context, url, error) =>
+                                Image.network(Constant.userPlaceHolder),
                           ),
                         ),
                       ),
@@ -418,12 +511,23 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      Text(Constant.dateAndTimeFormatTimestamp(data.createdAt), style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.w400)),
+                      Text(Constant.dateAndTimeFormatTimestamp(data.createdAt),
+                          style: GoogleFonts.poppins(
+                              fontSize: 10, fontWeight: FontWeight.w400)),
                       if (data.senderId == widget.userId)
                         data.seen == true
                             ? Text("✓✓",
-                                style: GoogleFonts.poppins(fontSize: 10, color: themeChange.getThem() ? AppColors.darksecondprimary : AppColors.lightsecondprimary, fontWeight: FontWeight.w400))
-                            : Text("✓", style: GoogleFonts.poppins(fontSize: 10, color: AppColors.subTitleColor, fontWeight: FontWeight.w400)),
+                                style: GoogleFonts.poppins(
+                                    fontSize: 10,
+                                    color: themeChange.getThem()
+                                        ? AppColors.darksecondprimary
+                                        : AppColors.lightsecondprimary,
+                                    fontWeight: FontWeight.w400))
+                            : Text("✓",
+                                style: GoogleFonts.poppins(
+                                    fontSize: 10,
+                                    color: AppColors.subTitleColor,
+                                    fontWeight: FontWeight.w400)),
                     ],
                   ),
                 ],
@@ -439,10 +543,14 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                     data.messageType == "text"
                         ? Container(
                             decoration: BoxDecoration(
-                              borderRadius: const BorderRadius.only(topLeft: Radius.circular(10), topRight: Radius.circular(10), bottomRight: Radius.circular(10)),
+                              borderRadius: const BorderRadius.only(
+                                  topLeft: Radius.circular(10),
+                                  topRight: Radius.circular(10),
+                                  bottomRight: Radius.circular(10)),
                               color: Colors.grey.shade300,
                             ),
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 10),
                             child: Text(
                               data.message.toString(),
                               style: GoogleFonts.poppins(color: Colors.black),
@@ -450,10 +558,16 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                           )
                         : Container(
                             decoration: BoxDecoration(
-                              color: themeChange.getThem() ? AppColors.darksecondprimary : AppColors.lightsecondprimary,
-                              borderRadius: const BorderRadius.only(topLeft: Radius.circular(10), topRight: Radius.circular(10), bottomLeft: Radius.circular(10)),
+                              color: themeChange.getThem()
+                                  ? AppColors.darksecondprimary
+                                  : AppColors.lightsecondprimary,
+                              borderRadius: const BorderRadius.only(
+                                  topLeft: Radius.circular(10),
+                                  topRight: Radius.circular(10),
+                                  bottomLeft: Radius.circular(10)),
                             ),
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 10),
                             child: data.messageType == "image"
                                 ? ConstrainedBox(
                                     constraints: const BoxConstraints(
@@ -461,24 +575,35 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                                       maxWidth: 200,
                                     ),
                                     child: ClipRRect(
-                                      borderRadius: const BorderRadius.only(topLeft: Radius.circular(10), topRight: Radius.circular(10), bottomRight: Radius.circular(10)),
-                                      child: Stack(alignment: Alignment.center, children: [
-                                        GestureDetector(
-                                          onTap: () {
-                                            Get.to(FullScreenImageViewer(
-                                              imageUrl: data.url!.url,
-                                            ));
-                                          },
-                                          child: Hero(
-                                            tag: data.url!.url,
-                                            child: CachedNetworkImage(
-                                              imageUrl: data.url!.url,
-                                              placeholder: (context, url) => Constant.loader(isDarkTheme: themeChange.getThem()),
-                                              errorWidget: (context, url, error) => const Icon(Icons.error),
+                                      borderRadius: const BorderRadius.only(
+                                          topLeft: Radius.circular(10),
+                                          topRight: Radius.circular(10),
+                                          bottomRight: Radius.circular(10)),
+                                      child: Stack(
+                                          alignment: Alignment.center,
+                                          children: [
+                                            GestureDetector(
+                                              onTap: () {
+                                                Get.to(FullScreenImageViewer(
+                                                  imageUrl: data.url!.url,
+                                                ));
+                                              },
+                                              child: Hero(
+                                                tag: data.url!.url,
+                                                child: CachedNetworkImage(
+                                                  imageUrl: data.url!.url,
+                                                  placeholder: (context, url) =>
+                                                      Constant.loader(
+                                                          isDarkTheme:
+                                                              themeChange
+                                                                  .getThem()),
+                                                  errorWidget: (context, url,
+                                                          error) =>
+                                                      const Icon(Icons.error),
+                                                ),
+                                              ),
                                             ),
-                                          ),
-                                        ),
-                                      ]),
+                                          ]),
                                     ))
                                 : data.messageType == "voice"
                                     ? VoiceBubble(
@@ -499,18 +624,38 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                                             ));
                                           },
                                           child: ClipRRect(
-                                            borderRadius: const BorderRadius.only(topLeft: Radius.circular(10), topRight: Radius.circular(10), bottomRight: Radius.circular(10)),
-                                            child: Stack(alignment: Alignment.center, children: [
-                                              Hero(
-                                                tag: data.url!.url,
-                                                child: CachedNetworkImage(
-                                                  imageUrl: data.videoThumbnail ?? '',
-                                                  placeholder: (context, url) => Constant.loader(isDarkTheme: themeChange.getThem()),
-                                                  errorWidget: (context, url, error) => const Icon(Icons.error),
-                                                ),
-                                              ),
-                                              Icon(Icons.play_arrow, size: 40)
-                                            ]),
+                                            borderRadius:
+                                                const BorderRadius.only(
+                                                    topLeft:
+                                                        Radius.circular(10),
+                                                    topRight:
+                                                        Radius.circular(10),
+                                                    bottomRight:
+                                                        Radius.circular(10)),
+                                            child: Stack(
+                                                alignment: Alignment.center,
+                                                children: [
+                                                  Hero(
+                                                    tag: data.url!.url,
+                                                    child: CachedNetworkImage(
+                                                      imageUrl:
+                                                          data.videoThumbnail ??
+                                                              '',
+                                                      placeholder: (context,
+                                                              url) =>
+                                                          Constant.loader(
+                                                              isDarkTheme:
+                                                                  themeChange
+                                                                      .getThem()),
+                                                      errorWidget: (context,
+                                                              url, error) =>
+                                                          const Icon(
+                                                              Icons.error),
+                                                    ),
+                                                  ),
+                                                  Icon(Icons.play_arrow,
+                                                      size: 40)
+                                                ]),
                                           ),
                                         )),
                           ),
@@ -522,8 +667,12 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("Admin", style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w400)),
-                    Text(Constant.dateAndTimeFormatTimestamp(data.createdAt), style: GoogleFonts.poppins(fontSize: 10, fontWeight: FontWeight.w400)),
+                    Text("Admin",
+                        style: GoogleFonts.poppins(
+                            fontSize: 12, fontWeight: FontWeight.w400)),
+                    Text(Constant.dateAndTimeFormatTimestamp(data.createdAt),
+                        style: GoogleFonts.poppins(
+                            fontSize: 10, fontWeight: FontWeight.w400)),
                   ],
                 ),
               ],
@@ -531,7 +680,9 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
     );
   }
 
-  Future<void> _sendMessage(String message, Url? url, String videoThumbnail, String messageType, {int? voiceTimer}) async {
+  Future<void> _sendMessage(
+      String message, Url? url, String videoThumbnail, String messageType,
+      {int? voiceTimer}) async {
     List<String> senderReceiverId = [Constant.adminType!, widget.userId!];
     InboxModel inboxModel = InboxModel(
       senderReceiverId: senderReceiverId,
@@ -599,9 +750,11 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
           isDefaultAction: false,
           onPressed: () async {
             Get.back();
-            XFile? image = await _imagePicker.pickImage(source: ImageSource.gallery);
+            XFile? image =
+                await _imagePicker.pickImage(source: ImageSource.gallery);
             if (image != null) {
-              Url url = await Constant().uploadChatImageToFireStorage(File(image.path));
+              Url url = await Constant()
+                  .uploadChatImageToFireStorage(File(image.path));
               _sendMessage('', url, '', 'image');
             }
           },
@@ -611,11 +764,14 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
           isDefaultAction: false,
           onPressed: () async {
             Navigator.pop(context);
-            XFile? galleryVideo = await _imagePicker.pickVideo(source: ImageSource.gallery);
+            XFile? galleryVideo =
+                await _imagePicker.pickVideo(source: ImageSource.gallery);
             if (galleryVideo != null) {
-              ChatVideoContainer? videoContainer = await Constant().uploadChatVideoToFireStorage(File(galleryVideo.path));
+              ChatVideoContainer? videoContainer = await Constant()
+                  .uploadChatVideoToFireStorage(File(galleryVideo.path));
               if (videoContainer != null) {
-                _sendMessage('', videoContainer.videoUrl, videoContainer.thumbnailUrl, 'video');
+                _sendMessage('', videoContainer.videoUrl,
+                    videoContainer.thumbnailUrl, 'video');
               } else {
                 ShowToastDialog.showToast("Message sent failed");
               }
@@ -627,9 +783,11 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
           isDestructiveAction: false,
           onPressed: () async {
             Navigator.pop(context);
-            XFile? image = await _imagePicker.pickImage(source: ImageSource.camera);
+            XFile? image =
+                await _imagePicker.pickImage(source: ImageSource.camera);
             if (image != null) {
-              Url url = await Constant().uploadChatImageToFireStorage(File(image.path));
+              Url url = await Constant()
+                  .uploadChatImageToFireStorage(File(image.path));
               _sendMessage('', url, '', 'image');
             }
           },
@@ -639,11 +797,14 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
           isDestructiveAction: false,
           onPressed: () async {
             Navigator.pop(context);
-            XFile? recordedVideo = await _imagePicker.pickVideo(source: ImageSource.camera);
+            XFile? recordedVideo =
+                await _imagePicker.pickVideo(source: ImageSource.camera);
             if (recordedVideo != null) {
-              ChatVideoContainer? videoContainer = await Constant().uploadChatVideoToFireStorage(File(recordedVideo.path));
+              ChatVideoContainer? videoContainer = await Constant()
+                  .uploadChatVideoToFireStorage(File(recordedVideo.path));
               if (videoContainer != null) {
-                _sendMessage('', videoContainer.videoUrl, videoContainer.thumbnailUrl, 'video');
+                _sendMessage('', videoContainer.videoUrl,
+                    videoContainer.thumbnailUrl, 'video');
               } else {
                 ShowToastDialog.showToast("Message sent failed");
               }

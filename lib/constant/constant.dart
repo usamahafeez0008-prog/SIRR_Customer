@@ -86,7 +86,7 @@ class Constant {
 
   static Widget loader({double strokeWidth = 4.0, required bool isDarkTheme}) {
     return Center(
-      child: CircularProgressIndicator(color: isDarkTheme ? AppColors.darksecondprimary : AppColors.lightsecondprimary, strokeWidth: strokeWidth),
+      child: CircularProgressIndicator(color: isDarkTheme ? AppColors.moroccoGreen : AppColors.moroccoRed, strokeWidth: strokeWidth),
     );
   }
 

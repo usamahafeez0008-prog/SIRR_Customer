@@ -70,7 +70,7 @@ class DashBoardController extends GetxController {
       case 7:
         return const InboxScreen();
       case 8:
-        return const ProfileScreen();
+        /*return const ProfileScreen();*/
       case 9:
         return const ContactUsScreen();
       case 10:

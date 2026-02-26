@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 
@@ -19,7 +20,6 @@ class MapPickerPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final themeChange = Provider.of<DarkThemeProvider>(context);
     return Scaffold(
       body: Stack(
         children: [
@@ -57,7 +57,8 @@ class MapPickerPage extends StatelessWidget {
                                 width: 60,
                                 height: 60,
                                 fit: BoxFit.fill,
-                                color: AppColors.darkBackground,
+                                colorFilter: const ColorFilter.mode(
+                                    AppColors.moroccoRed, BlendMode.srcIn),
                               )),
                         ]
                       : [],
@@ -71,61 +72,94 @@ class MapPickerPage extends StatelessWidget {
             right: 16,
             child: Column(
               children: [
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: IconButton(
-                    onPressed: () {
-                      Get.back();
-                    },
-                    icon: Icon(
-                      Icons.arrow_back,
-                      color: AppColors.darkContainerBackground,
+                Row(
+                  children: [
+                    Container(
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black12,
+                            blurRadius: 5,
+                            offset: Offset(0, 2),
+                          )
+                        ],
+                      ),
+                      child: IconButton(
+                        onPressed: () {
+                          Get.back();
+                        },
+                        icon: const Icon(
+                          Icons.arrow_back,
+                          color: AppColors.moroccoRed,
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-                Material(
-                  elevation: 4,
-                  borderRadius: BorderRadius.circular(8),
-                  child: TextField(
-                    controller: searchController,
-                    cursorColor: themeChange.getThem()
-                        ? AppColors.darksecondprimary
-                        : AppColors.lightsecondprimary,
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: themeChange.getThem()
-                          ? AppColors.darkContainerBackground
-                          : AppColors.containerBackground,
-                      hintText: 'Search location...'.tr,
-                      contentPadding: EdgeInsets.all(12),
-                      border: InputBorder.none,
-                      prefixIcon: Icon(Icons.search,
-                          color: themeChange.getThem()
-                              ? AppColors.darksecondprimary
-                              : AppColors.lightsecondprimary),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(30),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black12,
+                              blurRadius: 10,
+                              offset: const Offset(0, 5),
+                            )
+                          ],
+                        ),
+                        child: TextField(
+                          controller: searchController,
+                          cursorColor: AppColors.moroccoRed,
+                          style: GoogleFonts.outfit(color: Colors.black87),
+                          decoration: InputDecoration(
+                            hintText: 'Search location...'.tr,
+                            hintStyle: GoogleFonts.outfit(color: Colors.grey),
+                            contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 15),
+                            border: InputBorder.none,
+                            prefixIcon: const Icon(Icons.search,
+                                color: AppColors.moroccoRed),
+                          ),
+                          onChanged: controller.searchPlace,
+                        ),
+                      ),
                     ),
-                    onChanged: controller.searchPlace,
-                  ),
+                  ],
                 ),
                 Obx(() {
-                  if (controller.searchResults.isEmpty)
+                  if (controller.searchResults.isEmpty) {
                     return const SizedBox.shrink();
+                  }
 
                   return Container(
-                    margin: const EdgeInsets.only(top: 4),
+                    margin: const EdgeInsets.only(top: 8),
                     decoration: BoxDecoration(
-                      color: themeChange.getThem()
-                          ? AppColors.darkContainerBackground
-                          : AppColors.containerBackground,
-                      borderRadius: BorderRadius.circular(8),
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 10,
+                          offset: const Offset(0, 5),
+                        )
+                      ],
                     ),
                     child: ListView.builder(
                       shrinkWrap: true,
+                      padding: EdgeInsets.zero,
                       itemCount: controller.searchResults.length,
                       itemBuilder: (context, index) {
                         final place = controller.searchResults[index];
                         return ListTile(
-                          title: Text(place['display_name']),
+                          title: Text(
+                            place['display_name'],
+                            style: GoogleFonts.outfit(fontSize: 14),
+                          ),
+                          leading: const Icon(Icons.location_on_outlined,
+                              color: AppColors.moroccoRed),
                           onTap: () {
                             controller.selectSearchResult(place);
                             final lat = double.parse(place['lat']);
@@ -146,55 +180,85 @@ class MapPickerPage extends StatelessWidget {
       ),
       bottomNavigationBar: Obx(() {
         return Container(
-          padding: const EdgeInsets.all(16),
-          color: themeChange.getThem()
-              ? AppColors.darkBackground
-              : AppColors.background,
+          padding: EdgeInsets.fromLTRB(
+              20, 20, 20, MediaQuery.of(context).padding.bottom + 20),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(30),
+              topRight: Radius.circular(30),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 10,
+                offset: Offset(0, -5),
+              )
+            ],
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                controller.pickedPlace.value != null
-                    ? "Picked Location:".tr
-                    : "No Location Picked".tr,
-                style: TextStyle(
-                  color: themeChange.getThem()
-                      ? AppColors.background
-                      : AppColors.darkBackground,
-                  fontWeight: FontWeight.w600,
-                ),
+              Row(
+                children: [
+                  const Icon(Icons.location_on,
+                      color: AppColors.moroccoRed, size: 24),
+                  const SizedBox(width: 8),
+                  Text(
+                    controller.pickedPlace.value != null
+                        ? "Picked Location:".tr
+                        : "No Location Picked".tr,
+                    style: GoogleFonts.outfit(
+                      color: Colors.black87,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 8),
               if (controller.pickedPlace.value != null)
                 Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 2.0),
+                  padding: const EdgeInsets.only(left: 32),
                   child: Text(
-                    "${controller.pickedPlace.value!.address}\n(${controller.pickedPlace.value!.coordinates.latitude.toStringAsFixed(5)}, ${controller.pickedPlace.value!.coordinates.longitude.toStringAsFixed(5)})",
-                    style: const TextStyle(fontSize: 13),
+                    controller.pickedPlace.value!.address,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.outfit(
+                      fontSize: 14,
+                      color: Colors.grey.shade600,
+                    ),
                   ),
                 ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 20),
               Row(
                 children: [
                   Expanded(
-                    child: ButtonThem.buildButton(
+                    child: ButtonThem.roundButton(
                       context,
                       title: "Confirm Location".tr,
+                      btnColor: AppColors.moroccoRed,
+                      txtColor: Colors.white,
+                      btnWidthRatio: 1.0,
                       onPress: () async {
                         final selected = controller.pickedPlace.value;
                         if (selected != null) {
-                          Get.back(
-                              result: selected); // ✅ Return the selected place
-                          print("Selected location: $selected");
+                          Get.back(result: selected);
                         }
                       },
                     ),
                   ),
-                  const SizedBox(width: 10),
-                  IconButton(
-                    icon: const Icon(Icons.delete_forever, color: Colors.red),
-                    onPressed: controller.clearAll,
+                  const SizedBox(width: 12),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: IconButton(
+                      icon: const Icon(Icons.delete_outline, color: Colors.red),
+                      onPressed: controller.clearAll,
+                    ),
                   )
                 ],
               ),

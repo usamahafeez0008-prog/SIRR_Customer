@@ -8,13 +8,13 @@ import 'package:get/route_manager.dart';
 class ShowToastDialog {
   static void showToast(String? message, {Duration? duration}) {
     log("Get.isDarkMode :: ${Get.isDarkMode}");
-    EasyLoading.instance.backgroundColor = Get.isDarkMode ? AppColors.darksecondprimary : AppColors.lightsecondprimary;
+    EasyLoading.instance.backgroundColor = Get.isDarkMode ? AppColors.moroccoGreen : AppColors.moroccoGreen;
     EasyLoading.showToast(message!, duration: duration);
   }
 
   static void showLoader(String message) {
     log("Get.isDarkMode :: ${Get.isDarkMode}");
-    EasyLoading.instance.backgroundColor = Get.isDarkMode ? AppColors.darksecondprimary : AppColors.lightsecondprimary;
+    EasyLoading.instance.backgroundColor = Get.isDarkMode ? AppColors.moroccoGreen : AppColors.moroccoGreen;
     EasyLoading.show(status: message);
   }
 

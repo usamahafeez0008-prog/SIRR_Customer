@@ -22,7 +22,7 @@ void main() async {
     );
   } else {
     await Firebase.initializeApp(
-      name: 'goRide',
+      name: 'customer',
       options: DefaultFirebaseOptions.currentPlatform,
     );
   }
@@ -33,7 +33,7 @@ void main() async {
     ..indicatorType = EasyLoadingIndicatorType.fadingCircle
     ..loadingStyle = EasyLoadingStyle.custom
     ..backgroundColor = AppColors.darksecondprimary
-    ..textColor = Colors.black
+    ..textColor = AppColors.moroccoRed
     ..indicatorColor = Colors.black
     ..maskColor = Colors.blue.withOpacity(0.5)
     ..userInteractions = false
@@ -76,7 +76,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       },
       child: Consumer<DarkThemeProvider>(builder: (context, value, child) {
         return GetMaterialApp(
-            title: 'GoRide',
+            title: 'SIRR Customer',
             debugShowCheckedModeBanner: false,
             theme: Styles.themeData(
                 themeChangeProvider.darkTheme == 0
