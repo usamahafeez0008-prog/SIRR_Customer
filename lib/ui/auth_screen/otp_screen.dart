@@ -212,7 +212,10 @@ class OtpScreen extends StatelessWidget {
                                                   // Get.offAll(
                                                   //     const DashBoardScreen());
                                                   Get.offAll(
-                                                      const DummayScreen());
+                                                      const DummayScreen(),
+                                                      arguments: {
+                                                        'userModel': userModel
+                                                      });
                                                 } else {
                                                   await FirebaseAuth.instance
                                                       .signOut();

@@ -20,6 +20,7 @@ import 'package:provider/provider.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 import '../../utils/notification_service.dart';
+import 'login_with_password_screen.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -102,7 +103,7 @@ class LoginScreen extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                "Phone Login".tr,
+                                "Register with Phone".tr,
                                 style: GoogleFonts.poppins(
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
@@ -148,7 +149,7 @@ class LoginScreen extends StatelessWidget {
                                             controller.phoneNumberController,
                                         keyboardType: TextInputType.number,
                                         style: GoogleFonts.poppins(
-                                            color: Colors.black),
+                                            color: AppColors.moroccoGreen),
                                         decoration: InputDecoration(
                                           hintText: "6/7 XX XX XX XX".tr,
                                           hintStyle: GoogleFonts.poppins(
@@ -190,6 +191,30 @@ class LoginScreen extends StatelessWidget {
                                   ),
                                 ),
                               ),
+
+                              const SizedBox(height: 16),
+                              InkWell(
+                                onTap: () {
+                                  Get.to(() => const LoginWithPasswordScreen());
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.only(right: 8.0),
+                                  child: Container(
+                                    alignment: Alignment.centerRight,
+                                    child: Text(
+                                      textAlign: TextAlign.right,
+                                      "Already Have An Account! Login".tr,
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppColors.moroccoGreen,
+                                        //decoration: TextDecoration.underline,
+                                        decorationColor: AppColors.moroccoRed,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
                               const SizedBox(height: 40),
 
                               // Quick Login Divider
@@ -202,7 +227,7 @@ class LoginScreen extends StatelessWidget {
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 16),
                                     child: Text(
-                                      "Quick Login".tr,
+                                      "Continue with".tr,
                                       style: GoogleFonts.poppins(
                                         color: AppColors.moroccoGreen,
                                         fontSize: 14,
@@ -222,7 +247,6 @@ class LoginScreen extends StatelessWidget {
                                 children: [
                                   _buildSocialButton(
                                     onTap: () async {
-
                                       ShowToastDialog.showLoader(
                                           "Please wait".tr);
                                       await controller
@@ -289,7 +313,11 @@ class LoginScreen extends StatelessWidget {
                                                         .updateUser(userModel);
                                                     // Get.offAll(
                                                     //     const DashBoardScreen());
-                                                    Get.offAll(const DummayScreen());
+                                                    Get.offAll(
+                                                        const DummayScreen(),
+                                                        arguments: {
+                                                          'userModel': userModel
+                                                        });
                                                   } else {
                                                     await FirebaseAuth.instance
                                                         .signOut();
@@ -408,7 +436,11 @@ class LoginScreen extends StatelessWidget {
                                                       // Get.offAll(
                                                       //     const DashBoardScreen());
                                                       Get.offAll(
-                                                          const DummayScreen());
+                                                          const DummayScreen(),
+                                                          arguments: {
+                                                            'userModel':
+                                                                userModel
+                                                          });
                                                     } else {
                                                       await FirebaseAuth
                                                           .instance
@@ -457,8 +489,7 @@ class LoginScreen extends StatelessWidget {
                               children: [
                                 TextSpan(
                                   recognizer: TapGestureRecognizer()
-                                    ..onTap = () {
-                                    },
+                                    ..onTap = () {},
                                   text: 'Terms'.tr,
                                   style: GoogleFonts.poppins(
                                       color: AppColors.moroccoRed,
@@ -467,9 +498,7 @@ class LoginScreen extends StatelessWidget {
                                 TextSpan(text: ' & '.tr),
                                 TextSpan(
                                   recognizer: TapGestureRecognizer()
-                                    ..onTap = () {
-
-                                    },
+                                    ..onTap = () {},
                                   text: 'Privacy'.tr,
                                   style: GoogleFonts.poppins(
                                       color: AppColors.moroccoGreen,

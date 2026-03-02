@@ -12,8 +12,12 @@ class InformationController extends GetxController {
   TextEditingController emailController = TextEditingController();
   TextEditingController phoneNumberController = TextEditingController();
   TextEditingController referralCodeController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+  RxBool isPasswordVisible = false.obs;
   RxString countryCode = "+212".obs;
   RxString loginType = "".obs;
+  RxString userTitle = "Mr".obs;
+  List<String> titles = ["Mr", "Mme"];
 
   final ImagePicker _imagePicker = ImagePicker();
   RxString profileImage = "".obs;
@@ -43,6 +47,7 @@ class InformationController extends GetxController {
     emailController.dispose();
     phoneNumberController.dispose();
     referralCodeController.dispose();
+    passwordController.dispose();
     super.onClose();
   }
 
@@ -52,6 +57,7 @@ class InformationController extends GetxController {
     dynamic argumentData = Get.arguments;
     if (argumentData != null) {
       userModel.value = argumentData['userModel'];
+      userTitle.value = userModel.value.userTitle ?? "Mr";
       loginType.value = userModel.value.loginType.toString();
       if (loginType.value == Constant.phoneLoginType) {
         phoneNumberController.text = userModel.value.phoneNumber.toString();

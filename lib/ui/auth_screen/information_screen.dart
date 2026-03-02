@@ -68,7 +68,7 @@ class InformationScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          "Create your account to start using SIRR".tr,
+                          "Create your account to start using SIIR".tr,
                           style: GoogleFonts.outfit(
                             color: Colors.grey.shade600,
                             fontSize: 16,
@@ -99,6 +99,53 @@ class InformationScreen extends StatelessWidget {
                               // Profile Image Selector
                               _buildProfileImageSelector(context, controller),
                               const SizedBox(height: 24),
+
+                              // Title Dropdown
+                              Obx(() => Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 12, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey.shade50,
+                                      borderRadius: BorderRadius.circular(20),
+                                      border: Border.all(
+                                          color: Colors.grey.shade200),
+                                    ),
+                                    child: DropdownButtonHideUnderline(
+                                      child: DropdownButton<String>(
+                                        value: controller.userTitle.value,
+                                        isExpanded: true,
+                                        icon: Icon(Icons.keyboard_arrow_down,
+                                            color: AppColors.moroccoGreen
+                                                .withOpacity(0.6),
+                                            size: 20),
+                                        elevation: 16,
+                                        style: GoogleFonts.poppins(
+                                            color: Colors.black),
+                                        onChanged: (String? newValue) {
+                                          controller.userTitle.value =
+                                              newValue!;
+                                        },
+                                        items: controller.titles
+                                            .map<DropdownMenuItem<String>>(
+                                                (String value) {
+                                          return DropdownMenuItem<String>(
+                                            value: value,
+                                            child: Row(
+                                              children: [
+                                                Icon(Icons.person_outline,
+                                                    color: AppColors
+                                                        .moroccoGreen
+                                                        .withOpacity(0.6)),
+                                                const SizedBox(width: 12),
+                                                Text(value.tr),
+                                              ],
+                                            ),
+                                          );
+                                        }).toList(),
+                                      ),
+                                    ),
+                                  )),
+                              const SizedBox(height: 16),
 
                               // First Name
                               _buildThemedTextField(
@@ -177,6 +224,30 @@ class InformationScreen extends StatelessWidget {
                               ),
                               const SizedBox(height: 16),
 
+                              // Password
+                              Obx(() => _buildThemedTextField(
+                                    context,
+                                    hintText: 'Password'.tr,
+                                    controller: controller.passwordController,
+                                    icon: Icons.lock_outline,
+                                    obscureText:
+                                        !controller.isPasswordVisible.value,
+                                    suffixIcon: IconButton(
+                                      icon: Icon(
+                                        controller.isPasswordVisible.value
+                                            ? Icons.visibility
+                                            : Icons.visibility_off,
+                                        color: AppColors.moroccoGreen
+                                            .withOpacity(0.6),
+                                      ),
+                                      onPressed: () {
+                                        controller.isPasswordVisible.value =
+                                            !controller.isPasswordVisible.value;
+                                      },
+                                    ),
+                                  )),
+                              const SizedBox(height: 16),
+
                               // Referral Code
                               /*  _buildThemedTextField(
                                 context,
@@ -208,6 +279,10 @@ class InformationScreen extends StatelessWidget {
                                         .phoneNumberController.text.isEmpty) {
                                       ShowToastDialog.showToast(
                                           "Please enter phone".tr);
+                                    } else if (controller
+                                        .passwordController.text.isEmpty) {
+                                      ShowToastDialog.showToast(
+                                          "Please enter password".tr);
                                     } else if (Constant.validateEmail(
                                             controller.emailController.text) ==
                                         false) {
@@ -251,6 +326,8 @@ class InformationScreen extends StatelessWidget {
                                                   controller.profileImage.value;
                                             }
 
+                                            userModel.userTitle =
+                                                controller.userTitle.value;
                                             userModel.fullName = fullName;
                                             userModel.email =
                                                 controller.emailController.text;
@@ -258,6 +335,8 @@ class InformationScreen extends StatelessWidget {
                                                 controller.countryCode.value;
                                             userModel.phoneNumber = controller
                                                 .phoneNumberController.text;
+                                            userModel.password = controller
+                                                .passwordController.text;
                                             userModel.isActive = true;
                                             userModel.createdAt =
                                                 Timestamp.now();
@@ -304,7 +383,10 @@ class InformationScreen extends StatelessWidget {
                                               //   Get.offAll(
                                               //       const DashBoardScreen());
                                               // }
-                                              Get.to(const DummayScreen());
+                                              Get.to(const DummayScreen(),
+                                                  arguments: {
+                                                    'userModel': userModel
+                                                  });
                                             });
                                           } else {
                                             ShowToastDialog.showToast(
@@ -337,6 +419,8 @@ class InformationScreen extends StatelessWidget {
                                               controller.profileImage.value;
                                         }
 
+                                        userModel.userTitle =
+                                            controller.userTitle.value;
                                         userModel.fullName = fullName;
                                         userModel.email =
                                             controller.emailController.text;
@@ -344,6 +428,8 @@ class InformationScreen extends StatelessWidget {
                                             controller.countryCode.value;
                                         userModel.phoneNumber = controller
                                             .phoneNumberController.text;
+                                        userModel.password =
+                                            controller.passwordController.text;
                                         userModel.isActive = true;
                                         userModel.createdAt = Timestamp.now();
 
@@ -364,7 +450,10 @@ class InformationScreen extends StatelessWidget {
                                           // if (value == true) {
                                           //   Get.offAll(const DashBoardScreen());
                                           // }
-                                          Get.to(const DummayScreen());
+                                          Get.to(const DummayScreen(),
+                                              arguments: {
+                                                'userModel': userModel
+                                              });
                                         });
                                       }
                                     }
@@ -406,7 +495,9 @@ class InformationScreen extends StatelessWidget {
       {required String hintText,
       required TextEditingController controller,
       required IconData icon,
-      bool enabled = true}) {
+      bool enabled = true,
+      bool obscureText = false,
+      Widget? suffixIcon}) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.grey.shade50,
@@ -416,6 +507,7 @@ class InformationScreen extends StatelessWidget {
       child: TextFormField(
         controller: controller,
         enabled: enabled,
+        obscureText: obscureText,
         style: GoogleFonts.poppins(color: Colors.black),
         decoration: InputDecoration(
           isDense: true,
@@ -425,6 +517,7 @@ class InformationScreen extends StatelessWidget {
           border: InputBorder.none,
           prefixIcon:
               Icon(icon, color: AppColors.moroccoGreen.withOpacity(0.6)),
+          suffixIcon: suffixIcon,
         ),
       ),
     );
@@ -557,8 +650,6 @@ class InformationScreen extends StatelessWidget {
                 ),
               ],
             ),
-
-
           );
         });
   }

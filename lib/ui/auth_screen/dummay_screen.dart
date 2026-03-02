@@ -2,6 +2,11 @@ import 'package:customer/themes/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:customer/utils/Preferences.dart';
+import 'package:customer/ui/auth_screen/login_screen.dart';
+import 'package:customer/model/user_model.dart';
+import 'package:customer/utils/fire_store_utils.dart';
 
 class DummayScreen extends StatelessWidget {
   const DummayScreen({Key? key}) : super(key: key);
@@ -59,14 +64,30 @@ class DummayScreen extends StatelessWidget {
               const SizedBox(height: 50),
 
               // Title
-              Text(
-                "Coming Soon".tr,
-                style: GoogleFonts.outfit(
-                  fontSize: 34,
-                  fontWeight: FontWeight.bold,
-                  color: const Color(0xFF2D2D2D),
-                ),
-              ),
+              FutureBuilder<UserModel?>(
+                  future: Get.arguments != null &&
+                          Get.arguments['userModel'] != null
+                      ? Future.value(Get.arguments['userModel'] as UserModel)
+                      : FireStoreUtils.getUserProfile(
+                          FirebaseAuth.instance.currentUser!.uid),
+                  builder: (context, snapshot) {
+                    String title = "";
+                    String fullName = "";
+                    if (snapshot.hasData && snapshot.data != null) {
+                      title = snapshot.data!.userTitle ?? "";
+                      fullName = snapshot.data!.fullName ?? "";
+                    }
+                    return Text(
+                      "$title $fullName\n${"Other Services Coming Soon".tr}",
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.outfit(
+                        fontSize: 26,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF2D2D2D),
+                        height: 1.3,
+                      ),
+                    );
+                  }),
               const SizedBox(height: 16),
 
               // Subtitle
@@ -86,8 +107,10 @@ class DummayScreen extends StatelessWidget {
               SizedBox(
                 width: 180,
                 child: OutlinedButton(
-                  onPressed: () {
-                    Get.back();
+                  onPressed: () async {
+                    await FirebaseAuth.instance.signOut();
+                    await Preferences.clearSharPreference();
+                    Get.offAll(const LoginScreen());
                   },
                   style: OutlinedButton.styleFrom(
                     side:
