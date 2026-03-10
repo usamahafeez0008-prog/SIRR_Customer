@@ -38,7 +38,7 @@ class Constant {
   static const String phoneLoginType = "phone";
   static const String googleLoginType = "google";
   static const String appleLoginType = "apple";
-  static String mapAPIKey = "";
+  static String mapAPIKey = "AIzaSyB6CTdjcz5loFdqcxx3zOU4JnmMLwVSpWs";
   static String senderId = '';
   static String jsonNotificationFileURL = '';
   static String radius = "10";
@@ -86,47 +86,91 @@ class Constant {
 
   static Widget loader({double strokeWidth = 4.0, required bool isDarkTheme}) {
     return Center(
-      child: CircularProgressIndicator(color: isDarkTheme ? AppColors.moroccoGreen : AppColors.moroccoRed, strokeWidth: strokeWidth),
+      child: CircularProgressIndicator(
+          color: isDarkTheme ? AppColors.moroccoGreen : AppColors.moroccoRed,
+          strokeWidth: strokeWidth),
     );
   }
 
   static String localizationName(List<LanguageName>? name) {
-    if (name?.firstWhere((element) => element.type == Constant.getLanguage().code).name?.isNotEmpty == true) {
-      return name?.firstWhere((element) => element.type == Constant.getLanguage().code).name ?? '';
+    if (name
+            ?.firstWhere(
+                (element) => element.type == Constant.getLanguage().code)
+            .name
+            ?.isNotEmpty ==
+        true) {
+      return name
+              ?.firstWhere(
+                  (element) => element.type == Constant.getLanguage().code)
+              .name ??
+          '';
     } else {
       return name?.firstWhere((element) => element.type == "en").name ?? '';
     }
   }
 
   static String localizationTitle(List<LanguageName>? name) {
-    if (name?.firstWhere((element) => element.type == Constant.getLanguage().code).title?.isNotEmpty == true) {
-      return name?.firstWhere((element) => element.type == Constant.getLanguage().code).title ?? '';
+    if (name
+            ?.firstWhere(
+                (element) => element.type == Constant.getLanguage().code)
+            .title
+            ?.isNotEmpty ==
+        true) {
+      return name
+              ?.firstWhere(
+                  (element) => element.type == Constant.getLanguage().code)
+              .title ??
+          '';
     } else {
       return name?.firstWhere((element) => element.type == "en").title ?? '';
     }
   }
 
   static String localizationDescription(List<LanguageDescription>? name) {
-    if (name!.firstWhere((element) => element.type == Constant.getLanguage().code).description!.isNotEmpty) {
-      return name.firstWhere((element) => element.type == Constant.getLanguage().code).description!;
+    if (name!
+        .firstWhere((element) => element.type == Constant.getLanguage().code)
+        .description!
+        .isNotEmpty) {
+      return name
+          .firstWhere((element) => element.type == Constant.getLanguage().code)
+          .description!;
     } else {
-      return name.firstWhere((element) => element.type == "en").description.toString();
+      return name
+          .firstWhere((element) => element.type == "en")
+          .description
+          .toString();
     }
   }
 
   static String localizationPrivacyPolicy(List<LanguagePrivacyPolicy>? name) {
-    if (name!.firstWhere((element) => element.type == Constant.getLanguage().code).privacyPolicy!.isNotEmpty) {
-      return name.firstWhere((element) => element.type == Constant.getLanguage().code).privacyPolicy!;
+    if (name!
+        .firstWhere((element) => element.type == Constant.getLanguage().code)
+        .privacyPolicy!
+        .isNotEmpty) {
+      return name
+          .firstWhere((element) => element.type == Constant.getLanguage().code)
+          .privacyPolicy!;
     } else {
-      return name.firstWhere((element) => element.type == "en").privacyPolicy.toString();
+      return name
+          .firstWhere((element) => element.type == "en")
+          .privacyPolicy
+          .toString();
     }
   }
 
   static String localizationTermsCondition(List<LanguageTermsCondition>? name) {
-    if (name!.firstWhere((element) => element.type == Constant.getLanguage().code).termsAndConditions!.isNotEmpty) {
-      return name.firstWhere((element) => element.type == Constant.getLanguage().code).termsAndConditions!;
+    if (name!
+        .firstWhere((element) => element.type == Constant.getLanguage().code)
+        .termsAndConditions!
+        .isNotEmpty) {
+      return name
+          .firstWhere((element) => element.type == Constant.getLanguage().code)
+          .termsAndConditions!;
     } else {
-      return name.firstWhere((element) => element.type == "en").termsAndConditions.toString();
+      return name
+          .firstWhere((element) => element.type == "en")
+          .termsAndConditions
+          .toString();
     }
   }
 
@@ -139,7 +183,8 @@ class Constant {
   }
 
   static bool? validateEmail(String? value) {
-    String pattern = r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
+    String pattern =
+        r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
     RegExp regex = RegExp(pattern);
     if (!regex.hasMatch(value ?? '')) {
       return false;
@@ -152,7 +197,10 @@ class Constant {
     int crossings = 0;
     for (int i = 0; i < polygon.length; i++) {
       int next = (i + 1) % polygon.length;
-      if (polygon[i].latitude <= point.latitude && polygon[next].latitude > point.latitude || polygon[i].latitude > point.latitude && polygon[next].latitude <= point.latitude) {
+      if (polygon[i].latitude <= point.latitude &&
+              polygon[next].latitude > point.latitude ||
+          polygon[i].latitude > point.latitude &&
+              polygon[next].latitude <= point.latitude) {
         double edgeLong = polygon[next].longitude - polygon[i].longitude;
         double edgeLat = polygon[next].latitude - polygon[i].latitude;
         double interpol = (point.latitude - polygon[i].latitude) / edgeLat;
@@ -165,40 +213,45 @@ class Constant {
     return (crossings % 2 != 0);
   }
 
-  static Future<mapmodel.MapModel?> getDurationDistance(LatLng departureLatLong, LatLng destinationLatLong) async {
+  static Future<mapmodel.MapModel?> getDurationDistance(
+      LatLng departureLatLong, LatLng destinationLatLong) async {
     try {
       String url = 'https://maps.googleapis.com/maps/api/distancematrix/json';
-      http.Response restaurantToCustomerTime = await http.get(Uri.parse('$url?units=metric&origins=${departureLatLong.latitude},'
+      http.Response restaurantToCustomerTime = await http.get(Uri.parse(
+          '$url?units=metric&origins=${departureLatLong.latitude},'
           '${departureLatLong.longitude}&destinations=${destinationLatLong.latitude},${destinationLatLong.longitude}&key=${Constant.mapAPIKey}'));
 
       log(restaurantToCustomerTime.body.toString());
-      mapmodel.MapModel mapModel = mapmodel.MapModel.fromJson(jsonDecode(restaurantToCustomerTime.body));
+      mapmodel.MapModel mapModel =
+          mapmodel.MapModel.fromJson(jsonDecode(restaurantToCustomerTime.body));
 
-      if (mapModel.status == 'OK' && mapModel.rows!.first.elements!.first.status == "OK") {
+      if (mapModel.status == 'OK' &&
+          mapModel.rows!.first.elements!.first.status == "OK") {
         return mapModel;
       } else {
         ShowToastDialog.showToast(mapModel.errorMessage);
       }
       return null;
     } catch (e) {
-      ShowToastDialog.closeLoader();
       log("Error :: $e");
       return null;
     }
   }
 
-  static Future<Map<String, dynamic>> getDurationOsmDistance(LatLng departureLatLong, LatLng destinationLatLong) async {
+  static Future<Map<String, dynamic>> getDurationOsmDistance(
+      LatLng departureLatLong, LatLng destinationLatLong) async {
     try {
       String url = 'http://router.project-osrm.org/route/v1/driving';
-      String coordinates = '${departureLatLong.longitude},${departureLatLong.latitude};${destinationLatLong.longitude},${destinationLatLong.latitude}';
+      String coordinates =
+          '${departureLatLong.longitude},${departureLatLong.latitude};${destinationLatLong.longitude},${destinationLatLong.latitude}';
 
-      http.Response response = await http.get(Uri.parse('$url/$coordinates?overview=false&steps=false'));
+      http.Response response = await http
+          .get(Uri.parse('$url/$coordinates?overview=false&steps=false'));
 
       log(response.body.toString());
 
       return jsonDecode(response.body);
     } catch (e) {
-      ShowToastDialog.closeLoader();
       log("Error :: $e");
       return {};
     }
@@ -238,7 +291,9 @@ class Constant {
       if (taxModel.type == "fix") {
         taxAmount = double.parse(taxModel.tax.toString());
       } else {
-        taxAmount = (double.parse(amount.toString()) * double.parse(taxModel.tax!.toString())) / 100;
+        taxAmount = (double.parse(amount.toString()) *
+                double.parse(taxModel.tax!.toString())) /
+            100;
       }
     }
     return taxAmount;
@@ -252,23 +307,29 @@ class Constant {
     }
   }
 
-  static double calculateOrderAdminCommission({String? amount, AdminCommission? adminCommission}) {
+  static double calculateOrderAdminCommission(
+      {String? amount, AdminCommission? adminCommission}) {
     double taxAmount = 0.0;
     if (adminCommission != null) {
       if (adminCommission.type == "fix") {
         taxAmount = double.parse(adminCommission.amount ?? '0.0');
       } else {
-        taxAmount = (double.parse(amount ?? '0.0') * double.parse(adminCommission.amount ?? '0.0')) / 100;
+        taxAmount = (double.parse(amount ?? '0.0') *
+                double.parse(adminCommission.amount ?? '0.0')) /
+            100;
       }
     }
     return taxAmount;
   }
 
-  static String calculateReview({required String? reviewCount, required String? reviewSum}) {
+  static String calculateReview(
+      {required String? reviewCount, required String? reviewSum}) {
     if (reviewCount == "0.0" && reviewSum == "0.0") {
       return "0.0";
     }
-    return (double.parse(reviewSum.toString()) / double.parse(reviewCount.toString())).toStringAsFixed(Constant.currencyModel!.decimalDigits!);
+    return (double.parse(reviewSum.toString()) /
+            double.parse(reviewCount.toString()))
+        .toStringAsFixed(Constant.currencyModel!.decimalDigits!);
   }
 
   static bool IsNegative(double number) {
@@ -287,7 +348,8 @@ class Constant {
   }
 
   bool hasValidUrl(String value) {
-    String pattern = r'(http|https)://[\w-]+(\.[\w-]+)+([\w.,@?^=%&amp;:/~+#-]*[\w@?^=%&amp;/~+#-])?';
+    String pattern =
+        r'(http|https)://[\w-]+(\.[\w-]+)+([\w.,@?^=%&amp;:/~+#-]*[\w@?^=%&amp;/~+#-])?';
     RegExp regExp = RegExp(pattern);
     if (value.isEmpty) {
       return false;
@@ -297,16 +359,21 @@ class Constant {
     return true;
   }
 
-  static Future<String> uploadUserImageToFireStorage(File image, String filePath, String fileName) async {
-    Reference upload = FirebaseStorage.instance.ref().child('$filePath/$fileName');
+  static Future<String> uploadUserImageToFireStorage(
+      File image, String filePath, String fileName) async {
+    Reference upload =
+        FirebaseStorage.instance.ref().child('$filePath/$fileName');
     UploadTask uploadTask = upload.putFile(image);
-    var downloadUrl = await (await uploadTask.whenComplete(() {})).ref.getDownloadURL();
+    var downloadUrl =
+        await (await uploadTask.whenComplete(() {})).ref.getDownloadURL();
     return downloadUrl.toString();
   }
 
   Future<String> uploadVoiceMessage(String filePath) async {
     final file = File(filePath);
-    final ref = FirebaseStorage.instance.ref().child("voice_messages/${DateTime.now().millisecondsSinceEpoch}.m4a");
+    final ref = FirebaseStorage.instance
+        .ref()
+        .child("voice_messages/${DateTime.now().millisecondsSinceEpoch}.m4a");
     await ref.putFile(file);
     return await ref.getDownloadURL();
   }
@@ -322,20 +389,23 @@ class Constant {
   Future<Url> uploadChatImageToFireStorage(File image) async {
     ShowToastDialog.showLoader('Uploading image...');
     var uniqueID = const Uuid().v4();
-    Reference upload = FirebaseStorage.instance.ref().child('/chat/images/$uniqueID.png');
+    Reference upload =
+        FirebaseStorage.instance.ref().child('/chat/images/$uniqueID.png');
     UploadTask uploadTask = upload.putFile(image);
     var storageRef = (await uploadTask.whenComplete(() {})).ref;
     var downloadUrl = await storageRef.getDownloadURL();
     var metaData = await storageRef.getMetadata();
     ShowToastDialog.closeLoader();
-    return Url(mime: metaData.contentType ?? 'image', url: downloadUrl.toString());
+    return Url(
+        mime: metaData.contentType ?? 'image', url: downloadUrl.toString());
   }
 
   Future<ChatVideoContainer?> uploadChatVideoToFireStorage(File video) async {
     try {
       ShowToastDialog.showLoader("Uploading video...");
       final String uniqueID = const Uuid().v4();
-      final Reference videoRef = FirebaseStorage.instance.ref('videos/$uniqueID.mp4');
+      final Reference videoRef =
+          FirebaseStorage.instance.ref('videos/$uniqueID.mp4');
       final UploadTask uploadTask = videoRef.putFile(
         video,
         SettableMetadata(contentType: 'video/mp4'),
@@ -356,7 +426,8 @@ class Constant {
       }
 
       final String thumbnailID = const Uuid().v4();
-      final Reference thumbnailRef = FirebaseStorage.instance.ref('thumbnails/$thumbnailID.jpg');
+      final Reference thumbnailRef =
+          FirebaseStorage.instance.ref('thumbnails/$thumbnailID.jpg');
       final UploadTask thumbnailUploadTask = thumbnailRef.putData(
         thumbnailBytes,
         SettableMetadata(contentType: 'image/jpeg'),
@@ -367,7 +438,9 @@ class Constant {
       await thumbnailRef.getMetadata();
       ShowToastDialog.closeLoader();
 
-      return ChatVideoContainer(videoUrl: Url(url: videoUrl.toString(), mime: 'video/mp4'), thumbnailUrl: thumbnailUrl);
+      return ChatVideoContainer(
+          videoUrl: Url(url: videoUrl.toString(), mime: 'video/mp4'),
+          thumbnailUrl: thumbnailUrl);
     } catch (e) {
       ShowToastDialog.closeLoader();
       ShowToastDialog.showToast("Error: ${e.toString()}");
@@ -377,17 +450,22 @@ class Constant {
 
   Future<String> uploadVideoThumbnailToFireStorage(File file) async {
     var uniqueID = const Uuid().v4();
-    Reference upload = FirebaseStorage.instance.ref().child('/thumbnails/$uniqueID.png');
+    Reference upload =
+        FirebaseStorage.instance.ref().child('/thumbnails/$uniqueID.png');
     UploadTask uploadTask = upload.putFile(file);
-    var downloadUrl = await (await uploadTask.whenComplete(() {})).ref.getDownloadURL();
+    var downloadUrl =
+        await (await uploadTask.whenComplete(() {})).ref.getDownloadURL();
     return downloadUrl.toString();
   }
 
   Future<Uint8List> getBytesFromAsset(String path, int width) async {
     ByteData data = await rootBundle.load(path);
-    ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List(), targetWidth: width);
+    ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List(),
+        targetWidth: width);
     ui.FrameInfo fi = await codec.getNextFrame();
-    return (await fi.image.toByteData(format: ui.ImageByteFormat.png))!.buffer.asUint8List();
+    return (await fi.image.toByteData(format: ui.ImageByteFormat.png))!
+        .buffer
+        .asUint8List();
   }
 
   Future<Uint8List> getBytesFromUrl(String url, {int width = 100}) async {
@@ -399,10 +477,12 @@ class Constant {
     final Uint8List bytes = response.bodyBytes;
 
     // Decode & resize
-    final ui.Codec codec = await ui.instantiateImageCodec(bytes, targetWidth: width);
+    final ui.Codec codec =
+        await ui.instantiateImageCodec(bytes, targetWidth: width);
     final ui.FrameInfo frameInfo = await codec.getNextFrame();
 
-    final ByteData? byteData = await frameInfo.image.toByteData(format: ui.ImageByteFormat.png);
+    final ByteData? byteData =
+        await frameInfo.image.toByteData(format: ui.ImageByteFormat.png);
     return byteData!.buffer.asUint8List();
   }
 }

@@ -66,7 +66,11 @@ class DashBoardScreen extends StatelessWidget {
                     ),
                     child: IconButton(
                       onPressed: () {
-                         Scaffold.of(context).openDrawer();
+                        if (controller.selectedDrawerIndex.value == 2) {
+                          controller.selectedDrawerIndex(0);
+                        } else {
+                          controller.selectedDrawerIndex(2);
+                        }
                       },
                       icon: SvgPicture.asset(
                         'assets/icons/ic_humber.svg',
@@ -102,7 +106,7 @@ class DashBoardScreen extends StatelessWidget {
                                   return const SizedBox();
                                 return InkWell(
                                   onTap: () {
-                                    controller.selectedDrawerIndex(8);
+                                    _showLogoutDialog(context, controller);
                                   },
                                   child: Padding(
                                     padding: const EdgeInsets.all(8.0),
@@ -351,6 +355,46 @@ class DashBoardScreen extends StatelessWidget {
               ),
             ],
           ),
+        );
+      },
+    );
+  }
+
+  void _showLogoutDialog(BuildContext context, DashBoardController controller) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: Text(
+            "Log out".tr,
+            style: GoogleFonts.outfit(
+                fontWeight: FontWeight.bold, color: AppColors.moroccoRed),
+          ),
+          content: Text(
+            "Are you sure you want to log out?".tr,
+            style: GoogleFonts.outfit(),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Get.back(),
+              child: Text(
+                "No".tr,
+                style: GoogleFonts.outfit(color: Colors.grey),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                controller.onSelectItem(12);
+              },
+              child: Text(
+                "Yes".tr,
+                style: GoogleFonts.outfit(
+                    color: AppColors.moroccoRed, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
         );
       },
     );

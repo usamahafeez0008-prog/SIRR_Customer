@@ -45,7 +45,7 @@ class CompleteOrderScreen extends StatelessWidget {
                   Container(
                     height: Responsive.width(10, context),
                     width: Responsive.width(100, context),
-                    color: AppColors.lightprimary,
+                    //color: AppColors.lightprimary,
                   ),
                   Expanded(
                     child: Transform.translate(
@@ -547,6 +547,7 @@ class CompleteOrderScreen extends StatelessWidget {
                             ),
                     ),
                   ),
+                  SizedBox(height: 40,)
                 ],
               ));
         });

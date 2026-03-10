@@ -1470,6 +1470,25 @@ class FireStoreUtils {
     return airPortList;
   }
 
+  static Future<bool> checkActiveRide() async {
+    bool hasActiveRide = false;
+    try {
+      final snapshot = await fireStore
+          .collection(CollectionName.orders)
+          .where('userId', isEqualTo: FireStoreUtils.getCurrentUid())
+          .where('status', whereIn: [
+        Constant.ridePlaced,
+        Constant.rideActive,
+        Constant.rideInProgress,
+      ]).get();
+      hasActiveRide = snapshot.size >= 1;
+    } catch (e) {
+      log('checkActiveRide error: $e');
+      hasActiveRide = false;
+    }
+    return hasActiveRide;
+  }
+
   static Future<bool> paymentStatusCheck() async {
     ShowToastDialog.showLoader("Please wait");
     bool isFirst = false;

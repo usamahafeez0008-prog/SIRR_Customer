@@ -38,20 +38,24 @@ class PaymentOrderController extends GetxController {
 
   @override
   void onInit() {
-    // TODO: implement onInit
-    getArgument();
-    getPaymentData();
+    initData();
     super.onInit();
+  }
+
+  Future<void> initData() async {
+    getArgument();
+    await getPaymentData();
   }
 
   Rx<OrderModel> orderModel = OrderModel().obs;
 
-  Future<void> getArgument() async {
+  void getArgument() {
     dynamic argumentData = Get.arguments;
     if (argumentData != null) {
-      orderModel.value = argumentData['orderModel'];
+      if (argumentData['orderModel'] != null) {
+        orderModel.value = argumentData['orderModel'];
+      }
     }
-
     update();
   }
 
@@ -66,7 +70,8 @@ class PaymentOrderController extends GetxController {
       if (value != null) {
         paymentModel.value = value;
 
-        Stripe.publishableKey = paymentModel.value.strip!.clientpublishableKey.toString();
+        Stripe.publishableKey =
+            paymentModel.value.strip!.clientpublishableKey.toString();
         Stripe.merchantIdentifier = 'GoRide';
         Stripe.instance.applySettings();
         setRef();
@@ -78,12 +83,14 @@ class PaymentOrderController extends GetxController {
       }
     });
 
-    await FireStoreUtils.getUserProfile(FireStoreUtils.getCurrentUid()).then((value) {
+    await FireStoreUtils.getUserProfile(FireStoreUtils.getCurrentUid())
+        .then((value) {
       if (value != null) {
         userModel.value = value;
       }
     });
-    await FireStoreUtils.getDriver(orderModel.value.driverId.toString()).then((value) {
+    await FireStoreUtils.getDriver(orderModel.value.driverId.toString())
+        .then((value) {
       if (value != null) {
         driverUserModel.value = value;
       }
@@ -108,62 +115,84 @@ class PaymentOrderController extends GetxController {
         createdDate: Timestamp.now(),
         paymentType: selectedPaymentMethod.value,
         transactionId: orderModel.value.id,
-        userId: orderModel.value.ownerId == null ? orderModel.value.driverId.toString() : orderModel.value.ownerId.toString(),
+        userId: orderModel.value.ownerId == null
+            ? orderModel.value.driverId.toString()
+            : orderModel.value.ownerId.toString(),
         orderType: "city",
         userType: orderModel.value.ownerId == null ? "driver" : "owner",
         note: "Ride amount credited");
 
-    await FireStoreUtils.setWalletTransaction(transactionModel).then((value) async {
+    await FireStoreUtils.setWalletTransaction(transactionModel)
+        .then((value) async {
       if (value == true) {
         if (orderModel.value.ownerId == null) {
-          await FireStoreUtils.updateDriverWallet(amount: total.value.toString(), driverId: orderModel.value.driverId.toString());
+          await FireStoreUtils.updateDriverWallet(
+              amount: total.value.toString(),
+              driverId: orderModel.value.driverId.toString());
         } else {
-          await FireStoreUtils.updatedOwnerWallet(amount: total.value.toString(), ownerId: orderModel.value.ownerId.toString());
+          await FireStoreUtils.updatedOwnerWallet(
+              amount: total.value.toString(),
+              ownerId: orderModel.value.ownerId.toString());
         }
       }
     });
 
-    await FireStoreUtils.getCustomerFirstOrderOrNOt(customerId: orderModel.value.userId!, orderType: 'order').then((value) async {
+    await FireStoreUtils.getCustomerFirstOrderOrNOt(
+            customerId: orderModel.value.userId!, orderType: 'order')
+        .then((value) async {
       if (value == true) {
         await FireStoreUtils.updateReferralAmount(orderModel.value);
       }
     });
 
-    await FireStoreUtils.getDriverFirstOrderOrNOt(driverId: orderModel.value.driverId!, orderType: 'order').then((value) async {
+    await FireStoreUtils.getDriverFirstOrderOrNOt(
+            driverId: orderModel.value.driverId!, orderType: 'order')
+        .then((value) async {
       if (value == true) {
         await FireStoreUtils.updateDriverReferralAmount(orderModel.value);
       }
     });
 
     if (driverUserModel.value.fcmToken != null) {
-      Map<String, dynamic> playLoad = <String, dynamic>{"type": "city_order_payment_complete", "orderId": orderModel.value.id};
+      Map<String, dynamic> playLoad = <String, dynamic>{
+        "type": "city_order_payment_complete",
+        "orderId": orderModel.value.id
+      };
 
       await SendNotification.sendOneNotification(
           token: driverUserModel.value.fcmToken.toString(),
           title: 'Payment Received',
-          body: '${userModel.value.fullName} has paid ${Constant.amountShow(amount: total.value.toString())} for the completed ride.Check your earnings for details.',
+          body:
+              '${userModel.value.fullName} has paid ${Constant.amountShow(amount: total.value.toString())} for the completed ride.Check your earnings for details.',
           payload: playLoad);
     }
-    if (orderModel.value.adminCommission?.amount != '0' && orderModel.value.adminCommission?.amount != '0.0' && orderModel.value.adminCommission?.amount != null) {
+    if (orderModel.value.adminCommission?.amount != '0' &&
+        orderModel.value.adminCommission?.amount != '0.0' &&
+        orderModel.value.adminCommission?.amount != null) {
       WalletTransactionModel adminCommissionWallet = WalletTransactionModel(
           id: Constant.getUuid(),
-          amount: "-${Constant.calculateOrderAdminCommission(amount: (subTotal.value - double.parse(couponAmount.value)).toString(), adminCommission: orderModel.value.adminCommission)}",
+          amount:
+              "-${Constant.calculateOrderAdminCommission(amount: (subTotal.value - double.parse(couponAmount.value)).toString(), adminCommission: orderModel.value.adminCommission)}",
           createdDate: Timestamp.now(),
           paymentType: selectedPaymentMethod.value,
           transactionId: orderModel.value.id,
           orderType: "city",
           userType: orderModel.value.ownerId == null ? "driver" : "owner",
-          userId: orderModel.value.ownerId == null ? orderModel.value.driverId.toString() : orderModel.value.ownerId.toString(),
+          userId: orderModel.value.ownerId == null
+              ? orderModel.value.driverId.toString()
+              : orderModel.value.ownerId.toString(),
           note: "Admin commission debited");
 
       await FireStoreUtils.setWalletTransaction(adminCommissionWallet);
       if (orderModel.value.ownerId == null) {
         await FireStoreUtils.updateDriverWallet(
-            amount: "-${Constant.calculateOrderAdminCommission(amount: (subTotal.value - double.parse(couponAmount.value)).toString(), adminCommission: orderModel.value.adminCommission)}",
+            amount:
+                "-${Constant.calculateOrderAdminCommission(amount: (subTotal.value - double.parse(couponAmount.value)).toString(), adminCommission: orderModel.value.adminCommission)}",
             driverId: orderModel.value.driverId.toString());
       } else {
         await FireStoreUtils.updatedOwnerWallet(
-            amount: "-${Constant.calculateOrderAdminCommission(amount: (subTotal.value - double.parse(couponAmount.value)).toString(), adminCommission: orderModel.value.adminCommission)}",
+            amount:
+                "-${Constant.calculateOrderAdminCommission(amount: (subTotal.value - double.parse(couponAmount.value)).toString(), adminCommission: orderModel.value.adminCommission)}",
             ownerId: orderModel.value.ownerId.toString());
       }
     }
@@ -181,12 +210,17 @@ class PaymentOrderController extends GetxController {
     orderModel.value.coupon = selectedCouponModel.value;
 
     await SendNotification.sendOneNotification(
-        token: driverUserModel.value.fcmToken.toString(), title: 'Payment changed.', body: '${userModel.value.fullName} has changed payment method.', payload: {});
+        token: driverUserModel.value.fcmToken.toString(),
+        title: 'Payment changed.',
+        body: '${userModel.value.fullName} has changed payment method.',
+        payload: {});
 
     FireStoreUtils.setOrder(orderModel.value).then((value) {
       if (value == true) {
         Get.back();
-        ShowToastDialog.showToast("Your payment request sent to driver please wait to the conformation".tr);
+        ShowToastDialog.showToast(
+            "Your payment request sent to driver please wait to the conformation"
+                .tr);
       }
     });
   }
@@ -210,97 +244,177 @@ class PaymentOrderController extends GetxController {
   DateTime endNightTimeString = DateTime.now();
 
   Future<void> calculateAmount() async {
-    taxAmount.value = 0.0;
-    String formatTime(String? time) {
-      if (time == null || !time.contains(":")) {
-        return "00:00";
+    try {
+      taxAmount.value = 0.0;
+      if (orderModel.value.id == null ||
+          orderModel.value.service == null ||
+          orderModel.value.service!.prices == null ||
+          orderModel.value.service!.prices!.isEmpty) {
+        log("calculateAmount: Order, service, or prices are null/empty");
+        isLoading.value = false;
+        update();
+        return;
       }
-      List<String> parts = time.split(':');
-      if (parts.length != 2) return "00:00";
-      return "${parts[0].padLeft(2, '0')}:${parts[1].padLeft(2, '0')}";
-    }
 
-    startNightTime.value = formatTime(orderModel.value.service?.prices?.first.startNightTime);
-    endNightTime.value = formatTime(orderModel.value.service?.prices?.first.endNightTime);
+      String formatTime(String? time) {
+        if (time == null || !time.contains(":")) {
+          return "00:00";
+        }
+        List<String> parts = time.split(':');
+        if (parts.length != 2) return "00:00";
+        return "${parts[0].padLeft(2, '0')}:${parts[1].padLeft(2, '0')}";
+      }
 
-    List<String> startParts = startNightTime.split(':');
-    List<String> endParts = endNightTime.split(':');
+      startNightTime.value =
+          formatTime(orderModel.value.service?.prices?.first.startNightTime);
+      endNightTime.value =
+          formatTime(orderModel.value.service?.prices?.first.endNightTime);
 
-    startNightTimeString = DateTime(currentDate.year, currentDate.month, currentDate.day, int.parse(startParts[0]), int.parse(startParts[1]));
-    endNightTimeString = DateTime(currentDate.year, currentDate.month, currentDate.day, int.parse(endParts[0]), int.parse(endParts[1]));
+      List<String> startParts = startNightTime.split(':');
+      List<String> endParts = endNightTime.split(':');
 
-    double durationValueInMinutes = convertToMinutes(orderModel.value.duration.toString());
-    double distance = double.tryParse(orderModel.value.distance.toString()) ?? 0.0;
-    double nonAcChargeValue = 0.0;
-    double acChargeValue = 0.0;
-    double kmCharge = 0.0;
+      startNightTimeString = DateTime(currentDate.year, currentDate.month,
+          currentDate.day, int.parse(startParts[0]), int.parse(startParts[1]));
+      endNightTimeString = DateTime(currentDate.year, currentDate.month,
+          currentDate.day, int.parse(endParts[0]), int.parse(endParts[1]));
 
-    if (orderModel.value.driverId != null && orderModel.value.driverId!.isNotEmpty) {
-      String nonAcPerKmRateData = driverUserModel.value.vehicleInformation?.rates?.firstWhere((prices) => prices.zoneId == orderModel.value.zoneId).nonAcPerKmRate ?? '1.0';
-      String acPerKmRateData = driverUserModel.value.vehicleInformation?.rates?.firstWhere((prices) => prices.zoneId == orderModel.value.zoneId).acPerKmRate ?? '1.0';
-      String perKmRateData = driverUserModel.value.vehicleInformation?.rates?.firstWhere((prices) => prices.zoneId == orderModel.value.zoneId).perKmRate ?? '1.0';
-      nonAcChargeValue = double.tryParse(nonAcPerKmRateData) ?? 1.0;
-      acChargeValue = double.tryParse(acPerKmRateData) ?? 1.0;
-      kmCharge = double.tryParse(perKmRateData) ?? 1.0;
-    } else {
-      nonAcChargeValue = double.tryParse(orderModel.value.service!.prices!.first.nonAcCharge!) ?? 1.0;
-      acChargeValue = double.tryParse(orderModel.value.service!.prices!.first.acCharge!) ?? 1.0;
-      kmCharge = double.tryParse(orderModel.value.service!.prices!.first.kmCharge!) ?? 1.0;
-    }
+      double durationValueInMinutes =
+          convertToMinutes(orderModel.value.duration?.toString());
+      double distance =
+          double.tryParse(orderModel.value.distance.toString()) ?? 0.0;
+      double nonAcChargeValue = 1.0;
+      double acChargeValue = 1.0;
+      double kmCharge = 1.0;
 
-    totalChargeOfMinute.value = durationValueInMinutes * (double.tryParse(orderModel.value.service!.prices!.first.perMinuteCharge!) ?? 1.0);
-    basicFareCharge.value = (double.tryParse(orderModel.value.service!.prices!.first.basicFareCharge!)) ?? 1.0;
-    holdingCharge.value = double.tryParse(orderModel.value.totalHoldingCharges!) ?? 1.0;
-    if (distance <= double.parse(orderModel.value.service!.prices!.first.basicFare!)) {
-      if (currentTime.isAfter(startNightTimeString) && currentTime.isBefore(endNightTimeString)) {
-        amount.value = amount.value * (double.tryParse(orderModel.value.service!.prices!.first.nightCharge!) ?? 1.0);
+      if (orderModel.value.driverId != null &&
+          orderModel.value.driverId!.isNotEmpty &&
+          driverUserModel.value.id != null) {
+        try {
+          var rate = driverUserModel.value.vehicleInformation?.rates
+              ?.firstWhere(
+                  (prices) => prices.zoneId == orderModel.value.zoneId);
+          if (rate != null) {
+            nonAcChargeValue =
+                double.tryParse(rate.nonAcPerKmRate ?? '1.0') ?? 1.0;
+            acChargeValue = double.tryParse(rate.acPerKmRate ?? '1.0') ?? 1.0;
+            kmCharge = double.tryParse(rate.perKmRate ?? '1.0') ?? 1.0;
+          }
+        } catch (e) {
+          log("calculateAmount: Rate not found for zone. Using defaults.");
+        }
       } else {
-        amount.value = double.parse(orderModel.value.service?.prices?.first.basicFareCharge ?? '0.0');
+        nonAcChargeValue = double.tryParse(
+                orderModel.value.service?.prices?.first.nonAcCharge ?? '1.0') ??
+            1.0;
+        acChargeValue = double.tryParse(
+                orderModel.value.service?.prices?.first.acCharge ?? '1.0') ??
+            1.0;
+        kmCharge = double.tryParse(
+                orderModel.value.service?.prices?.first.kmCharge ?? '1.0') ??
+            1.0;
       }
-    } else {
-      double distanceValue = double.tryParse(orderModel.value.distance.toString()) ?? 0.0;
-      double basicFareValue = double.tryParse(orderModel.value.service!.prices!.first.basicFare!) ?? 0.0;
-      double extraDist = distanceValue - basicFareValue;
 
-      double perKmCharge = orderModel.value.service?.prices?.first.isAcNonAc == true
-          ? orderModel.value.isAcSelected == false
-              ? nonAcChargeValue
-              : acChargeValue
-          : kmCharge;
-      if (perKmCharge == 0.0) {
-        amount.value = extraDist;
+      totalChargeOfMinute.value = durationValueInMinutes *
+          (double.tryParse(
+                  orderModel.value.service?.prices?.first.perMinuteCharge ??
+                      '0.0') ??
+              0.0);
+      basicFareCharge.value = (double.tryParse(
+              orderModel.value.service?.prices?.first.basicFareCharge ??
+                  '0.0')) ??
+          0.0;
+      holdingCharge.value =
+          double.tryParse(orderModel.value.totalHoldingCharges ?? '0.0') ?? 0.0;
+
+      double basicFareThreshold = double.tryParse(
+              orderModel.value.service?.prices?.first.basicFare ?? '0.0') ??
+          0.0;
+      double nightMultiplier = double.tryParse(
+              orderModel.value.service?.prices?.first.nightCharge ?? '1.0') ??
+          1.0;
+
+      bool isNight = currentTime.isAfter(startNightTimeString) &&
+          currentTime.isBefore(endNightTimeString);
+
+      if (distance <= basicFareThreshold) {
+        amount.value = 0.0; // No extra distance charge
       } else {
-        amount.value = (perKmCharge * extraDist);
+        double extraDist = distance - basicFareThreshold;
+        double perKmCharge =
+            orderModel.value.service?.prices?.first.isAcNonAc == true
+                ? (orderModel.value.isAcSelected == true
+                    ? acChargeValue
+                    : nonAcChargeValue)
+                : kmCharge;
+
+        amount.value = perKmCharge * extraDist;
       }
 
-      if (currentTime.isAfter(startNightTimeString) && currentTime.isBefore(endNightTimeString)) {
-        totalChargeOfMinute.value = totalChargeOfMinute.value * (double.tryParse(orderModel.value.service!.prices!.first.nightCharge!) ?? 1.0);
-        basicFareCharge.value = basicFareCharge.value * (double.tryParse(orderModel.value.service!.prices!.first.nightCharge!) ?? 1.0);
-        holdingCharge.value = holdingCharge.value * (double.tryParse(orderModel.value.service!.prices!.first.nightCharge!) ?? 1.0);
+      // Apply night charge if applicable
+      if (isNight) {
+        amount.value *= nightMultiplier;
+        basicFareCharge.value *= nightMultiplier;
+        totalChargeOfMinute.value *= nightMultiplier;
+        holdingCharge.value *= nightMultiplier;
       }
-    }
 
-    if (orderModel.value.finalRate != null && orderModel.value.finalRate != '0.0') {
-      amount.value = double.parse(orderModel.value.finalRate.toString()) - basicFareCharge.value - totalChargeOfMinute.value - holdingCharge.value;
-    } else {
-      amount.value = amount.value * (double.tryParse(orderModel.value.service!.prices!.first.nightCharge!) ?? 0.0);
-    }
-
-    subTotal.value = amount.value + basicFareCharge.value + totalChargeOfMinute.value + holdingCharge.value;
-
-    print("===>Subtotal${subTotal.value}");
-    if (orderModel.value.taxList != null) {
-      for (var element in orderModel.value.taxList!) {
-        taxAmount.value = taxAmount.value + Constant().calculateTax(amount: (subTotal.value - double.parse(couponAmount.value)).toString(), taxModel: element);
+      // Handle finalRate override if set
+      if (orderModel.value.finalRate != null &&
+          orderModel.value.finalRate != '0.0' &&
+          orderModel.value.finalRate != '0') {
+        double totalFare =
+            double.tryParse(orderModel.value.finalRate.toString()) ?? 0.0;
+        if (totalFare > 0) {
+          amount.value = totalFare -
+              (basicFareCharge.value +
+                  totalChargeOfMinute.value +
+                  holdingCharge.value);
+          if (amount.value < 0)
+            amount.value = 0; // Guard against negative distance fare
+        }
       }
+
+      subTotal.value = amount.value +
+          basicFareCharge.value +
+          totalChargeOfMinute.value +
+          holdingCharge.value;
+
+      if (orderModel.value.taxList != null) {
+        for (var element in orderModel.value.taxList!) {
+          taxAmount.value = taxAmount.value +
+              Constant().calculateTax(
+                  amount: (subTotal.value - double.parse(couponAmount.value))
+                      .toString(),
+                  taxModel: element);
+        }
+      }
+      total.value =
+          (subTotal.value - double.parse(couponAmount.value)) + taxAmount.value;
+      update();
+    } catch (e, stack) {
+      log("Error in calculateAmount: $e");
+      log(stack.toString());
     }
-    total.value = (subTotal.value - double.parse(couponAmount.value)) + taxAmount.value;
   }
 
-  double convertToMinutes(String duration) {
+  double convertToMinutes(String? duration) {
+    if (duration == null || duration.isEmpty || duration == "null") return 0.0;
     double durationValue = 0.0;
 
     try {
+      if (duration.contains(":")) {
+        List<String> parts = duration.split(':');
+        if (parts.length == 3) {
+          durationValue = (double.tryParse(parts[0]) ?? 0) * 60 +
+              (double.tryParse(parts[1]) ?? 0) +
+              (double.tryParse(parts[2]) ?? 0) / 60;
+        } else if (parts.length == 2) {
+          durationValue = (double.tryParse(parts[0]) ?? 0) +
+              (double.tryParse(parts[1]) ?? 0) / 60;
+        }
+        return durationValue;
+      }
+
       final RegExp hoursRegex = RegExp(r"(\d+)\s*hour");
       final RegExp minutesRegex = RegExp(r"(\d+)\s*min");
 
@@ -315,9 +429,12 @@ class PaymentOrderController extends GetxController {
         int minutes = int.parse(minutesMatch.group(1)!.trim());
         durationValue += minutes;
       }
+
+      if (durationValue == 0.0) {
+        durationValue = double.tryParse(duration) ?? 0.0;
+      }
     } catch (e) {
-      print("Exception: $e");
-      throw FormatException("Invalid duration format: $duration");
+      log("convertToMinutes: Error parsing duration '$duration': $e");
     }
 
     return durationValue;
@@ -327,10 +444,12 @@ class PaymentOrderController extends GetxController {
   Future<void> stripeMakePayment({required String amount}) async {
     log(double.parse(amount).toStringAsFixed(0));
     try {
-      Map<String, dynamic>? paymentIntentData = await createStripeIntent(amount: amount);
+      Map<String, dynamic>? paymentIntentData =
+          await createStripeIntent(amount: amount);
       if (paymentIntentData!.containsKey("error")) {
         Get.back();
-        ShowToastDialog.showToast("Something went wrong, please contact admin.");
+        ShowToastDialog.showToast(
+            "Something went wrong, please contact admin.");
       } else {
         await Stripe.instance.initPaymentSheet(
             paymentSheetParameters: SetupPaymentSheetParameters(
@@ -390,8 +509,13 @@ class PaymentOrderController extends GetxController {
       };
       log(paymentModel.value.strip!.stripeSecret.toString());
       var stripeSecret = paymentModel.value.strip!.stripeSecret;
-      var response =
-          await http.post(Uri.parse('https://api.stripe.com/v1/payment_intents'), body: body, headers: {'Authorization': 'Bearer $stripeSecret', 'Content-Type': 'application/x-www-form-urlencoded'});
+      var response = await http.post(
+          Uri.parse('https://api.stripe.com/v1/payment_intents'),
+          body: body,
+          headers: {
+            'Authorization': 'Bearer $stripeSecret',
+            'Content-Type': 'application/x-www-form-urlencoded'
+          });
 
       return jsonDecode(response.body);
     } catch (e) {
@@ -400,7 +524,8 @@ class PaymentOrderController extends GetxController {
   }
 
   //mercadoo
-  mercadoPagoMakePayment({required BuildContext context, required String amount}) async {
+  mercadoPagoMakePayment(
+      {required BuildContext context, required String amount}) async {
     final headers = {
       'Authorization': 'Bearer ${paymentModel.value.mercadoPago!.accessToken}',
       'Content-Type': 'application/json',
@@ -453,7 +578,8 @@ class PaymentOrderController extends GetxController {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (BuildContext context) => UsePaypal(
-            sandboxMode: paymentModel.value.paypal!.isSandbox == true ? false : true,
+            sandboxMode:
+                paymentModel.value.paypal!.isSandbox == true ? false : true,
             clientId: paymentModel.value.paypal!.paypalClient ?? '',
             secretKey: paymentModel.value.paypal!.paypalSecret ?? '',
             returnURL: "com.parkme://paypalpay",
@@ -486,7 +612,11 @@ class PaymentOrderController extends GetxController {
 
   ///PayStack Payment Method
   payStackPayment(String totalAmount) async {
-    await PayStackURLGen.payStackURLGen(amount: (double.parse(totalAmount) * 100).toString(), currency: "ZAR", secretKey: paymentModel.value.payStack!.secretKey.toString(), userModel: userModel.value)
+    await PayStackURLGen.payStackURLGen(
+            amount: (double.parse(totalAmount) * 100).toString(),
+            currency: "ZAR",
+            secretKey: paymentModel.value.payStack!.secretKey.toString(),
+            userModel: userModel.value)
         .then((value) async {
       if (value != null) {
         PayStackUrlModel payStackModel = value;
@@ -506,13 +636,15 @@ class PaymentOrderController extends GetxController {
           }
         });
       } else {
-        ShowToastDialog.showToast("Something went wrong, please contact admin.");
+        ShowToastDialog.showToast(
+            "Something went wrong, please contact admin.");
       }
     });
   }
 
   //flutter wave Payment Method
-  flutterWaveInitiatePayment({required BuildContext context, required String amount}) async {
+  flutterWaveInitiatePayment(
+      {required BuildContext context, required String amount}) async {
     final url = Uri.parse('https://api.flutterwave.com/v3/payments');
     final headers = {
       'Authorization': 'Bearer ${paymentModel.value.flutterWave!.secretKey}',
@@ -540,7 +672,8 @@ class PaymentOrderController extends GetxController {
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      Get.to(MercadoPagoScreen(initialURl: data['data']['link']))!.then((value) {
+      Get.to(MercadoPagoScreen(initialURl: data['data']['link']))!
+          .then((value) {
         if (value) {
           ShowToastDialog.showToast("Payment Successful!!");
           completeOrder();
@@ -569,8 +702,13 @@ class PaymentOrderController extends GetxController {
 
   // payFast
   payFastPayment({required BuildContext context, required String amount}) {
-    PayStackURLGen.getPayHTML(payFastSettingData: paymentModel.value.payfast!, amount: amount.toString(), userModel: userModel.value).then((String? value) async {
-      bool isDone = await Get.to(PayFastScreen(htmlData: value!, payFastSettingData: paymentModel.value.payfast!));
+    PayStackURLGen.getPayHTML(
+            payFastSettingData: paymentModel.value.payfast!,
+            amount: amount.toString(),
+            userModel: userModel.value)
+        .then((String? value) async {
+      bool isDone = await Get.to(PayFastScreen(
+          htmlData: value!, payFastSettingData: paymentModel.value.payfast!));
       if (isDone) {
         Get.back();
         ShowToastDialog.showToast("Payment successfully");
@@ -601,26 +739,40 @@ class PaymentOrderController extends GetxController {
     final data = jsonDecode(response.body);
     print(paymentModel.value.paytm!.paytmMID.toString());
 
-    await verifyCheckSum(checkSum: data["code"], amount: amount, orderId: orderId).then((value) {
+    await verifyCheckSum(
+            checkSum: data["code"], amount: amount, orderId: orderId)
+        .then((value) {
       initiatePayment(amount: amount, orderId: orderId).then((value) {
         String callback = "";
         if (paymentModel.value.paytm!.isSandbox == true) {
-          callback = "${callback}https://securegw-stage.paytm.in/theia/paytmCallback?ORDER_ID=$orderId";
+          callback =
+              "${callback}https://securegw-stage.paytm.in/theia/paytmCallback?ORDER_ID=$orderId";
         } else {
-          callback = "${callback}https://securegw.paytm.in/theia/paytmCallback?ORDER_ID=$orderId";
+          callback =
+              "${callback}https://securegw.paytm.in/theia/paytmCallback?ORDER_ID=$orderId";
         }
 
         if (value.head.version.isEmpty) {
           ShowToastDialog.showToast("Payment Failed");
         } else {
           GetPaymentTxtTokenModel result = value;
-          startTransaction(context, txnTokenBy: result.body.txnToken, orderId: orderId, amount: amount, callBackURL: callback, isStaging: paymentModel.value.paytm!.isSandbox);
+          startTransaction(context,
+              txnTokenBy: result.body.txnToken,
+              orderId: orderId,
+              amount: amount,
+              callBackURL: callback,
+              isStaging: paymentModel.value.paytm!.isSandbox);
         }
       });
     });
   }
 
-  Future<void> startTransaction(context, {required String txnTokenBy, required orderId, required double amount, required callBackURL, required isStaging}) async {
+  Future<void> startTransaction(context,
+      {required String txnTokenBy,
+      required orderId,
+      required double amount,
+      required callBackURL,
+      required isStaging}) async {
     // try {
     //   var response = AllInOneSdk.startTransaction(
     //     paymentModel.value.paytm!.paytmMID.toString(),
@@ -656,7 +808,10 @@ class PaymentOrderController extends GetxController {
     // }
   }
 
-  Future verifyCheckSum({required String checkSum, required double amount, required orderId}) async {
+  Future verifyCheckSum(
+      {required String checkSum,
+      required double amount,
+      required orderId}) async {
     String getChecksum = "${Constant.globalUrl}payments/validatechecksum";
     final response = await http.post(
         Uri.parse(
@@ -673,15 +828,19 @@ class PaymentOrderController extends GetxController {
     return data['status'];
   }
 
-  Future<GetPaymentTxtTokenModel> initiatePayment({required double amount, required orderId}) async {
+  Future<GetPaymentTxtTokenModel> initiatePayment(
+      {required double amount, required orderId}) async {
     String initiateURL = "${Constant.globalUrl}payments/initiatepaytmpayment";
     String callback = "";
     if (paymentModel.value.paytm!.isSandbox == true) {
-      callback = "${callback}https://securegw-stage.paytm.in/theia/paytmCallback?ORDER_ID=$orderId";
+      callback =
+          "${callback}https://securegw-stage.paytm.in/theia/paytmCallback?ORDER_ID=$orderId";
     } else {
-      callback = "${callback}https://securegw.paytm.in/theia/paytmCallback?ORDER_ID=$orderId";
+      callback =
+          "${callback}https://securegw.paytm.in/theia/paytmCallback?ORDER_ID=$orderId";
     }
-    final response = await http.post(Uri.parse(initiateURL), headers: {}, body: {
+    final response =
+        await http.post(Uri.parse(initiateURL), headers: {}, body: {
       "mid": paymentModel.value.paytm!.paytmMID,
       "order_id": orderId,
       "key_secret": paymentModel.value.paytm!.merchantKey,
@@ -693,7 +852,8 @@ class PaymentOrderController extends GetxController {
     });
     print(response.body);
     final data = jsonDecode(response.body);
-    if (data["body"]["txnToken"] == null || data["body"]["txnToken"].toString().isEmpty) {
+    if (data["body"]["txnToken"] == null ||
+        data["body"]["txnToken"].toString().isEmpty) {
       Get.back();
       ShowToastDialog.showToast("something went wrong, please contact admin.");
     }
@@ -775,7 +935,8 @@ class PaymentOrderController extends GetxController {
     const url = 'https://api.xendit.co/v2/invoices';
     var headers = {
       'Content-Type': 'application/json',
-      'Authorization': generateBasicAuthHeader(paymentModel.value.xendit!.apiKey!.toString()),
+      'Authorization': generateBasicAuthHeader(
+          paymentModel.value.xendit!.apiKey!.toString()),
       // 'Cookie': '__cf_bm=yERkrx3xDITyFGiou0bbKY1bi7xEwovHNwxV1vCNbVc-1724155511-1.0.1.1-jekyYQmPCwY6vIJ524K0V6_CEw6O.dAwOmQnHtwmaXO_MfTrdnmZMka0KZvjukQgXu5B.K_6FJm47SGOPeWviQ',
     };
 
@@ -788,7 +949,8 @@ class PaymentOrderController extends GetxController {
     });
 
     try {
-      final response = await http.post(Uri.parse(url), headers: headers, body: body);
+      final response =
+          await http.post(Uri.parse(url), headers: headers, body: body);
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         XenditModel model = XenditModel.fromJson(jsonDecode(response.body));
@@ -812,10 +974,12 @@ class PaymentOrderController extends GetxController {
   static String payToken = '';
   static String orderId = '';
 
-  orangeMakePayment({required String amount, required BuildContext context}) async {
+  orangeMakePayment(
+      {required String amount, required BuildContext context}) async {
     reset();
     var id = Constant.getUuid();
-    var paymentURL = await fetchToken(context: context, orderId: id, amount: amount, currency: 'USD');
+    var paymentURL = await fetchToken(
+        context: context, orderId: id, amount: amount, currency: 'USD');
     ShowToastDialog.closeLoader();
     if (paymentURL.toString() != '') {
       Get.to(() => OrangeMoneyScreen(
@@ -840,7 +1004,11 @@ class PaymentOrderController extends GetxController {
     }
   }
 
-  Future fetchToken({required String orderId, required String currency, required BuildContext context, required String amount}) async {
+  Future fetchToken(
+      {required String orderId,
+      required String currency,
+      required BuildContext context,
+      required String amount}) async {
     String apiUrl = 'https://api.orange.com/oauth/v3/token';
     Map<String, String> requestBody = {
       'grant_type': 'client_credentials',
@@ -861,7 +1029,11 @@ class PaymentOrderController extends GetxController {
 
       accessToken = responseData['access_token'];
       // ignore: use_build_context_synchronously
-      return await webpayment(context: context, amountData: amount, currency: currency, orderIdData: orderId);
+      return await webpayment(
+          context: context,
+          amountData: amount,
+          currency: currency,
+          orderIdData: orderId);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           backgroundColor: Color(0xff635bff),
@@ -874,12 +1046,19 @@ class PaymentOrderController extends GetxController {
     }
   }
 
-  Future webpayment({required String orderIdData, required BuildContext context, required String currency, required String amountData}) async {
+  Future webpayment(
+      {required String orderIdData,
+      required BuildContext context,
+      required String currency,
+      required String amountData}) async {
     orderId = orderIdData;
-    String apiUrl = paymentModel.value.orangePay!.isSandbox! == true ? 'https://api.orange.com/orange-money-webpay/dev/v1/webpayment' : 'https://api.orange.com/orange-money-webpay/cm/v1/webpayment';
+    String apiUrl = paymentModel.value.orangePay!.isSandbox! == true
+        ? 'https://api.orange.com/orange-money-webpay/dev/v1/webpayment'
+        : 'https://api.orange.com/orange-money-webpay/cm/v1/webpayment';
     Map<String, String> requestBody = {
       "merchant_key": paymentModel.value.orangePay!.merchantKey ?? '',
-      "currency": paymentModel.value.orangePay!.isSandbox == true ? "OUV" : currency,
+      "currency":
+          paymentModel.value.orangePay!.isSandbox == true ? "OUV" : currency,
       "order_id": orderId,
       "amount": amount.value.toString(),
       "reference": 'Y-Note Test',
@@ -891,7 +1070,11 @@ class PaymentOrderController extends GetxController {
 
     var response = await http.post(
       Uri.parse(apiUrl),
-      headers: <String, String>{'Authorization': 'Bearer $accessToken', 'Content-Type': 'application/json', 'Accept': 'application/json'},
+      headers: <String, String>{
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
       body: json.encode(requestBody),
     );
 
@@ -922,7 +1105,8 @@ class PaymentOrderController extends GetxController {
   }
 
   //Midtrans payment
-  midtransMakePayment({required String amount, required BuildContext context}) async {
+  midtransMakePayment(
+      {required String amount, required BuildContext context}) async {
     await createPaymentLink(amount: amount).then((url) {
       ShowToastDialog.closeLoader();
       if (url != '') {
@@ -943,14 +1127,17 @@ class PaymentOrderController extends GetxController {
 
   Future<String> createPaymentLink({required var amount}) async {
     var ordersId = Constant.getUuid();
-    final url = Uri.parse(paymentModel.value.midtrans!.isSandbox == true ? 'https://api.sandbox.midtrans.com/v1/payment-links' : 'https://api.midtrans.com/v1/payment-links');
+    final url = Uri.parse(paymentModel.value.midtrans!.isSandbox == true
+        ? 'https://api.sandbox.midtrans.com/v1/payment-links'
+        : 'https://api.midtrans.com/v1/payment-links');
 
     final response = await http.post(
       url,
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
-        'Authorization': generateBasicAuthHeader(paymentModel.value.midtrans!.serverKey!),
+        'Authorization':
+            generateBasicAuthHeader(paymentModel.value.midtrans!.serverKey!),
       },
       body: jsonEncode({
         'transaction_details': {
@@ -958,7 +1145,9 @@ class PaymentOrderController extends GetxController {
           'gross_amount': double.parse(amount.toString()).toInt(),
         },
         'usage_limit': 2,
-        "callbacks": {"finish": "https://www.google.com?merchant_order_id=$ordersId"},
+        "callbacks": {
+          "finish": "https://www.google.com?merchant_order_id=$ordersId"
+        },
       }),
     );
 

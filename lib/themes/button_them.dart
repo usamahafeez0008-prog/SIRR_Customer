@@ -31,11 +31,11 @@ class ButtonThem {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(btnRadius),
           ),
-          color: themeChange.getThem() ? AppColors.darksecondprimary : AppColors.lightsecondprimary,
+          color: themeChange.getThem() ? AppColors.moroccoRed : AppColors.moroccoRed,
           child: Text(
             title.toUpperCase(),
             textAlign: TextAlign.center,
-            style: GoogleFonts.poppins(fontSize: txtSize, fontWeight: FontWeight.w600, color: themeChange.getThem() ? AppColors.darkBackground : AppColors.background),
+            style: GoogleFonts.poppins(fontSize: txtSize, fontWeight: FontWeight.w600, color: Colors.white),
           ),
         ),
       ),

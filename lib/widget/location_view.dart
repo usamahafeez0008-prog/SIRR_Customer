@@ -3,7 +3,7 @@ import 'package:customer/themes/responsive.dart';
 import 'package:customer/utils/DarkThemeProvider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dash/flutter_dash.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
@@ -11,7 +11,8 @@ class LocationView extends StatelessWidget {
   final String? sourceLocation;
   final String? destinationLocation;
 
-  const LocationView({super.key, this.sourceLocation, this.destinationLocation});
+  const LocationView(
+      {super.key, this.sourceLocation, this.destinationLocation});
 
   @override
   Widget build(BuildContext context) {
@@ -22,17 +23,26 @@ class LocationView extends StatelessWidget {
       children: [
         Column(
           children: [
-            SvgPicture.asset(themeChange.getThem() ? 'assets/icons/ic_source_dark.svg' : 'assets/icons/ic_source.svg', width: 18),
-            Dash(direction: Axis.vertical, length: Responsive.height(4, context), dashLength: 6, dashColor: AppColors.dottedDivider),
+            Icon(
+              Icons.radio_button_unchecked,
+              size: 20,
+              color: themeChange.getThem() ? Colors.white : Colors.black,
+            ),
+            Dash(
+                direction: Axis.vertical,
+                length: Responsive.height(4, context),
+                dashLength: 6,
+                dashColor: AppColors.dottedDivider),
             Container(
-              decoration: BoxDecoration(
-                color: themeChange.getThem() ? AppColors.darksecondprimary : AppColors.lightsecondprimary,
-                borderRadius: BorderRadius.circular(20),
+              padding: const EdgeInsets.all(4),
+              decoration: const BoxDecoration(
+                color: AppColors.moroccoGreen,
+                shape: BoxShape.circle,
               ),
-              child: SvgPicture.asset(
-                'assets/icons/ic_destination.svg',
-                width: 18,
-                color: themeChange.getThem() ? AppColors.containerBackground : AppColors.darkContainerBackground,
+              child: const Icon(
+                Icons.location_on,
+                size: 14,
+                color: Colors.black,
               ),
             ),
           ],
@@ -44,9 +54,14 @@ class LocationView extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(sourceLocation.toString(), maxLines: 2, style: GoogleFonts.poppins()),
+              Text(sourceLocation.toString(),
+                  maxLines: 2, style: GoogleFonts.poppins()),
               SizedBox(
-                  height: calculateLineWraps(text: sourceLocation.toString(), textStyle: TextStyle(), maxWidth: Responsive.width(80, context)) == 2
+                  height: calculateLineWraps(
+                              text: sourceLocation.toString(),
+                              textStyle: TextStyle(),
+                              maxWidth: Responsive.width(80, context)) ==
+                          2
                       ? Responsive.height(2.2, context)
                       : Responsive.height(4.4, context)),
               Text(
