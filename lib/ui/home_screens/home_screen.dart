@@ -1126,8 +1126,8 @@ class HomeScreen extends StatelessWidget {
                                       const SizedBox(height: 12),
                                       InkWell(
                                         onTap: () {
-                                          // paymentMethodDialog(
-                                          //     context, controller);
+                                          paymentMethodDialog(
+                                              context, controller);
                                         },
                                         child: Container(
                                           decoration: BoxDecoration(
@@ -1188,10 +1188,8 @@ class HomeScreen extends StatelessWidget {
                                         btnColor: AppColors.moroccoRed,
                                         txtColor: Colors.white,
                                         btnWidthRatio: 1.0,
-                                        onPress: () {
-                                          ShowToastDialog.showToast("Book Ride Later");
-                                        },
-                                        /*onPress: () async {
+
+                                        onPress: () async {
                                           bool isPaymentNotCompleted =
                                               await FireStoreUtils
                                                   .paymentStatusCheck();
@@ -1422,7 +1420,7 @@ class HomeScreen extends StatelessWidget {
                                               return;
                                             }
                                           }
-                                        },*/
+                                        },
                                       ),
                                       const SizedBox(
                                         height: 40,
@@ -1657,51 +1655,51 @@ class HomeScreen extends StatelessWidget {
                 ),
 
                 // ── "Selected" crown badge (top-right) ──
-                // if (isSelected)
-                //   Positioned(
-                //     top: -6,
-                //     right: 10,
-                //     child: Container(
-                //       padding: const EdgeInsets.symmetric(
-                //           horizontal: 10, vertical: 5),
-                //       decoration: BoxDecoration(
-                //         gradient: const LinearGradient(
-                //           colors: [
-                //             AppColors.moroccoGreen,
-                //             Color(0xFF2A9D5C),
-                //           ],
-                //         ),
-                //         borderRadius: BorderRadius.circular(30),
-                //         boxShadow: [
-                //           BoxShadow(
-                //             color: AppColors.moroccoGreen.withOpacity(0.4),
-                //             blurRadius: 8,
-                //             offset: const Offset(0, 3),
-                //           ),
-                //         ],
-                //       ),
-                //       child: Row(
-                //         mainAxisSize: MainAxisSize.min,
-                //         children: [
-                //           const Icon(
-                //             Icons.verified_rounded,
-                //             color: Colors.white,
-                //             size: 11,
-                //           ),
-                //           const SizedBox(width: 4),
-                //           Text(
-                //             'MY RIDE'.tr,
-                //             style: GoogleFonts.outfit(
-                //               fontSize: 9,
-                //               fontWeight: FontWeight.w800,
-                //               color: Colors.white,
-                //               letterSpacing: 0.8,
-                //             ),
-                //           ),
-                //         ],
-                //       ),
-                //     ),
-                //   ),
+                if (isSelected)
+                  Positioned(
+                    top: -6,
+                    right: 10,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [
+                            AppColors.moroccoGreen,
+                            Color(0xFF2A9D5C),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(30),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.moroccoGreen.withOpacity(0.4),
+                            blurRadius: 8,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.verified_rounded,
+                            color: Colors.white,
+                            size: 11,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            'MY RIDE'.tr,
+                            style: GoogleFonts.outfit(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white,
+                              letterSpacing: 0.8,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
               ],
             ), // closes Stack
           ), // closes AnimatedContainer (inner card)

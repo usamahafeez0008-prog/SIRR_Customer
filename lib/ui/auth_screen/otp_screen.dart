@@ -13,6 +13,8 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 
+import '../dashboard_screen.dart';
+
 class OtpScreen extends StatelessWidget {
   const OtpScreen({Key? key}) : super(key: key);
 
@@ -209,13 +211,13 @@ class OtpScreen extends StatelessWidget {
                                               if (userModel != null) {
                                                 if (userModel.isActive ==
                                                     true) {
-                                                  // Get.offAll(
-                                                  //     const DashBoardScreen());
                                                   Get.offAll(
+                                                      const DashBoardScreen());
+                                                /*  Get.offAll(
                                                       const DummayScreen(),
                                                       arguments: {
                                                         'userModel': userModel
-                                                      });
+                                                      });*/
                                                 } else {
                                                   await FirebaseAuth.instance
                                                       .signOut();

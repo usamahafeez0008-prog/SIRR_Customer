@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:customer/constant/collection_name.dart';
 import 'package:customer/model/user_model.dart';
 import 'package:customer/ui/auth_screen/dummay_screen.dart';
+import 'package:customer/ui/dashboard_screen.dart';
 import 'package:customer/utils/Preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -61,7 +62,7 @@ class LoginWithPasswordController extends GetxController {
           Preferences.setString('savedPassword', password);
 
           ShowToastDialog.showToast("Login Successful".tr);
-          Get.offAll(() => const DummayScreen(),
+          Get.offAll(() => const DashBoardScreen(),
               arguments: {'userModel': userModel});
         } else {
           ShowToastDialog.showToast(

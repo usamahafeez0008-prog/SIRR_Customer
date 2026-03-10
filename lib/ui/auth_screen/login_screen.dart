@@ -20,6 +20,7 @@ import 'package:provider/provider.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 import '../../utils/notification_service.dart';
+import '../dashboard_screen.dart';
 import 'login_with_password_screen.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -311,13 +312,13 @@ class LoginScreen extends StatelessWidget {
                                                     userModel.fcmToken = token;
                                                     await FireStoreUtils
                                                         .updateUser(userModel);
-                                                    // Get.offAll(
-                                                    //     const DashBoardScreen());
                                                     Get.offAll(
+                                                        const DashBoardScreen());
+                                                  /*  Get.offAll(
                                                         const DummayScreen(),
                                                         arguments: {
                                                           'userModel': userModel
-                                                        });
+                                                        });*/
                                                   } else {
                                                     await FirebaseAuth.instance
                                                         .signOut();
@@ -433,14 +434,14 @@ class LoginScreen extends StatelessWidget {
                                                   if (userModel != null) {
                                                     if (userModel.isActive ==
                                                         true) {
-                                                      // Get.offAll(
-                                                      //     const DashBoardScreen());
                                                       Get.offAll(
+                                                          const DashBoardScreen());
+                                                    /*  Get.offAll(
                                                           const DummayScreen(),
                                                           arguments: {
                                                             'userModel':
                                                                 userModel
-                                                          });
+                                                          });*/
                                                     } else {
                                                       await FirebaseAuth
                                                           .instance

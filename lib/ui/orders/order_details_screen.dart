@@ -347,32 +347,32 @@ class OrderDetailsScreen extends StatelessWidget {
                                                                                       title: "Accept ${Constant.amountShow(amount: driverIdAcceptReject.offerAmount)}".tr,
                                                                                       btnHeight: 45,
                                                                                       onPress: () async {
-                                                                                        orderModel.acceptedDriverId = [];
-                                                                                        orderModel.driverId = driverIdAcceptReject.driverId.toString();
-                                                                                        orderModel.status = Constant.rideActive;
-                                                                                        orderModel.finalRate = driverIdAcceptReject.offerAmount;
-                                                                                        orderModel.vehicleInformation = driverModel.vehicleInformation;
-                                                                                        if (driverModel.ownerId != null) {
-                                                                                          orderModel.ownerId = driverModel.ownerId;
-                                                                                        }
-                                                                                        if (orderModel.isAcSelected == true) {
-                                                                                          String acPerKmRateData = driverModel.vehicleInformation!.rates!
-                                                                                              .firstWhere(
-                                                                                                (prices) => prices.zoneId == orderModel.zoneId,
-                                                                                                orElse: () => RateModel(),
-                                                                                              )
-                                                                                              .acPerKmRate!;
-                                                                                          orderModel.acNonAcCharges = acPerKmRateData;
-                                                                                        } else {
-                                                                                          String nonAcPerKmRateData = driverModel.vehicleInformation!.rates!
-                                                                                              .firstWhere(
-                                                                                                (prices) => prices.zoneId == orderModel.zoneId,
-                                                                                                orElse: () => RateModel(),
-                                                                                              )
-                                                                                              .nonAcPerKmRate!;
-                                                                                          orderModel.acNonAcCharges = nonAcPerKmRateData;
-                                                                                        }
-                                                                                        FireStoreUtils.setOrder(orderModel);
+                                                                                         controller.orderModel.value.acceptedDriverId = [];
+                                                                                         controller.orderModel.value.driverId = driverIdAcceptReject.driverId.toString();
+                                                                                         controller.orderModel.value.status = Constant.rideActive;
+                                                                                         controller.orderModel.value.finalRate = driverIdAcceptReject.offerAmount;
+                                                                                         controller.orderModel.value.vehicleInformation = driverModel.vehicleInformation;
+                                                                                         if (driverModel.ownerId != null) {
+                                                                                           controller.orderModel.value.ownerId = driverModel.ownerId;
+                                                                                         }
+                                                                                         // if (controller.orderModel.value.isAcSelected == true) {
+                                                                                         //   String acPerKmRateData = driverModel.vehicleInformation!.rates!
+                                                                                         //       .firstWhere(
+                                                                                         //         (prices) => prices.zoneId == controller.orderModel.value.zoneId,
+                                                                                         //         orElse: () => RateModel(),
+                                                                                         //       )
+                                                                                         //       .acPerKmRate!;
+                                                                                         //   controller.orderModel.value.acNonAcCharges = acPerKmRateData;
+                                                                                         // } else {
+                                                                                         //   String nonAcPerKmRateData = driverModel.vehicleInformation!.rates!
+                                                                                         //       .firstWhere(
+                                                                                         //         (prices) => prices.zoneId == controller.orderModel.value.zoneId,
+                                                                                         //         orElse: () => RateModel(),
+                                                                                         //       )
+                                                                                         //       .nonAcPerKmRate!;
+                                                                                         //   controller.orderModel.value.acNonAcCharges = nonAcPerKmRateData;
+                                                                                         // }
+                                                                                         await FireStoreUtils.setOrder(controller.orderModel.value);
 
                                                                                         await SendNotification.sendOneNotification(
                                                                                             token: driverModel.fcmToken.toString(),

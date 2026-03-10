@@ -7,6 +7,8 @@ import 'package:customer/utils/Preferences.dart';
 import 'package:customer/utils/fire_store_utils.dart';
 import 'package:get/get.dart';
 
+import '../ui/dashboard_screen.dart';
+
 class SplashController extends GetxController {
   @override
   void onInit() {
@@ -24,8 +26,8 @@ class SplashController extends GetxController {
       // } else {
       bool isLogin = await FireStoreUtils.isLogin();
       if (isLogin == true) {
-        // Get.offAll(const DashBoardScreen());
-        Get.offAll(const DummayScreen());
+         Get.offAll(const DashBoardScreen());
+        //Get.offAll(const DummayScreen());
       } else {
         Get.offAll(const LoginScreen());
       }

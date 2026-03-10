@@ -69,7 +69,7 @@ class DummayScreen extends StatelessWidget {
                           Get.arguments['userModel'] != null
                       ? Future.value(Get.arguments['userModel'] as UserModel)
                       : FireStoreUtils.getUserProfile(
-                          FirebaseAuth.instance.currentUser!.uid),
+                          FireStoreUtils.getCurrentUid()),
                   builder: (context, snapshot) {
                     String title = "";
                     String fullName = "";

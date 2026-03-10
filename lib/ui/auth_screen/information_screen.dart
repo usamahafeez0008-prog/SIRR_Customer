@@ -16,6 +16,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../dashboard_screen.dart';
+
 class InformationScreen extends StatelessWidget {
   const InformationScreen({Key? key}) : super(key: key);
 
@@ -379,14 +381,14 @@ class InformationScreen extends StatelessWidget {
                                                 .then((value) {
                                               ShowToastDialog.closeLoader();
 
-                                              // if (value == true) {
-                                              //   Get.offAll(
-                                              //       const DashBoardScreen());
-                                              // }
-                                              Get.to(const DummayScreen(),
+                                              if (value == true) {
+                                                Get.offAll(
+                                                    const DashBoardScreen());
+                                              }
+                                            /*  Get.to(const DummayScreen(),
                                                   arguments: {
                                                     'userModel': userModel
-                                                  });
+                                                  });*/
                                             });
                                           } else {
                                             ShowToastDialog.showToast(
@@ -447,13 +449,13 @@ class InformationScreen extends StatelessWidget {
                                                 userModel)
                                             .then((value) {
                                           ShowToastDialog.closeLoader();
-                                          // if (value == true) {
-                                          //   Get.offAll(const DashBoardScreen());
-                                          // }
-                                          Get.to(const DummayScreen(),
+                                          if (value == true) {
+                                            Get.offAll(const DashBoardScreen());
+                                          }
+                                         /* Get.to(const DummayScreen(),
                                               arguments: {
                                                 'userModel': userModel
-                                              });
+                                              });*/
                                         });
                                       }
                                     }

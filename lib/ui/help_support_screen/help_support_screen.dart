@@ -29,6 +29,8 @@ import 'package:provider/provider.dart';
 import 'package:record/record.dart';
 import 'package:uuid/uuid.dart';
 
+import '../dashboard_screen.dart';
+
 class HelpSupportScreen extends StatefulWidget {
   final String? userId;
   final String? userName;
@@ -120,8 +122,8 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                       GoogleFonts.poppins(color: Colors.white, fontSize: 14)),
               leading: InkWell(
                   onTap: () {
-                    // Get.offAll(DashBoardScreen());
-                    Get.offAll(const DummayScreen());
+                     Get.offAll(DashBoardScreen());
+                    //Get.offAll(const DummayScreen());
                   },
                   child: const Icon(
                     Icons.arrow_back,

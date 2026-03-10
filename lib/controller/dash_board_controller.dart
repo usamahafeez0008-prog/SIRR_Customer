@@ -9,11 +9,11 @@ import 'package:customer/ui/home_screens/home_screen.dart';
 import 'package:customer/ui/interCity/interCity_screen.dart';
 import 'package:customer/ui/intercityOrders/intercity_order_screen.dart';
 import 'package:customer/ui/orders/order_screen.dart';
-import 'package:customer/ui/profile_screen/profile_screen.dart';
 import 'package:customer/ui/referral_screen/referral_screen.dart';
 import 'package:customer/ui/settings_screen/setting_screen.dart';
 import 'package:customer/ui/wallet/wallet_screen.dart';
 import 'package:customer/utils/fire_store_utils.dart';
+import 'package:customer/utils/Preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -44,7 +44,8 @@ class DashBoardController extends GetxController {
 
   Rx<UserModel> driverUser = UserModel().obs;
   Future<void> getDriver() async {
-    await FireStoreUtils.getUserProfile(FireStoreUtils.getCurrentUid()).then((driver) {
+    await FireStoreUtils.getUserProfile(FireStoreUtils.getCurrentUid())
+        .then((driver) {
       if (driver?.id != null) {
         driverUser.value = driver!;
       }
@@ -70,7 +71,7 @@ class DashBoardController extends GetxController {
       case 7:
         return const InboxScreen();
       case 8:
-        /*return const ProfileScreen();*/
+      /*return const ProfileScreen();*/
       case 9:
         return const ContactUsScreen();
       case 10:
@@ -93,6 +94,7 @@ class DashBoardController extends GetxController {
   Future<void> onSelectItem(int index) async {
     if (index == 12) {
       await FirebaseAuth.instance.signOut();
+      await Preferences.clearKeyData('userId');
       Get.offAll(const LoginScreen());
     } else {
       selectedDrawerIndex.value = index;
@@ -104,7 +106,8 @@ class DashBoardController extends GetxController {
 
   Future<bool> onWillPop() {
     DateTime now = DateTime.now();
-    if (now.difference(currentBackPressTime.value) > const Duration(seconds: 2)) {
+    if (now.difference(currentBackPressTime.value) >
+        const Duration(seconds: 2)) {
       currentBackPressTime.value = now;
       ShowToastDialog.showToast("Double press to exit");
       return Future.value(false);

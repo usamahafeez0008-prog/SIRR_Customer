@@ -28,6 +28,8 @@ import 'package:uuid/uuid.dart';
 import 'package:record/record.dart';
 import 'package:path_provider/path_provider.dart';
 
+import '../dashboard_screen.dart';
+
 class ChatScreens extends StatefulWidget {
   final String? orderId;
   final String? customerId;
@@ -118,8 +120,8 @@ class _ChatScreensState extends State<ChatScreens> {
             style: GoogleFonts.poppins(color: Colors.white, fontSize: 14)),
         leading: InkWell(
             onTap: () {
-              // Get.offAll(DashBoardScreen());
-              Get.offAll(const DummayScreen());
+               Get.offAll(DashBoardScreen());
+              //Get.offAll(const DummayScreen());
             },
             child: const Icon(
               Icons.arrow_back,

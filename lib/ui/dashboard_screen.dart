@@ -66,7 +66,7 @@ class DashBoardScreen extends StatelessWidget {
                     ),
                     child: IconButton(
                       onPressed: () {
-                        // Scaffold.of(context).openDrawer();
+                         Scaffold.of(context).openDrawer();
                       },
                       icon: SvgPicture.asset(
                         'assets/icons/ic_humber.svg',
@@ -97,7 +97,9 @@ class DashBoardScreen extends StatelessWidget {
                               if (snapshot.hasError) {
                                 return const SizedBox();
                               } else {
-                                UserModel driverModel = snapshot.data!;
+                                UserModel? driverModel = snapshot.data;
+                                if (driverModel == null)
+                                  return const SizedBox();
                                 return InkWell(
                                   onTap: () {
                                     controller.selectedDrawerIndex(8);
