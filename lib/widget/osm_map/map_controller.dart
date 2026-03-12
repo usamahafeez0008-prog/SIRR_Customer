@@ -36,17 +36,43 @@ class OSMMapController extends GetxController {
     final lat = double.parse(place['lat']);
     final lon = double.parse(place['lon']);
     final address = place['display_name'];
-    final city = place['address']['city'] ?? place['address']['town'] ?? place['address']['village'] ?? place['address']['state_district'] ?? place['address']['display_name'];
+    
+    String city = '';
+    if (place['address'] != null) {
+      final addressMap = place['address'] as Map<String, dynamic>;
+      city = addressMap['city'] ?? 
+             addressMap['town'] ?? 
+             addressMap['village'] ?? 
+             addressMap['state_district'] ?? 
+             addressMap['county'] ?? 
+             '';
+    }
 
     // Store only the selected place
-    pickedPlace.value = PlaceModel(coordinates: LatLng(lat, lon), address: address, city: city ?? '');
+    pickedPlace.value = PlaceModel(coordinates: LatLng(lat, lon), address: address, city: city);
     searchResults.clear();
   }
 
   void addLatLngOnly(LatLng coords) async {
     final address = await _getAddressFromLatLng(coords);
-    final city = address['address']['city'] ?? address['address']['town'] ?? address['address']['village'] ?? address['address']['state_district'] ?? address['address']['display_name'];
-    pickedPlace.value = PlaceModel(coordinates: coords, address: address['display_name'] ?? 'Unknown location', city: city);
+    if (address == null || address is! Map) return;
+    
+    String city = '';
+    if (address['address'] != null) {
+      final addressMap = address['address'] as Map<String, dynamic>;
+      city = addressMap['city'] ?? 
+             addressMap['town'] ?? 
+             addressMap['village'] ?? 
+             addressMap['state_district'] ?? 
+             addressMap['county'] ?? 
+             '';
+    }
+    
+    pickedPlace.value = PlaceModel(
+      coordinates: coords, 
+      address: address['display_name'] ?? 'Unknown location', 
+      city: city
+    );
   }
 
   Future<dynamic> _getAddressFromLatLng(LatLng coords) async {
