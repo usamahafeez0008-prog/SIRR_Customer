@@ -456,7 +456,9 @@ class HomeScreen extends StatelessWidget {
                           await FireStoreUtils()
                               .sendOrderDataFuture(orderModel)
                               .then((eventData) async {
+                            log("Nearby drivers found: ${eventData.length}");
                             for (var driver in eventData) {
+                              log("Driver Token: ${driver.fcmToken}");
                               if (driver.fcmToken != null) {
                                 Map<String, dynamic> playLoad =
                                     <String, dynamic>{

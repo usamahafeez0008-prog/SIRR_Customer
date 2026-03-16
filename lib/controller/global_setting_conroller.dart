@@ -48,6 +48,7 @@ class GlobalSettingController extends GetxController {
       }
     });
     await FireStoreUtils().getSettings();
+    log("GlobalSettings: All settings loaded. SenderId: ${Constant.senderId}");
   }
 
   NotificationService notificationService = NotificationService();

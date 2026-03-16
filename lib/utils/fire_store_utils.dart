@@ -91,18 +91,26 @@ class FireStoreUtils {
       }
     });
 
+    log("Fetching notification settings...");
     await fireStore
         .collection(CollectionName.settings)
         .doc("notification_setting")
         .get()
         .then((value) {
       if (value.exists) {
+        log("Notification settings found: ${value.data()}");
         if (value.data() != null) {
           Constant.senderId = value.data()!['senderId'].toString();
           Constant.jsonNotificationFileURL =
               value.data()!['serviceJson'].toString();
+          log("Loaded senderId: ${Constant.senderId}");
+          log("Loaded serviceJson: ${Constant.jsonNotificationFileURL}");
         }
+      } else {
+        log("Notification settings document NOT FOUND!");
       }
+    }).catchError((error) {
+      log("Error fetching notification settings: $error");
     });
 
     await fireStore

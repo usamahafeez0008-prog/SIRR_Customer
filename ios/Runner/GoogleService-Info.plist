@@ -2,25 +2,37 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <key>API_KEY</key>
-    <string>YOUR_FIREBASE_API_KEY</string>
-    <key>CLIENT_ID</key>
-    <string>YOUR_CLIENT_ID</string>
-    <key>PROJECT_ID</key>
-    <string>YOUR_PROJECT_ID</string>
-    <key>STORAGE_BUCKET</key>
-    <string>YOUR_PROJECT_ID.appspot.com</string>
-    <key>GCM_SENDER_ID</key>
-    <string>YOUR_PROJECT_NUMBER</string>
-    <key>PLIST_VERSION</key>
-    <string>1</string>
-    <key>BUNDLE_ID</key>
-    <string>YOUR_IOS_BUNDLE_ID</string>
-    <key>DATABASE_URL</key>
-    <string>https://YOUR_PROJECT_ID.firebaseio.com</string>
-    <key>TRACKING_ID</key>
-    <string>YOUR_TRACKING_ID</string>
-    <key>GOOGLE_APP_ID</key>
-    <string>YOUR_GOOGLE_APP_ID</string>
+	<key>CLIENT_ID</key>
+	<string>500107150753-kderm6dao6d9lk2n7nui5fqcc5m798g0.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.500107150753-kderm6dao6d9lk2n7nui5fqcc5m798g0</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>500107150753-9ndm1a9dejdpeatq8fncjp0vq05fq0ml.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyDSYENPbKxZtOOOdwHZdoO5u-rd6eDpvSE</string>
+	<key>GCM_SENDER_ID</key>
+	<string>500107150753</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.codesteem.customer</string>
+	<key>PROJECT_ID</key>
+	<string>siir-929b4</string>
+	<key>STORAGE_BUCKET</key>
+	<string>siir-929b4.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:500107150753:ios:76fc7e28e19d3ada5077e0</string>
+	<key>DATABASE_URL</key>
+	<string>https://siir-929b4-default-rtdb.firebaseio.com</string>
 </dict>
 </plist>

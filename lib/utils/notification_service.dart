@@ -80,7 +80,7 @@ class NotificationService {
         handleMessageClick(payload: message?.data);
       }
     });
-    await FirebaseMessaging.instance.subscribeToTopic("goRide_customer");
+    await FirebaseMessaging.instance.subscribeToTopic("siiR-customer");
   }
 
   Future<void> handleMessageClick({required dynamic payload}) async {
@@ -137,7 +137,7 @@ class NotificationService {
 
       AndroidNotificationChannel channel = const AndroidNotificationChannel(
         '0',
-        'goRide-customer',
+        'siiR-customer',
         description: 'Show QuickLAI Notification',
         importance: Importance.max,
       );
