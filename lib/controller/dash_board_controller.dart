@@ -1,19 +1,14 @@
 import 'package:customer/constant/show_toast_dialog.dart';
 import 'package:customer/model/user_model.dart';
 import 'package:customer/ui/auth_screen/login_screen.dart';
-import 'package:customer/ui/chat_screen/inbox_screen.dart';
 import 'package:customer/ui/contact_us/contact_us_screen.dart';
 import 'package:customer/ui/faq/faq_screen.dart';
-import 'package:customer/ui/help_support_screen/help_support_screen.dart';
 import 'package:customer/ui/home_screens/home_screen.dart';
-import 'package:customer/ui/interCity/interCity_screen.dart';
-import 'package:customer/ui/intercityOrders/intercity_order_screen.dart';
 import 'package:customer/ui/orders/order_screen.dart';
-import 'package:customer/ui/referral_screen/referral_screen.dart';
 import 'package:customer/ui/settings_screen/setting_screen.dart';
-import 'package:customer/ui/wallet/wallet_screen.dart';
 import 'package:customer/utils/fire_store_utils.dart';
 import 'package:customer/utils/Preferences.dart';
+import 'package:customer/utils/zego_call_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +16,36 @@ import 'package:get/get.dart';
 
 class DashBoardController extends GetxController {
   RxList<DrawerItem> drawerItems = [
+    // Trips Section
+    DrawerItem('Trips', '', isHeader: true),
+    DrawerItem('Home'.tr, "assets/icons/ic_city.svg"),
+    DrawerItem('Trips in progress'.tr, "assets/icons/ic_order.svg"),
+    DrawerItem('Trip history'.tr, "assets/icons/ic_order.svg"),
+    DrawerItem('Saved addresses'.tr, "assets/icons/ic_profile.svg"),
+
+    // Safety Section
+    DrawerItem('Safety', '', isHeader: true),
+    DrawerItem('Safety center'.tr, "assets/icons/ic_help_support.svg"),
+    DrawerItem('Trusted contacts'.tr, "assets/icons/ic_profile.svg"),
+    DrawerItem('Share my trip'.tr, "assets/icons/ic_invite.svg"), 
+
+    // Support Section
+    DrawerItem('Support', '', isHeader: true),
+    DrawerItem('Help / FAQ'.tr, "assets/icons/ic_faq.svg"),
+    DrawerItem('Contact us'.tr, "assets/icons/ic_contact_us.svg"),
+    DrawerItem('Report a problem'.tr, "assets/icons/ic_support.svg"),
+
+    // Application Section
+    DrawerItem('Application', '', isHeader: true),
+    DrawerItem('Settings'.tr, "assets/icons/ic_settings.svg"),
+    DrawerItem('Notifications'.tr, "assets/icons/ic_inbox.svg"),
+    DrawerItem('Accessibility'.tr, "assets/icons/ic_settings.svg"),
+
+    // Logout
+    DrawerItem('Log out'.tr, "assets/icons/ic_logout.svg"),
+  ].obs;
+
+  /*RxList<DrawerItem> drawerItems = [
     DrawerItem('City'.tr, "assets/icons/ic_city.svg"),
     DrawerItem('OutStation'.tr, "assets/icons/ic_intercity.svg"),
     DrawerItem('Rides'.tr, "assets/icons/ic_order.svg"),
@@ -34,7 +59,7 @@ class DashBoardController extends GetxController {
     DrawerItem('Help & Support'.tr, "assets/icons/ic_help_support.svg"),
     DrawerItem('FAQs'.tr, "assets/icons/ic_faq.svg"),
     DrawerItem('Log out'.tr, "assets/icons/ic_logout.svg"),
-  ].obs;
+  ].obs;*/
   @override
   void onInit() {
     // TODO: implement onInit
@@ -53,6 +78,26 @@ class DashBoardController extends GetxController {
   }
 
   Widget getDrawerItemWidget(int pos) {
+    switch (pos) {
+      case 1:
+        return const HomeScreen();
+      case 2:
+        return const OrderScreen(initialIndex: 0);
+      case 3:
+        return const OrderScreen(initialIndex: 1);
+      case 10:
+        return const FaqScreen();
+      case 11:
+        return const ContactUsScreen();
+      case 14:
+        return const SettingScreen();
+      default:
+        // Default to HomeScreen if something goes wrong or for headers (though headers shouldn't be selectable)
+        return const HomeScreen();
+    }
+  }
+
+  /*Widget getDrawerItemWidget(int pos) {
     switch (pos) {
       case 0:
         return const HomeScreen();
@@ -87,12 +132,21 @@ class DashBoardController extends GetxController {
       default:
         return const Text("Error");
     }
-  }
+  }*/
 
   RxInt selectedDrawerIndex = 0.obs;
 
   Future<void> onSelectItem(int index) async {
-    if (index == 12) {
+    if (drawerItems[index].isHeader) return;
+
+    if (index == 4 || index == 6 || index == 7 || index == 8 || index == 12 || index == 15 || index == 16) {
+      ShowToastDialog.showToast("Coming Soon");
+      Get.back();
+      return;
+    }
+
+    if (index == 17) {
+      ZegoCallService().uninitZego();
       await FirebaseAuth.instance.signOut();
       await Preferences.clearKeyData('userId');
       Get.offAll(const LoginScreen());
@@ -101,6 +155,17 @@ class DashBoardController extends GetxController {
     }
     Get.back();
   }
+
+  /*Future<void> onSelectItem(int index) async {
+    if (index == 12) {
+      await FirebaseAuth.instance.signOut();
+      await Preferences.clearKeyData('userId');
+      Get.offAll(const LoginScreen());
+    } else {
+      selectedDrawerIndex.value = index;
+    }
+    Get.back();
+  }*/
 
   Rx<DateTime> currentBackPressTime = DateTime.now().obs;
 
@@ -119,6 +184,7 @@ class DashBoardController extends GetxController {
 class DrawerItem {
   String title;
   String icon;
+  bool isHeader;
 
-  DrawerItem(this.title, this.icon);
+  DrawerItem(this.title, this.icon, {this.isHeader = false});
 }

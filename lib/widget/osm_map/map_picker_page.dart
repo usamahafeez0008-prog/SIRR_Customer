@@ -1,8 +1,11 @@
+import 'package:customer/constant/collection_name.dart';
+import 'package:customer/constant/show_toast_dialog.dart';
+import 'package:customer/utils/fire_store_utils.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:io';
 
 import 'package:customer/themes/app_colors.dart';
 import 'package:customer/themes/button_them.dart';
-import 'package:customer/utils/DarkThemeProvider.dart';
 import 'package:customer/widget/osm_map/map_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -10,7 +13,6 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:provider/provider.dart';
 
 class MapPickerPage extends StatelessWidget {
   final OSMMapController controller = Get.put(OSMMapController());
@@ -256,8 +258,43 @@ class MapPickerPage extends StatelessWidget {
                       borderRadius: BorderRadius.circular(15),
                     ),
                     child: IconButton(
-                      icon: const Icon(Icons.delete_outline, color: Colors.red),
-                      onPressed: controller.clearAll,
+                      icon: const Icon(Icons.bookmark_border, color: AppColors.moroccoRed),
+                      onPressed: () async {
+                        if (controller.pickedPlace.value != null) {
+                          ShowToastDialog.showLoader("Saving Address...");
+                          String userId = FireStoreUtils.getCurrentUid();
+                          // Create a unique yet deterministic ID based on coordinates to handle "overwrite if same location"
+                          String latLngId = "${controller.pickedPlace.value!.coordinates.latitude.toStringAsFixed(6)}_${controller.pickedPlace.value!.coordinates.longitude.toStringAsFixed(6)}";
+                          
+                          await FirebaseFirestore.instance
+                              .collection(CollectionName.savedAddresses)
+                              .doc(userId)
+                              .set({'addressSave': true}, SetOptions(merge: true));
+
+                          await FirebaseFirestore.instance
+                              .collection(CollectionName.savedAddresses)
+                              .doc(userId)
+                              .collection("addresses")
+                              .doc(latLngId)
+                              .set({
+                            'id': latLngId,
+                            'lat': controller.pickedPlace.value!.coordinates.latitude,
+                            'lng': controller.pickedPlace.value!.coordinates.longitude,
+                            'address': controller.pickedPlace.value!.address,
+                            'city': controller.pickedPlace.value!.city,
+                            'userId': userId,
+                            'timestamp': Timestamp.now(),
+                          }).then((value) {
+                            ShowToastDialog.closeLoader();
+                            ShowToastDialog.showToast("Address Saved Successfully");
+                          }).catchError((error) {
+                            ShowToastDialog.closeLoader();
+                            ShowToastDialog.showToast("Failed to save address: $error");
+                          });
+                        } else {
+                          ShowToastDialog.showToast("Please pick a location first");
+                        }
+                      },
                     ),
                   )
                 ],

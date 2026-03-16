@@ -26,7 +26,7 @@ class SplashController extends GetxController {
       // } else {
       bool isLogin = await FireStoreUtils.isLogin();
       if (isLogin == true) {
-         Get.offAll(const DashBoardScreen());
+        Get.offAll(const DashBoardScreen());
         //Get.offAll(const DummayScreen());
       } else {
         Get.offAll(const LoginScreen());

@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'dart:developer';
-import 'dart:io';
 import 'dart:ui' as ui;
 import 'dart:typed_data';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:customer/constant/constant.dart';
 import 'package:customer/constant/show_toast_dialog.dart';
 import 'package:customer/controller/dash_board_controller.dart';
@@ -20,10 +20,9 @@ import 'package:customer/utils/Preferences.dart';
 import 'package:customer/utils/fire_store_utils.dart';
 import 'package:customer/utils/notification_service.dart';
 import 'package:customer/utils/utils.dart';
+import 'package:customer/utils/zego_call_service.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
-import 'package:get/get.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:get/get.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -79,6 +78,9 @@ class HomeController extends GetxController {
   DateTime startNightTimeString = DateTime.now();
   DateTime endNightTimeString = DateTime.now();
 
+  RxBool hasSavedAddresses = false.obs;
+  RxList<Map<String, dynamic>> savedAddresses = <Map<String, dynamic>>[].obs;
+
   @override
   void onInit() {
     // TODO: implement onInit
@@ -86,7 +88,33 @@ class HomeController extends GetxController {
     getServiceType();
     getPaymentData();
     getContact();
+    checkSavedAddresses();
     super.onInit();
+  }
+
+  Future<void> checkSavedAddresses() async {
+    String userId = FireStoreUtils.getCurrentUid();
+    await FirebaseFirestore.instance
+        .collection('saved_addresses')
+        .doc(userId)
+        .get()
+        .then((doc) async {
+      if (doc.exists && doc.data()?['addressSave'] == true) {
+        hasSavedAddresses.value = true;
+        await FirebaseFirestore.instance
+            .collection('saved_addresses')
+            .doc(userId)
+            .collection('addresses')
+            .orderBy('timestamp', descending: true)
+            .get()
+            .then((snapshot) {
+          savedAddresses.value = snapshot.docs.map((d) => d.data()).toList();
+        });
+      } else {
+        hasSavedAddresses.value = false;
+        savedAddresses.clear();
+      }
+    });
   }
 
   Future<void> getLocation() async {
@@ -143,6 +171,7 @@ class HomeController extends GetxController {
       userModel.value = value!;
       userModel.value.fcmToken = token;
       FireStoreUtils.updateUser(userModel.value);
+      ZegoCallService().initZego(userModel.value.id!, userModel.value.fullName!);
     });
 
     isLoading.value = false;

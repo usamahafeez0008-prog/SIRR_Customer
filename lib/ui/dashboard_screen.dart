@@ -66,11 +66,12 @@ class DashBoardScreen extends StatelessWidget {
                     ),
                     child: IconButton(
                       onPressed: () {
-                        if (controller.selectedDrawerIndex.value == 2) {
+                        Scaffold.of(context).openDrawer();
+                      /*  if (controller.selectedDrawerIndex.value == 2) {
                           controller.selectedDrawerIndex(0);
                         } else {
                           controller.selectedDrawerIndex(2);
-                        }
+                        }*/
                       },
                       icon: SvgPicture.asset(
                         'assets/icons/ic_humber.svg',
@@ -164,21 +165,8 @@ class DashBoardScreen extends StatelessWidget {
   }
 
   Drawer buildAppDrawer(BuildContext context, DashBoardController controller) {
-    RxList<DrawerItem> drawerItems = [
-      DrawerItem('City'.tr, "assets/icons/ic_city.svg"),
-      DrawerItem('OutStation'.tr, "assets/icons/ic_intercity.svg"),
-      DrawerItem('Rides'.tr, "assets/icons/ic_order.svg"),
-      DrawerItem('OutStation Rides'.tr, "assets/icons/ic_order.svg"),
-      DrawerItem('My Wallet'.tr, "assets/icons/ic_wallet.svg"),
-      DrawerItem('Settings'.tr, "assets/icons/ic_settings.svg"),
-      DrawerItem('Referral a friends'.tr, "assets/icons/ic_referral.svg"),
-      DrawerItem('Inbox'.tr, "assets/icons/ic_inbox.svg"),
-      DrawerItem('Profile'.tr, "assets/icons/ic_profile.svg"),
-      DrawerItem('Contact us'.tr, "assets/icons/ic_contact_us.svg"),
-      DrawerItem('Help & Support'.tr, "assets/icons/ic_help_support.svg"),
-      DrawerItem('FAQs'.tr, "assets/icons/ic_faq.svg"),
-      DrawerItem('Log out'.tr, "assets/icons/ic_logout.svg"),
-    ].obs;
+    // Use drawerItems from the controller
+    var drawerItems = controller.drawerItems;
 
     return Drawer(
       backgroundColor: AppColors.moroccoBackground,
@@ -213,6 +201,21 @@ class DashBoardScreen extends StatelessWidget {
                   itemBuilder: (context, i) {
                     var d = drawerItems[i];
                     bool isSelected = i == controller.selectedDrawerIndex.value;
+
+                    if (d.isHeader) {
+                      return Padding(
+                        padding: const EdgeInsets.only(top: 15, bottom: 8, left: 16),
+                        child: Text(
+                          d.title.tr,
+                          style: GoogleFonts.outfit(
+                            color: AppColors.moroccoRed.withOpacity(0.8),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            letterSpacing: 1.2,
+                          ),
+                        ),
+                      );
+                    }
 
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 4),
@@ -386,7 +389,7 @@ class DashBoardScreen extends StatelessWidget {
             ),
             TextButton(
               onPressed: () {
-                controller.onSelectItem(12);
+                controller.onSelectItem(17);
               },
               child: Text(
                 "Yes".tr,
