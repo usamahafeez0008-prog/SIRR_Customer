@@ -30,7 +30,8 @@ class MapPickerPage extends StatelessWidget {
               mapController: controller.mapController,
               options: MapOptions(
                 initialCenter: controller.pickedPlace.value?.coordinates ??
-                    LatLng(20.5937, 78.9629), // Default India center
+                    // LatLng(20.5937, 78.9629), // Default India center
+                    const LatLng(31.7917, -7.0926), // Morocco center
                 initialZoom: 13,
                 onTap: (tapPos, latlng) {
                   controller.addLatLngOnly(latlng);
@@ -136,42 +137,46 @@ class MapPickerPage extends StatelessWidget {
                     return const SizedBox.shrink();
                   }
 
-                  return Container(
-                    margin: const EdgeInsets.only(top: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black12,
-                          blurRadius: 10,
-                          offset: const Offset(0, 5),
-                        )
-                      ],
+                  return ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxHeight: MediaQuery.of(context).size.height * 0.5,
                     ),
-                    child: ListView.builder(
-                      shrinkWrap: true,
-                      padding: EdgeInsets.zero,
-                      itemCount: controller.searchResults.length,
-                      itemBuilder: (context, index) {
-                        final place = controller.searchResults[index];
-                        return ListTile(
-                          title: Text(
-                            place['display_name'],
-                            style: GoogleFonts.outfit(fontSize: 14),
-                          ),
-                          leading: const Icon(Icons.location_on_outlined,
-                              color: AppColors.moroccoRed),
-                          onTap: () {
-                            controller.selectSearchResult(place);
-                            final lat = double.parse(place['lat']);
-                            final lon = double.parse(place['lon']);
-                            final pos = LatLng(lat, lon);
-                            controller.mapController.move(pos, 15);
-                            searchController.text = place['display_name'];
-                          },
-                        );
-                      },
+                    child: Container(
+                      margin: const EdgeInsets.only(top: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black12,
+                            blurRadius: 10,
+                            offset: const Offset(0, 5),
+                          )
+                        ],
+                      ),
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        padding: EdgeInsets.zero,
+                        itemCount: controller.searchResults.length,
+                        itemBuilder: (context, index) {
+                          final place = controller.searchResults[index];
+                          return ListTile(
+                            title: Text(
+                              place['display_name'],
+                              style: GoogleFonts.outfit(fontSize: 14),
+                            ),
+                            leading: const Icon(Icons.location_on_outlined, color: AppColors.moroccoRed),
+                            onTap: () {
+                              controller.selectSearchResult(place);
+                              final lat = double.parse(place['lat']);
+                              final lon = double.parse(place['lon']);
+                              final pos = LatLng(lat, lon);
+                              controller.mapController.move(pos, 15);
+                              searchController.text = place['display_name'];
+                            },
+                          );
+                        },
+                      ),
                     ),
                   );
                 }),

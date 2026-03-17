@@ -1,10 +1,8 @@
 import 'dart:convert';
-
 import 'package:customer/constant/constant.dart';
 import 'package:customer/constant/show_toast_dialog.dart';
 import 'package:customer/services/localization_service.dart';
 import 'package:customer/themes/app_colors.dart';
-import 'package:customer/themes/responsive.dart';
 import 'package:customer/ui/auth_screen/login_screen.dart';
 import 'package:customer/utils/DarkThemeProvider.dart';
 import 'package:customer/utils/Preferences.dart';
@@ -15,7 +13,6 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:http/http.dart' as http;
 import '../../controller/setting_controller.dart';
 
 class SettingScreen extends StatelessWidget {
@@ -28,170 +25,164 @@ class SettingScreen extends StatelessWidget {
         init: SettingController(),
         builder: (controller) {
           return Scaffold(
-            backgroundColor: AppColors.lightprimary,
+            backgroundColor: themeChange.getThem() ? AppColors.darkBackground : AppColors.moroccoBackground,
             body: controller.isLoading.value
                 ? Constant.loader(isDarkTheme: themeChange.getThem())
                 : Column(
                     children: [
                       Container(
-                        height: Responsive.width(10, context),
-                        width: Responsive.width(100, context),
-                        color: AppColors.lightprimary,
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
+                        decoration: BoxDecoration(
+                          color: themeChange.getThem() ? AppColors.darkBackground : AppColors.moroccoRed,
+                          borderRadius: const BorderRadius.only(
+                            bottomLeft: Radius.circular(30),
+                            bottomRight: Radius.circular(30),
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 10),
+                            /*IconButton(
+                              onPressed: () => Get.back(),
+                              icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                            ),
+                            const SizedBox(height: 20),
+                            Text(
+                              "Settings".tr,
+                              style: GoogleFonts.outfit(
+                                color: Colors.white,
+                                fontSize: 28,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),*/
+                            Text(
+                              "Customize your app experience".tr,
+                              style: GoogleFonts.outfit(
+                                color: Colors.white.withOpacity(0.8),
+                                fontSize: 18,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                       Expanded(
-                        child: Container(
-                          decoration:
-                              BoxDecoration(color: Theme.of(context).colorScheme.background, borderRadius: const BorderRadius.only(topLeft: Radius.circular(25), topRight: Radius.circular(25))),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 10),
-                            child: Column(
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    children: [
-                                      const SizedBox(
-                                        height: 20,
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Row(
-                                          children: [
-                                            SvgPicture.asset('assets/icons/ic_language.svg', width: 24),
-                                            const SizedBox(
-                                              width: 20,
-                                            ),
-                                            Expanded(
-                                              child: Text(
-                                                "Language".tr,
-                                                style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
-                                              ),
-                                            ),
-                                            SizedBox(
-                                              width: Responsive.width(26, context),
-                                              child: DropdownButtonFormField(
-                                                  isExpanded: true,
-                                                  decoration: const InputDecoration(
-                                                    contentPadding: EdgeInsets.symmetric(vertical: 1),
-                                                    disabledBorder: InputBorder.none,
-                                                    focusedBorder: InputBorder.none,
-                                                    enabledBorder: InputBorder.none,
-                                                    errorBorder: InputBorder.none,
-                                                    border: InputBorder.none,
-                                                    isDense: true,
-                                                  ),
-                                                  value: controller.selectedLanguage.value.id == null ? null : controller.selectedLanguage.value,
-                                                  onChanged: (value) {
-                                                    controller.selectedLanguage.value = value!;
-
-                                                    LocalizationService().changeLocale(value.code.toString());
-                                                    Preferences.setString(Preferences.languageCodeKey, jsonEncode(controller.selectedLanguage.value));
-                                                  },
-                                                  hint: Text("select".tr),
-                                                  items: controller.languageList.map((item) {
-                                                    return DropdownMenuItem(
-                                                      value: item,
-                                                      child: Text(item.name.toString(), style: GoogleFonts.poppins(fontWeight: FontWeight.w500)),
-                                                    );
-                                                  }).toList()),
-                                            ),
-                                          ],
+                        child: SingleChildScrollView(
+                          padding: const EdgeInsets.all(20),
+                          child: Column(
+                            children: [
+                              _buildSettingCard(
+                                themeChange,
+                                icon: 'assets/icons/ic_language.svg',
+                                title: "Language".tr,
+                                trailing: SizedBox(
+                                  width: 120,
+                                  child: DropdownButtonHideUnderline(
+                                    child: DropdownButtonFormField(
+                                        isExpanded: true,
+                                        alignment: Alignment.centerRight,
+                                        decoration: const InputDecoration(
+                                          contentPadding: EdgeInsets.zero,
+                                          border: InputBorder.none,
+                                          isDense: true,
                                         ),
-                                      ),
-                                      const Divider(),
-                                      Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Row(
-                                          children: [
-                                            SvgPicture.asset('assets/icons/ic_light_drak.svg', width: 24),
-                                            const SizedBox(
-                                              width: 20,
-                                            ),
-                                            Expanded(child: Text("Light/dark mode".tr, style: GoogleFonts.poppins(fontWeight: FontWeight.w500))),
-                                            SizedBox(
-                                              width: Responsive.width(26, context),
-                                              child: DropdownButtonFormField<String>(
-                                                  isExpanded: true,
-                                                  decoration: const InputDecoration(
-                                                    contentPadding: EdgeInsets.symmetric(vertical: 1),
-                                                    disabledBorder: InputBorder.none,
-                                                    focusedBorder: InputBorder.none,
-                                                    enabledBorder: InputBorder.none,
-                                                    errorBorder: InputBorder.none,
-                                                    border: InputBorder.none,
-                                                    isDense: true,
-                                                  ),
-                                                  validator: (value) => value == null ? 'field required' : null,
-                                                  value: controller.selectedMode.isEmpty ? null : controller.selectedMode.value,
-                                                  onChanged: (value) {
-                                                    controller.selectedMode.value = value!;
-                                                    Preferences.setString(Preferences.themKey, value.toString());
-                                                    if (controller.selectedMode.value == "Dark mode") {
-                                                      themeChange.darkTheme = 0;
-                                                    } else if (controller.selectedMode.value == "Light mode") {
-                                                      themeChange.darkTheme = 1;
-                                                    } else {
-                                                      themeChange.darkTheme = 2;
-                                                    }
-                                                  },
-                                                  hint: Text("select".tr),
-                                                  items: controller.modeList.map((item) {
-                                                    return DropdownMenuItem(
-                                                      value: item,
-                                                      child: Text(item.toString(), style: GoogleFonts.poppins(fontWeight: FontWeight.w500)),
-                                                    );
-                                                  }).toList()),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      const Divider(),
-                                      Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: InkWell(
-                                          onTap: () async {
-                                            final Uri url = Uri.parse(Constant.supportURL.toString());
-                                            if (!await launchUrl(url)) {
-                                              throw Exception('Could not launch ${Constant.supportURL.toString()}'.tr);
-                                            }
-                                          },
-                                          child: Row(
-                                            children: [
-                                              SvgPicture.asset('assets/icons/ic_support.svg', width: 24),
-                                              const SizedBox(
-                                                width: 20,
-                                              ),
-                                              Text("Support".tr, style: GoogleFonts.poppins(fontWeight: FontWeight.w500)),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                      const Divider(),
-                                      Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: InkWell(
-                                          onTap: () {
-                                            showAlertDialog(context, controller);
-                                          },
-                                          child: Row(
-                                            children: [
-                                              SvgPicture.asset('assets/icons/ic_delete.svg', width: 24),
-                                              const SizedBox(
-                                                width: 20,
-                                              ),
-                                              Text("Delete Account".tr, style: GoogleFonts.poppins(fontWeight: FontWeight.w500))
-                                            ],
-                                          ),
-                                        ),
-                                      )
-                                    ],
+                                        icon: Icon(Icons.keyboard_arrow_down_rounded, color: themeChange.getThem() ? Colors.white70 : Colors.black45),
+                                        value: controller.selectedLanguage.value.id == null ? null : controller.selectedLanguage.value,
+                                        onChanged: (value) {
+                                          controller.selectedLanguage.value = value!;
+                                          LocalizationService().changeLocale(value.code.toString());
+                                          Preferences.setString(Preferences.languageCodeKey, jsonEncode(controller.selectedLanguage.value));
+                                        },
+                                        hint: Text("Select".tr, style: GoogleFonts.outfit(fontSize: 14)),
+                                        items: controller.languageList.map((item) {
+                                          return DropdownMenuItem(
+                                            value: item,
+                                            child: Text(item.name.toString(), 
+                                              textAlign: TextAlign.end,
+                                              style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.w500)),
+                                          );
+                                        }).toList()),
                                   ),
                                 ),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 10),
-                                  child: Text("V ${Constant.appVersion}".tr),
-                                )
-                              ],
-                            ),
+                              ),
+                              const SizedBox(height: 16),
+                              _buildSettingCard(
+                                themeChange,
+                                icon: 'assets/icons/ic_light_drak.svg',
+                                title: "Appearance".tr,
+                                trailing: SizedBox(
+                                  width: 120,
+                                  child: DropdownButtonHideUnderline(
+                                    child: DropdownButtonFormField<String>(
+                                        isExpanded: true,
+                                        alignment: Alignment.centerRight,
+                                        decoration: const InputDecoration(
+                                          contentPadding: EdgeInsets.zero,
+                                          border: InputBorder.none,
+                                          isDense: true,
+                                        ),
+                                        icon: Icon(Icons.keyboard_arrow_down_rounded, color: themeChange.getThem() ? Colors.white70 : Colors.black45),
+                                        value: controller.selectedMode.isEmpty ? null : controller.selectedMode.value,
+                                        onChanged: (value) {
+                                          controller.selectedMode.value = value!;
+                                          Preferences.setString(Preferences.themKey, value.toString());
+                                          if (controller.selectedMode.value == "Dark mode") {
+                                            themeChange.darkTheme = 0;
+                                          } else if (controller.selectedMode.value == "Light mode") {
+                                            themeChange.darkTheme = 1;
+                                          } else {
+                                            themeChange.darkTheme = 2;
+                                          }
+                                        },
+                                        hint: Text("Select".tr, style: GoogleFonts.outfit(fontSize: 14)),
+                                        items: controller.modeList.map((item) {
+                                          return DropdownMenuItem(
+                                            value: item,
+                                            child: Text(item.toString().tr, 
+                                              textAlign: TextAlign.end,
+                                              style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.w500)),
+                                          );
+                                        }).toList()),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              _buildSettingCard(
+                                themeChange,
+                                icon: 'assets/icons/ic_support.svg',
+                                title: "Support".tr,
+                                onTap: () async {
+                                  final Uri url = Uri.parse(Constant.supportURL.toString());
+                                  if (!await launchUrl(url)) {
+                                    throw Exception('Could not launch ${Constant.supportURL.toString()}'.tr);
+                                  }
+                                },
+                                trailing: Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Colors.grey[400]),
+                              ),
+                              const SizedBox(height: 16),
+                            /*  _buildSettingCard(
+                                themeChange,
+                                icon: 'assets/icons/ic_delete.svg',
+                                title: "Delete Account".tr,
+                                isDestructive: true,
+                                onTap: () {
+                                  showAlertDialog(context, controller);
+                                },
+                                trailing: Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Colors.grey[400]),
+                              ),
+                              const SizedBox(height: 40),*/
+                             /* Text(
+                                "V ${Constant.appVersion}".tr,
+                                style: GoogleFonts.outfit(
+                                  color: Colors.grey[500],
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),*/
+                            ],
                           ),
                         ),
                       ),
@@ -201,66 +192,102 @@ class SettingScreen extends StatelessWidget {
         });
   }
 
+  Widget _buildSettingCard(
+    DarkThemeProvider themeChange, {
+    required String icon,
+    required String title,
+    Widget? trailing,
+    VoidCallback? onTap,
+    bool isDestructive = false,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: themeChange.getThem() ? AppColors.darkGray : Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: (isDestructive ? Colors.red : (themeChange.getThem() ? AppColors.moroccoGreen : AppColors.moroccoRed)).withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: SvgPicture.asset(
+                icon,
+                width: 20,
+                color: isDestructive ? Colors.red : (themeChange.getThem() ? AppColors.moroccoGreen : AppColors.moroccoRed),
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Text(
+                title,
+                style: GoogleFonts.outfit(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: isDestructive 
+                      ? Colors.red 
+                      : (themeChange.getThem() ? Colors.white : Colors.black87),
+                ),
+              ),
+            ),
+            if (trailing != null) trailing,
+          ],
+        ),
+      ),
+    );
+  }
+
   void showAlertDialog(BuildContext context, SettingController controller) {
-    // set up the button
     Widget okButton = TextButton(
-      child: Text("OK".tr),
+      child: Text("OK".tr, style: GoogleFonts.outfit(color: Colors.red, fontWeight: FontWeight.bold)),
       onPressed: () async {
         ShowToastDialog.showLoader("Please wait".tr);
-        // await controller.deleteUserFromServer();
         await FireStoreUtils.deleteUser().then((value) {
           ShowToastDialog.closeLoader();
           if (value == true) {
-            ShowToastDialog.showToast("Account delete".tr);
+            ShowToastDialog.showToast("Account deleted".tr);
             Get.offAll(const LoginScreen());
           } else {
-            ShowToastDialog.showToast("Please contact to administrator".tr);
+            ShowToastDialog.showToast("Please contact the administrator".tr);
           }
         });
       },
     );
-    Widget cancel = TextButton(
-      child: Text("Cancel".tr),
+    Widget cancelButton = TextButton(
+      child: Text("Cancel".tr, style: GoogleFonts.outfit(color: Colors.grey)),
       onPressed: () {
         Get.back();
       },
     );
 
-    // set up the AlertDialog
     AlertDialog alert = AlertDialog(
-      title: Text("Account delete".tr),
-      content: Text("Are you sure want to delete Account.".tr),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      title: Text("Account delete".tr, style: GoogleFonts.outfit(fontWeight: FontWeight.bold)),
+      content: Text("Are you sure want to delete Account.".tr, style: GoogleFonts.outfit()),
       actions: [
+        cancelButton,
         okButton,
-        cancel,
       ],
     );
 
-    // show the dialog
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return alert;
       },
     );
-  }
-
-  Future<bool> deleteUserFromServer() async {
-    var url = '${Constant.globalUrl}/api/delete-user';
-    try {
-      var response = await http.post(
-        Uri.parse(url),
-        body: {
-          'uuid': FireStoreUtils.getCurrentUid(),
-        },
-      );
-      if (response.statusCode == 200) {
-        return true;
-      } else {
-        return false;
-      }
-    } catch (e) {
-      return false;
-    }
   }
 }

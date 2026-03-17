@@ -37,19 +37,19 @@ class TextFieldThem {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: const BorderRadius.all(Radius.circular(4)),
-              borderSide: BorderSide(color: themeChange.getThem() ? AppColors.darksecondprimary : AppColors.lightsecondprimary, width: 1),
+              borderSide: BorderSide(color: themeChange.getThem() ? AppColors.moroccoGreen : AppColors.moroccoGreen, width: 1),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: const BorderRadius.all(Radius.circular(4)),
-              borderSide: BorderSide(color: themeChange.getThem() ? AppColors.darkTextFieldBorder : AppColors.textFieldBorder, width: 1),
+              borderSide: BorderSide(color: themeChange.getThem() ? AppColors.moroccoGreen : AppColors.moroccoGreen, width: 1),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: const BorderRadius.all(Radius.circular(4)),
-              borderSide: BorderSide(color: themeChange.getThem() ? AppColors.darkTextFieldBorder : AppColors.textFieldBorder, width: 1),
+              borderSide: BorderSide(color: themeChange.getThem() ? AppColors.moroccoGreen : AppColors.moroccoGreen, width: 1),
             ),
             border: OutlineInputBorder(
               borderRadius: const BorderRadius.all(Radius.circular(4)),
-              borderSide: BorderSide(color: themeChange.getThem() ? AppColors.darkTextFieldBorder : AppColors.textFieldBorder, width: 1),
+              borderSide: BorderSide(color: themeChange.getThem() ? AppColors.moroccoGreen : AppColors.moroccoGreen, width: 1),
             ),
             hintText: hintText));
   }

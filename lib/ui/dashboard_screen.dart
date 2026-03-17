@@ -190,7 +190,7 @@ class DashBoardScreen extends StatelessWidget {
           Column(
             children: [
               // Drawer Header
-              _buildDrawerHeader(context),
+              _buildDrawerHeader(context, controller),
 
               // Drawer Items
               Expanded(
@@ -276,6 +276,7 @@ class DashBoardScreen extends StatelessWidget {
                   },
                 ),
               ),
+              SizedBox(height: 30)
             ],
           ),
         ],
@@ -283,18 +284,18 @@ class DashBoardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDrawerHeader(BuildContext context) {
+  Widget _buildDrawerHeader(BuildContext context, DashBoardController controller) {
     return FutureBuilder<UserModel?>(
       future: FireStoreUtils.getUserProfile(FireStoreUtils.getCurrentUid()),
       builder: (context, snapshot) {
-        UserModel? driverModel = snapshot.data;
+        UserModel? userModel = snapshot.data;
 
         return Container(
           padding: EdgeInsets.only(
-            top: MediaQuery.of(context).padding.top + 20,
+            top: MediaQuery.of(context).padding.top + 24,
             bottom: 24,
-            left: 24,
-            right: 24,
+            left: 20,
+            right: 20,
           ),
           width: double.infinity,
           decoration: const BoxDecoration(
@@ -304,56 +305,81 @@ class DashBoardScreen extends StatelessWidget {
               bottomRight: Radius.circular(30),
             ),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Row(
             children: [
               Container(
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(color: AppColors.moroccoGreen, width: 2),
+                  border: Border.all(color: Colors.grey.withOpacity(0.2), width: 1),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.moroccoGreen.withOpacity(0.2),
-                      blurRadius: 15,
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
                     )
                   ],
                 ),
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(60),
-                  child: driverModel != null
+                  borderRadius: BorderRadius.circular(50),
+                  child: userModel != null
                       ? CachedNetworkImage(
-                          height: 70,
-                          width: 70,
-                          imageUrl: driverModel.profilePic.toString(),
+                          height: 75,
+                          width: 75,
+                          imageUrl: userModel.profilePic.toString(),
                           fit: BoxFit.cover,
                           placeholder: (context, url) => const Center(
-                              child: CircularProgressIndicator(strokeWidth: 2)),
+                              child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.moroccoRed)),
                           errorWidget: (context, url, error) =>
-                              Image.network(Constant.userPlaceHolder),
+                              Image.network(Constant.userPlaceHolder, fit: BoxFit.cover),
                         )
                       : Container(
-                          height: 70,
-                          width: 70,
+                          height: 75,
+                          width: 75,
                           color: Colors.grey.shade200,
-                          child:
-                              Icon(Icons.person, color: Colors.grey.shade400),
+                          child: Icon(Icons.person, color: Colors.grey.shade400, size: 40),
                         ),
                 ),
               ),
-              const SizedBox(height: 16),
-              Text(
-                driverModel?.fullName.toString() ?? "Loading...",
-                style: GoogleFonts.outfit(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.moroccoRed,
-                ),
-              ),
-              Text(
-                driverModel?.email.toString() ?? "",
-                style: GoogleFonts.outfit(
-                  fontSize: 14,
-                  color: Colors.grey.shade600,
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      userModel?.fullName.toString() ?? "Loading...".tr,
+                      style: GoogleFonts.outfit(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.moroccoRed, // Dark Morocco Red/Brown
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Obx(() => Row(
+                      children: [
+                        const Icon(Icons.star, color: AppColors.moroccoRed, size: 18),
+                        const SizedBox(width: 4),
+                        Text(
+                          controller.userRating.value,
+                          style: GoogleFonts.outfit(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey.shade700,
+                          ),
+                        ),
+                      ],
+                    )),
+                    const SizedBox(height: 2),
+                    Text(
+                      "Verified account".tr,
+                      style: GoogleFonts.outfit(
+                        fontSize: 16,
+                        color: Colors.grey.shade600,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],

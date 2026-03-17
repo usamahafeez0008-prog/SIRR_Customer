@@ -17,89 +17,100 @@ class FaqScreen extends StatelessWidget {
     final themeChange = Provider.of<DarkThemeProvider>(context);
 
     return Scaffold(
-      backgroundColor: AppColors.lightprimary,
+      backgroundColor: AppColors.moroccoBackground,
       body: Column(
         children: [
-          SizedBox(
-            height: Responsive.width(8, context),
+          Container(
+            height: Responsive.width(28, context),
             width: Responsive.width(100, context),
-          ),
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(color: Theme.of(context).colorScheme.background, borderRadius: const BorderRadius.only(topLeft: Radius.circular(25), topRight: Radius.circular(25))),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 14),
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 10),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text("FAQs".tr, style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.w600)),
-                      Text("Read FAQs solution".tr, style: GoogleFonts.poppins()),
-                      const SizedBox(
-                        height: 20,
-                      ),
-                      Expanded(
-                        child: FutureBuilder<List<FaqModel>?>(
-                            future: FireStoreUtils.getFaq(),
-                            builder: (context, snapshot) {
-                              switch (snapshot.connectionState) {
-                                case ConnectionState.waiting:
-                                  return Constant.loader(isDarkTheme: themeChange.getThem());
-                                case ConnectionState.done:
-                                  if (snapshot.hasError) {
-                                    return Text(snapshot.error.toString());
-                                  } else {
-                                    List<FaqModel> faqList = snapshot.data!;
-                                    return ListView.builder(
-                                      itemCount: faqList.length,
-                                      shrinkWrap: true,
-                                      itemBuilder: (context, index) {
-                                        FaqModel faqModel = faqList[index];
-                                        return InkWell(
-                                          onTap: () {
-                                            faqModel.isShow = true;
-                                          },
-                                          child: Padding(
-                                            padding: const EdgeInsets.symmetric(vertical: 5),
-                                            child: Container(
-                                              decoration: BoxDecoration(
-                                                color: themeChange.getThem() ? AppColors.darkContainerBackground : AppColors.containerBackground,
-                                                borderRadius: const BorderRadius.all(Radius.circular(10)),
-                                                border: Border.all(color: themeChange.getThem() ? AppColors.darkContainerBorder : AppColors.containerBorder, width: 0.5),
-                                                boxShadow: themeChange.getThem()
-                                                    ? null
-                                                    : [
-                                                        BoxShadow(
-                                                          color: Colors.grey.withOpacity(0.5),
-                                                          blurRadius: 8,
-                                                          offset: const Offset(0, 2), // changes position of shadow
-                                                        ),
-                                                      ],
-                                              ),
-                                              child: ExpansionTile(
-                                                title: Text(Constant.localizationTitle(faqModel.title), style: GoogleFonts.poppins()),
-                                                children: <Widget>[
-                                                  ListTile(
-                                                    title: Text(Constant.localizationDescription(faqModel.description), style: GoogleFonts.poppins()),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                    );
-                                  }
-                                default:
-                                  return Text('Error'.tr);
-                              }
-                            }),
-                      ),
-                    ],
-                  ),
-                ),
+            decoration: const BoxDecoration(
+              color: AppColors.moroccoRed,
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(30),
+                bottomRight: Radius.circular(30),
               ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.only(left: 20, right: 20, top: 40),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    "FAQs".tr,
+                    style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+                  ),
+                  Text(
+                    "Read FAQs solution".tr,
+                    style: GoogleFonts.outfit(fontSize: 14, color: Colors.white.withOpacity(0.8)),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: FutureBuilder<List<FaqModel>?>(
+                  future: FireStoreUtils.getFaq(),
+                  builder: (context, snapshot) {
+                    switch (snapshot.connectionState) {
+                      case ConnectionState.waiting:
+                        return Constant.loader(isDarkTheme: themeChange.getThem());
+                      case ConnectionState.done:
+                        if (snapshot.hasError) {
+                          return Center(child: Text(snapshot.error.toString()));
+                        } else {
+                          List<FaqModel> faqList = snapshot.data!;
+                          return ListView.builder(
+                            itemCount: faqList.length,
+                            padding: const EdgeInsets.only(top: 10, bottom: 20),
+                            itemBuilder: (context, index) {
+                              FaqModel faqModel = faqList[index];
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 6),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(15),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.05),
+                                        blurRadius: 10,
+                                        offset: const Offset(0, 4),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Theme(
+                                    data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                                    child: ExpansionTile(
+                                      iconColor: AppColors.moroccoRed,
+                                      collapsedIconColor: Colors.grey,
+                                      title: Text(
+                                        Constant.localizationTitle(faqModel.title),
+                                        style: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: 16, color: const Color(0xFF4A1520)),
+                                      ),
+                                      children: <Widget>[
+                                        Padding(
+                                          padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+                                          child: Text(
+                                            Constant.localizationDescription(faqModel.description),
+                                            style: GoogleFonts.outfit(fontSize: 14, color: Colors.grey.shade700, height: 1.5),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          );
+                        }
+                      default:
+                        return Center(child: Text('Error'.tr));
+                    }
+                  }),
             ),
           ),
         ],

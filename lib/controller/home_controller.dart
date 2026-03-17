@@ -167,11 +167,16 @@ class HomeController extends GetxController {
 
     String token = await NotificationService.getToken();
     await FireStoreUtils.getUserProfile(FireStoreUtils.getCurrentUid())
-        .then((value) {
+        .then((value) async {
       userModel.value = value!;
       userModel.value.fcmToken = token;
-      FireStoreUtils.updateUser(userModel.value);
-      ZegoCallService().initZego(userModel.value.id!, userModel.value.fullName!);
+      await FireStoreUtils.updateUser(userModel.value);
+      // Initialize Zego once the app user is known
+
+      await ZegoCallService().initZego(
+        userModel.value.id!,
+        userModel.value.fullName!,
+      );
     });
 
     isLoading.value = false;

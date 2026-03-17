@@ -6,6 +6,11 @@ import 'package:customer/ui/faq/faq_screen.dart';
 import 'package:customer/ui/home_screens/home_screen.dart';
 import 'package:customer/ui/orders/order_screen.dart';
 import 'package:customer/ui/settings_screen/setting_screen.dart';
+import 'package:customer/ui/address/saved_address_screen.dart';
+import 'package:customer/ui/wallet/wallet_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+
 import 'package:customer/utils/fire_store_utils.dart';
 import 'package:customer/utils/Preferences.dart';
 import 'package:customer/utils/zego_call_service.dart';
@@ -22,6 +27,8 @@ class DashBoardController extends GetxController {
     DrawerItem('Trips in progress'.tr, "assets/icons/ic_order.svg"),
     DrawerItem('Trip history'.tr, "assets/icons/ic_order.svg"),
     DrawerItem('Saved addresses'.tr, "assets/icons/ic_profile.svg"),
+    DrawerItem('My Wallet'.tr, "assets/icons/ic_wallet.svg"),
+
 
     // Safety Section
     DrawerItem('Safety', '', isHeader: true),
@@ -64,10 +71,35 @@ class DashBoardController extends GetxController {
   void onInit() {
     // TODO: implement onInit
     getDriver();
+    getUserRating();
     super.onInit();
   }
 
+  RxString userRating = "0.0".obs;
+
+  Future<void> getUserRating() async {
+    try {
+      String userId = FireStoreUtils.getCurrentUid();
+      await FirebaseFirestore.instance
+          .collection('review_customer')
+          .where('customerId', isEqualTo: userId)
+          .get()
+          .then((value) {
+        if (value.docs.isNotEmpty) {
+          double totalRating = 0;
+          for (var element in value.docs) {
+            totalRating += double.parse(element.data()['rating'].toString());
+          }
+          userRating.value = (totalRating / value.docs.length).toStringAsFixed(1);
+        }
+      });
+    } catch (e) {
+      print("Error fetching rating: $e");
+    }
+  }
+
   Rx<UserModel> driverUser = UserModel().obs;
+
   Future<void> getDriver() async {
     await FireStoreUtils.getUserProfile(FireStoreUtils.getCurrentUid())
         .then((driver) {
@@ -85,12 +117,17 @@ class DashBoardController extends GetxController {
         return const OrderScreen(initialIndex: 0);
       case 3:
         return const OrderScreen(initialIndex: 1);
-      case 10:
-        return const FaqScreen();
+      case 4:
+        return const SavedAddressScreen();
+      case 5:
+        return const WalletScreen();
       case 11:
+        return const FaqScreen();
+      case 12:
         return const ContactUsScreen();
-      case 14:
+      case 15:
         return const SettingScreen();
+
       default:
         // Default to HomeScreen if something goes wrong or for headers (though headers shouldn't be selectable)
         return const HomeScreen();
@@ -139,13 +176,13 @@ class DashBoardController extends GetxController {
   Future<void> onSelectItem(int index) async {
     if (drawerItems[index].isHeader) return;
 
-    if (index == 4 || index == 6 || index == 7 || index == 8 || index == 12 || index == 15 || index == 16) {
+    if (index == 7 || index == 8 || index == 9 || index == 13 || index == 16 || index == 17) {
       ShowToastDialog.showToast("Coming Soon");
       Get.back();
       return;
     }
 
-    if (index == 17) {
+    if (index == 18) {
       ZegoCallService().uninitZego();
       await FirebaseAuth.instance.signOut();
       await Preferences.clearKeyData('userId');
@@ -155,6 +192,7 @@ class DashBoardController extends GetxController {
     }
     Get.back();
   }
+
 
   /*Future<void> onSelectItem(int index) async {
     if (index == 12) {
