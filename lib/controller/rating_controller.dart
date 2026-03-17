@@ -11,6 +11,7 @@ class RatingController extends GetxController {
   RxBool isLoading = true.obs;
   RxDouble rating = 1.0.obs;
   Rx<TextEditingController> commentController = TextEditingController().obs;
+  RxList<String> selectedTags = <String>[].obs;
 
   Rx<ReviewModel> reviewModel = ReviewModel().obs;
   Rx<DriverUserModel> driverModel = DriverUserModel().obs;

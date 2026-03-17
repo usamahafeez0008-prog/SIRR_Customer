@@ -220,6 +220,47 @@ class _ChatScreensState extends State<ChatScreens> {
                     }),
               ),
             ),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              child: Row(
+                children: [
+                  "I'm Coming",
+                  "I'm Here",
+                  "I'm looking for you",
+                  "Traffic jams",
+                  "Ok",
+                ].map((text) {
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: InkWell(
+                      onTap: () {
+                        _sendMessage(text.tr, null, '', 'text');
+                      },
+                      borderRadius: BorderRadius.circular(20),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: themeChange.getThem() ? AppColors.darkTextField : Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: (themeChange.getThem() ? AppColors.moroccoGreen : AppColors.moroccoRed).withOpacity(0.3),
+                          ),
+                        ),
+                        child: Text(
+                          text.tr,
+                          style: GoogleFonts.outfit(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            color: themeChange.getThem() ? Colors.white : Colors.black87,
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               child: Container(

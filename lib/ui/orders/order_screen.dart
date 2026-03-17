@@ -24,6 +24,8 @@ import 'package:share_plus/share_plus.dart';
 import 'package:zego_uikit/zego_uikit.dart';
 import 'package:zego_uikit_prebuilt_call/zego_uikit_prebuilt_call.dart';
 
+import '../review/review_screen.dart';
+
 class OrderScreen extends StatefulWidget {
   final int initialIndex;
 
@@ -1220,14 +1222,14 @@ class _OrderScreenState extends State<OrderScreen>
                                                             title: "Review".tr,
                                                             btnHeight: 44,
                                                             onPress: () async {
-                                                              /* Get.to(
+                                                               Get.to(
                                                               const ReviewScreen(),
                                                               arguments: {
                                                                 "type":
                                                                     "orderModel",
                                                                 "orderModel":
                                                                     orderModel,
-                                                              });*/
+                                                              });
                                                             },
                                                           )),
                                                         ],
