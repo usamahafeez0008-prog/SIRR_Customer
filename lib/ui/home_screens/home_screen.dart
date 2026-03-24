@@ -232,9 +232,15 @@ class _HomeScreenState extends State<HomeScreen> {
       );
 
       _locationReady = true;
-
       if (mounted) {
         setState(() {});
+        // Automatically move camera if location becomes ready after map was already created
+        final controller =
+            Get.find<HomeController>();
+        if (controller.mapController != null) {
+          _moveCameraToCurrentLocation(
+              controller);
+        }
       }
     } catch (_) {}
   }
@@ -251,16 +257,39 @@ class _HomeScreenState extends State<HomeScreen> {
         desiredAccuracy: LocationAccuracy.high,
       );
 
+      // Default logic was:
+      /*
       controller.mapController?.animateCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(
+            target: LatLng(pos.latitude, pos.longitude),
+            zoom: 10.0,
+          ),
+        ),
+      );
+      */
+
+      // New logic matching 'locateMeBtn':
+      await controller.mapController
+          ?.animateCamera(
         CameraUpdate.newCameraPosition(
           CameraPosition(
             target: LatLng(
               pos.latitude,
               pos.longitude,
             ),
-            zoom: 10.0,
+            zoom: 15.0,
           ),
         ),
+      );
+
+      final screenH =
+          MediaQuery.of(context).size.height;
+      await Future.delayed(
+          const Duration(milliseconds: 300));
+
+      controller.mapController?.animateCamera(
+        CameraUpdate.scrollBy(0, screenH * 0.28),
       );
     } catch (_) {}
   }
@@ -311,7 +340,8 @@ Widget _buildBottomBookingCard(
                 _buildLocationField(
                   context,
                   hint:
-                      "Where are you leaving from?",
+                      "Where are you leaving from?"
+                          .tr,
                   controller: controller
                       .sourceLocationController
                       .value,
@@ -353,7 +383,7 @@ Widget _buildBottomBookingCard(
                 const SizedBox(height: 12),
                 _buildLocationField(
                   context,
-                  hint: "Which destination?",
+                  hint: "Which destination?".tr,
                   controller: controller
                       .destinationLocationController
                       .value,
@@ -572,76 +602,73 @@ Widget _buildBottomBookingCard(
                 const SizedBox(height: 16),
 
                 // Select Payment type
-                Obx(() => InkWell(
-                      onTap: () {
-                        paymentMethodDialog(
-                            context, controller);
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius:
-                              BorderRadius
-                                  .circular(15),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black
-                                  .withOpacity(
-                                      0.05),
-                              blurRadius: 8,
-                              offset:
-                                  const Offset(
-                                      0, 2),
-                            )
-                          ],
-                        ),
-                        padding: const EdgeInsets
-                            .symmetric(
-                            horizontal: 16,
-                            vertical: 14),
-                        child: Row(
-                          children: [
-                            SvgPicture.asset(
-                              'assets/icons/ic_payment.svg',
-                              width: 24,
-                              colorFilter:
-                                  const ColorFilter
-                                      .mode(
-                                      AppColors
-                                          .moroccoRed,
-                                      BlendMode
-                                          .srcIn),
-                            ),
-                            const SizedBox(
-                                width: 12),
-                            Expanded(
-                              child: Text(
-                                controller
-                                        .selectedPaymentMethod
-                                        .value
-                                        .isNotEmpty
-                                    ? controller
-                                        .selectedPaymentMethod
-                                        .value
-                                    : "Select Payment type"
-                                        .tr,
-                                style: GoogleFonts
-                                    .outfit(
-                                        fontSize:
-                                            15,
-                                        color: Colors
-                                            .black87),
-                              ),
-                            ),
-                            const Icon(
-                                Icons
-                                    .keyboard_arrow_down,
-                                color:
-                                    Colors.grey),
-                          ],
-                        ),
+                InkWell(
+                  onTap: () {
+                    // paymentMethodDialog(
+                    //     context, controller);
+                  },
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.only(
+                            left: 4.0,
+                            right: 4.0),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius:
+                            BorderRadius.circular(
+                                20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black
+                                .withOpacity(0.2),
+                            blurRadius: 8,
+                            offset: const Offset(
+                                0, 6),
+                          )
+                        ],
                       ),
-                    )),
+                      padding: const EdgeInsets
+                          .symmetric(
+                          horizontal: 24,
+                          vertical: 20),
+                      child: Row(
+                        children: [
+                          SvgPicture.asset(
+                            'assets/icons/ic_payment.svg',
+                            width: 24,
+                            colorFilter:
+                                const ColorFilter
+                                    .mode(
+                                    AppColors
+                                        .moroccoRed,
+                                    BlendMode
+                                        .srcIn),
+                          ),
+                          const SizedBox(
+                              width: 12),
+                          Expanded(
+                            child: Text(
+                              "Cash".tr,
+                              style: GoogleFonts.outfit(
+                                  fontSize: 15,
+                                  fontWeight:
+                                      FontWeight
+                                          .w600,
+                                  color: Colors
+                                      .black87),
+                            ),
+                          ),
+                          const Icon(
+                              Icons
+                                  .info_outline_rounded,
+                              size: 20,
+                              color: Colors.grey),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
 
                 const SizedBox(height: 14),
 
@@ -718,7 +745,7 @@ Widget _buildBottomBookingCard(
                       showAlertDialog(context);
                     } else {
                       ShowToastDialog.showLoader(
-                          "Please wait");
+                          "Please wait".tr);
                       OrderModel orderModel =
                           OrderModel();
                       orderModel.id =
@@ -889,6 +916,7 @@ Widget _buildBottomBookingCard(
                       if (controller.selectedZone
                               .value.id !=
                           null) {
+                        debugPrint("Step: Zone identified, setting order model...");
                         orderModel.zoneId =
                             controller
                                 .selectedZone
@@ -898,41 +926,36 @@ Widget _buildBottomBookingCard(
                             controller
                                 .selectedZone
                                 .value;
+                        debugPrint("Step: Sending order data future to find drivers...");
                         await FireStoreUtils()
                             .sendOrderDataFuture(
                                 orderModel)
                             .then(
                                 (eventData) async {
-                          log("Nearby drivers found: ${eventData.length}");
-                          for (var driver
-                              in eventData) {
-                            log("Driver Token: ${driver.fcmToken}");
-                            if (driver.fcmToken !=
-                                null) {
-                              Map<String, dynamic>
-                                  playLoad =
-                                  <String,
-                                      dynamic>{
-                                "type":
-                                    "city_order",
-                                "orderId":
-                                    orderModel.id
-                              };
-                              await SendNotification.sendOneNotification(
-                                  token: driver
-                                      .fcmToken
-                                      .toString(),
-                                  title:
-                                      'New Ride Available'
-                                          .tr,
-                                  body:
-                                      'A customer has placed a ride near your location.'
-                                          .tr,
-                                  payload:
-                                      playLoad);
+                          debugPrint("Step: Nearby drivers found: ${eventData.length}");
+                          if (eventData.isEmpty) {
+                            debugPrint("Step: No drivers found within range.");
+                          }
+                          List<Future> notificationFutures = [];
+                          for (var driver in eventData) {
+                            debugPrint("Step: Queueing notification for driver: ${driver.id}");
+                            if (driver.fcmToken != null && driver.fcmToken! != "null" && driver.fcmToken!.isNotEmpty) {
+                              Map<String, dynamic> playLoad = <String, dynamic>{"type": "city_order", "orderId": orderModel.id};
+                              notificationFutures.add(SendNotification.sendOneNotification(
+                                  token: driver.fcmToken.toString(),
+                                  title: 'New Ride Available'.tr,
+                                  body: 'A customer has placed a ride near your location.'.tr,
+                                  payload: playLoad));
+                            } else {
+                              debugPrint("Step: Skipping driver ${driver.id} because FCM token is invalid.");
                             }
                           }
+                          if (notificationFutures.isNotEmpty) {
+                            debugPrint("Step: Sending ${notificationFutures.length} notifications in parallel...");
+                            await Future.wait(notificationFutures);
+                          }
                         });
+                        debugPrint("Step: Finalizing order in Firestore...");
                         await FireStoreUtils
                                 .setOrder(
                                     orderModel)
@@ -948,10 +971,12 @@ Widget _buildBottomBookingCard(
                               .closeLoader();
                         });
                       } else {
+                        log("Zone of  drivers : ${controller.selectedZone.value.publish}");
                         ShowToastDialog
                             .closeLoader();
                         ShowToastDialog.showToast(
-                          "Services are currently unavailable on the selected location. Please reach out to the administrator for assistance.",
+                          "Services are currently unavailable on the selected location. Please reach out to the administrator for assistance."
+                              .tr,
                         );
                         return;
                       }
@@ -1078,7 +1103,7 @@ Widget _buildLocationField(BuildContext context,
                       children: [
                         Text(
                           addressData['city'] ??
-                              "Saved Address",
+                              "Saved Address".tr,
                           style:
                               GoogleFonts.poppins(
                             fontWeight:

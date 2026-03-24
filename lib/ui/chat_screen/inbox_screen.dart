@@ -180,7 +180,7 @@ class InboxScreen extends StatelessWidget {
                               DriverUserModel? driver = snapshot.data;
                               return InkWell(
                                 onTap: () async {
-                                  ShowToastDialog.showLoader("Please wait..");
+                                  ShowToastDialog.showLoader("Please wait".tr);
                                   await FireStoreUtils.getUserProfile(FireStoreUtils.getCurrentUid()).then((value) {
                                     ShowToastDialog.closeLoader();
                                     Get.to(ChatScreens(

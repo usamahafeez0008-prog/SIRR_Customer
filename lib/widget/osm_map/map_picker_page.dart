@@ -2,17 +2,14 @@ import 'package:customer/constant/collection_name.dart';
 import 'package:customer/constant/show_toast_dialog.dart';
 import 'package:customer/utils/fire_store_utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'dart:io';
-
 import 'package:customer/themes/app_colors.dart';
 import 'package:customer/themes/button_them.dart';
 import 'package:customer/widget/osm_map/map_controller.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:latlong2/latlong.dart';
+import 'package:latlong2/latlong.dart' as osm_latlong;
+import 'package:google_maps_flutter/google_maps_flutter.dart' as gm_flutter;
 
 class MapPickerPage extends StatelessWidget {
   final OSMMapController controller = Get.put(OSMMapController());
@@ -25,6 +22,27 @@ class MapPickerPage extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
+          Obx(
+            () => gm_flutter.GoogleMap(
+              initialCameraPosition: gm_flutter.CameraPosition(
+                target: gm_flutter.LatLng(
+                  controller.pickedPlace.value?.coordinates.latitude ?? 31.7917,
+                  controller.pickedPlace.value?.coordinates.longitude ?? -7.0926,
+                ),
+                zoom: 13,
+              ),
+              onMapCreated: (gm_flutter.GoogleMapController mapController) {
+                controller.googleMapController = mapController;
+              },
+              onTap: (gm_flutter.LatLng latlng) {
+                controller.addLatLngOnly(osm_latlong.LatLng(latlng.latitude, latlng.longitude));
+              },
+              markers: controller.markers,
+              myLocationEnabled: true,
+              myLocationButtonEnabled: true,
+            ),
+          ),
+          /*
           Obx(
             () => FlutterMap(
               mapController: controller.mapController,
@@ -69,6 +87,7 @@ class MapPickerPage extends StatelessWidget {
               ],
             ),
           ),
+          */
           Positioned(
             top: 32,
             left: 16,
@@ -162,16 +181,18 @@ class MapPickerPage extends StatelessWidget {
                           final place = controller.searchResults[index];
                           return ListTile(
                             title: Text(
-                              place['display_name'],
-                              style: GoogleFonts.outfit(fontSize: 14),
+                              place['title'],
+                              style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.bold),
                             ),
+                            subtitle: place['address'].isNotEmpty 
+                                ? Text(
+                                    place['address'],
+                                    style: GoogleFonts.outfit(fontSize: 12, color: Colors.grey),
+                                  )
+                                : null,
                             leading: const Icon(Icons.location_on_outlined, color: AppColors.moroccoRed),
-                            onTap: () {
-                              controller.selectSearchResult(place);
-                              final lat = double.parse(place['lat']);
-                              final lon = double.parse(place['lon']);
-                              final pos = LatLng(lat, lon);
-                              controller.mapController.move(pos, 15);
+                            onTap: () async {
+                              await controller.selectSearchResult(place);
                               searchController.text = place['display_name'];
                             },
                           );

@@ -23,33 +23,33 @@ class DashBoardController extends GetxController {
   RxList<DrawerItem> drawerItems = [
     // Trips Section
     DrawerItem('Trips', '', isHeader: true),
-    DrawerItem('Home'.tr, "assets/icons/ic_city.svg"),
-    DrawerItem('Trips in progress'.tr, "assets/icons/ic_order.svg"),
-    DrawerItem('Trip history'.tr, "assets/icons/ic_order.svg"),
-    DrawerItem('Saved addresses'.tr, "assets/icons/ic_profile.svg"),
-    DrawerItem('My Wallet'.tr, "assets/icons/ic_wallet.svg"),
+    DrawerItem('Home', "assets/icons/ic_city.svg"),
+    DrawerItem('Trips in progress', "assets/icons/ic_order.svg"),
+    DrawerItem('Trip history', "assets/icons/ic_order.svg"),
+    DrawerItem('Saved addresses', "assets/icons/ic_profile.svg"),
+    DrawerItem('My Wallet', "assets/icons/ic_wallet.svg"),
 
 
     // Safety Section
     DrawerItem('Safety', '', isHeader: true),
-    DrawerItem('Safety center'.tr, "assets/icons/ic_help_support.svg"),
-    DrawerItem('Trusted contacts'.tr, "assets/icons/ic_profile.svg"),
-    DrawerItem('Share my trip'.tr, "assets/icons/ic_invite.svg"), 
+    DrawerItem('Safety center', "assets/icons/ic_help_support.svg"),
+    DrawerItem('Trusted contacts', "assets/icons/ic_profile.svg"),
+    DrawerItem('Share my trip', "assets/icons/ic_invite.svg"), 
 
     // Support Section
     DrawerItem('Support', '', isHeader: true),
-    DrawerItem('Help / FAQ'.tr, "assets/icons/ic_faq.svg"),
-    DrawerItem('Contact us'.tr, "assets/icons/ic_contact_us.svg"),
-    DrawerItem('Report a problem'.tr, "assets/icons/ic_support.svg"),
+    DrawerItem('Help / FAQ', "assets/icons/ic_faq.svg"),
+    DrawerItem('Contact us', "assets/icons/ic_contact_us.svg"),
+    DrawerItem('Report a problem', "assets/icons/ic_support.svg"),
 
     // Application Section
     DrawerItem('Application', '', isHeader: true),
-    DrawerItem('Settings'.tr, "assets/icons/ic_settings.svg"),
-    DrawerItem('Notifications'.tr, "assets/icons/ic_inbox.svg"),
-    DrawerItem('Accessibility'.tr, "assets/icons/ic_settings.svg"),
+    DrawerItem('Settings', "assets/icons/ic_settings.svg"),
+    DrawerItem('Notifications', "assets/icons/ic_inbox.svg"),
+    DrawerItem('Accessibility', "assets/icons/ic_settings.svg"),
 
     // Logout
-    DrawerItem('Log out'.tr, "assets/icons/ic_logout.svg"),
+    DrawerItem('Log out', "assets/icons/ic_logout.svg"),
   ].obs;
 
   /*RxList<DrawerItem> drawerItems = [
@@ -205,16 +205,35 @@ class DashBoardController extends GetxController {
     Get.back();
   }*/
 
-  Rx<DateTime> currentBackPressTime = DateTime.now().obs;
+  Rx<DateTime> currentBackPressTime =
+      DateTime.now().subtract(const Duration(seconds: 3)).obs;
 
   Future<bool> onWillPop() {
+    // If we are not on the Home screen (index 0 or 1), navigate back to Home (index 0)
+    if (selectedDrawerIndex.value != 0 && selectedDrawerIndex.value != 1) {
+      selectedDrawerIndex.value = 0;
+      return Future.value(false);
+    }
+
+    // New logic for Home screen (index 0 or 1): Show toast on first press, exit on second
     DateTime now = DateTime.now();
+
+    // 1. If it's the first press after a long time, show toast
     if (now.difference(currentBackPressTime.value) >
         const Duration(seconds: 2)) {
       currentBackPressTime.value = now;
       ShowToastDialog.showToast("Double press to exit");
       return Future.value(false);
     }
+
+    // 2. If it's a second press but TOO FAST (less than 300ms), 
+    // it's likely a duplicate system call. Ignore it.
+    if (now.difference(currentBackPressTime.value) <
+        const Duration(milliseconds: 300)) {
+      return Future.value(false);
+    }
+
+    // 3. Otherwise, it's a deliberate second press within the 2s window. Exit.
     return Future.value(true);
   }
 }

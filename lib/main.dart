@@ -105,8 +105,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             localizationsDelegates: const [
               CountryLocalizations.delegate,
             ],
-            locale: LocalizationService.locale,
-            fallbackLocale: LocalizationService.locale,
+            locale: LocalizationService.currentLocale,
+            fallbackLocale: LocalizationService.currentLocale,
             translations: LocalizationService(),
             builder: EasyLoading.init(),
             home: GetBuilder<GlobalSettingController>(
@@ -214,8 +214,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             localizationsDelegates: const [
               CountryLocalizations.delegate,
             ],
-            locale: LocalizationService.locale,
-            fallbackLocale: LocalizationService.locale,
+            locale: LocalizationService.currentLocale,
+            fallbackLocale: LocalizationService.currentLocale,
             translations: LocalizationService(),
             builder: EasyLoading.init(),
             home: GetBuilder<GlobalSettingController>(

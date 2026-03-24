@@ -386,8 +386,19 @@ class PaymentOrderScreen extends StatelessWidget {
                                         ButtonThem.buildButton(
                                           context,
                                           title: "Confirm Payment".tr,
-                                          onPress: () => paymentMethodDialog(
-                                              context, controller, orderModel),
+                                          // onPress: () => paymentMethodDialog(
+                                          //     context, controller, orderModel),
+                                          onPress: () async {
+                                            ShowToastDialog.showLoader("Please wait..".tr);
+                                            orderModel.paymentStatus = true;
+                                            await FireStoreUtils.setOrder(orderModel).then((value) {
+                                              ShowToastDialog.closeLoader();
+                                              if (value == true) {
+                                                ShowToastDialog.showToast("Payment Status Updated Successfully".tr);
+                                                Get.back();
+                                              }
+                                            });
+                                          },
                                         ),
                                         const SizedBox(height: 40),
                                       ],

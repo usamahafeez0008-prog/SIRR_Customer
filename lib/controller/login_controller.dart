@@ -29,7 +29,7 @@ class LoginController extends GetxController {
   }
 
   Future<void> sendCode() async {
-    ShowToastDialog.showLoader("Please wait");
+    ShowToastDialog.showLoader("Please wait".tr);
     await FirebaseAuth.instance
         .verifyPhoneNumber(
       phoneNumber: countryCode + phoneNumberController.text,

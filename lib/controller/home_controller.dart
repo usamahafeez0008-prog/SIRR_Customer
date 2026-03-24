@@ -92,23 +92,31 @@ class HomeController extends GetxController {
     super.onInit();
   }
 
-  Future<void> checkSavedAddresses() async {
+  void checkSavedAddresses() {
     String userId = FireStoreUtils.getCurrentUid();
-    await FirebaseFirestore.instance
+    FirebaseFirestore.instance
         .collection('saved_addresses')
         .doc(userId)
-        .get()
-        .then((doc) async {
+        .snapshots()
+        .listen((doc) {
       if (doc.exists && doc.data()?['addressSave'] == true) {
         hasSavedAddresses.value = true;
-        await FirebaseFirestore.instance
+        FirebaseFirestore.instance
             .collection('saved_addresses')
             .doc(userId)
             .collection('addresses')
-            .orderBy('timestamp', descending: true)
-            .get()
-            .then((snapshot) {
-          savedAddresses.value = snapshot.docs.map((d) => d.data()).toList();
+            .snapshots()
+            .listen((snapshot) {
+          List<Map<String, dynamic>> list = snapshot.docs.map((d) => d.data()).toList();
+          // Sort in memory to avoid disappearing items that lack timestamps
+          list.sort((a, b) {
+            Timestamp? tA = a['timestamp'];
+            Timestamp? tB = b['timestamp'];
+            if (tA == null) return 1;
+            if (tB == null) return -1;
+            return tB.compareTo(tA);
+          });
+          savedAddresses.value = list;
         });
       } else {
         hasSavedAddresses.value = false;
@@ -229,7 +237,7 @@ class HomeController extends GetxController {
     }
 
     try {
-      ShowToastDialog.showLoader("Please wait");
+      ShowToastDialog.showLoader("Please wait".tr);
       if (Constant.selectedMapType == 'osm') {
         final value = await Constant.getDurationOsmDistance(
             LatLng(sourceLocationLAtLng.value.latitude!,
@@ -543,6 +551,7 @@ class HomeController extends GetxController {
     await FireStoreUtils().getPayment().then((value) {
       if (value != null) {
         paymentModel.value = value;
+        selectedPaymentMethod.value = value.cash?.name ?? "Cash";
       }
     });
 
