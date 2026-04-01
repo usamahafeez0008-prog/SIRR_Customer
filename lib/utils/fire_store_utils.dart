@@ -39,6 +39,7 @@ import 'package:customer/widget/geoflutterfire/src/geoflutterfire.dart';
 import 'package:customer/widget/geoflutterfire/src/models/point.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:customer/utils/Preferences.dart';
 
@@ -61,67 +62,116 @@ class FireStoreUtils {
   }
 
   Future<void> getSettings() async {
-    await Future.wait([
-      fireStore.collection(CollectionName.settings).doc("globalValue").get().then((value) {
-        if (value.exists) {
-          AppColors.darksecondprimary = Color(int.parse(value.data()!['app_customer_color'].replaceFirst("#", "0xff")));
-          AppColors.lightsecondprimary = Color(int.parse(value.data()!['app_customer_light_color'].replaceFirst("#", "0xff")));
-          Constant.distanceType = value.data()!["distanceType"];
-          Constant.radius = value.data()!["radius"];
-          Constant.mapType = value.data()!["mapType"];
-          Constant.selectedMapType = value.data()!["selectedMapType"];
-          Constant.driverLocationUpdate = value.data()!["driverLocationUpdate"];
-          Constant.regionCode = value.data()!["regionCode"];
-          Constant.regionCountry = value.data()!["regionCountry"];
-        }
-      }),
-      fireStore.collection(CollectionName.settings).doc("globalKey").get().then((value) {
-        if (value.exists) {
-          Constant.mapAPIKey = value.data()!["googleMapKey"];
-        }
-      }),
-      fireStore.collection(CollectionName.settings).doc("notification_setting").get().then((value) {
-        if (value.exists && value.data() != null) {
-          Constant.senderId = value.data()!['senderId'].toString();
-          Constant.jsonNotificationFileURL = value.data()!['serviceJson'].toString();
-        }
-      }),
-      fireStore.collection(CollectionName.settings).doc("global").get().then((value) {
-        if (value.exists) {
-          if (value.data()!["privacyPolicy"] != null) {
-            Constant.privacyPolicy = <LanguagePrivacyPolicy>[];
-            value.data()!["privacyPolicy"].forEach((v) {
-              Constant.privacyPolicy.add(LanguagePrivacyPolicy.fromJson(v));
-            });
-          }
-          if (value.data()!["termsAndConditions"] != null) {
-            Constant.termsAndConditions = <LanguageTermsCondition>[];
-            value.data()!["termsAndConditions"].forEach((v) {
-              Constant.termsAndConditions.add(LanguageTermsCondition.fromJson(v));
-            });
-          }
-          Constant.appVersion = value.data()!["appVersion"];
-        }
-      }),
-      fireStore.collection(CollectionName.settings).doc("referral").get().then((value) {
-        if (value.exists) {
-          Constant.referralCustomerAmount = value.data()!["referralAmount"];
-          Constant.referralDriverAmount = value.data()!["referralAmountDriver"];
-        }
-      }),
-      fireStore.collection(CollectionName.settings).doc("contact_us").get().then((value) {
-        if (value.exists) {
-          Constant.supportURL = value.data()!["supportURL"];
-        }
-      }),
-    ]);
+    await fireStore
+        .collection(CollectionName.settings)
+        .doc("globalValue")
+        .get()
+        .then((value) {
+      if (value.exists) {
+        AppColors.darksecondprimary = Color(int.parse(
+            value.data()!['app_customer_color'].replaceFirst("#", "0xff")));
+        AppColors.lightsecondprimary = Color(int.parse(value
+            .data()!['app_customer_light_color']
+            .replaceFirst("#", "0xff")));
+        Constant.distanceType = value.data()!["distanceType"];
+        Constant.radius = value.data()!["radius"];
+        Constant.mapType = value.data()!["mapType"];
+        Constant.selectedMapType = value.data()!["selectedMapType"];
+        Constant.driverLocationUpdate = value.data()!["driverLocationUpdate"];
+        Constant.regionCode = value.data()!["regionCode"];
+        Constant.regionCountry = value.data()!["regionCountry"];
+      }
+    });
 
-    fireStore.collection(CollectionName.settings).doc("adminCommission").snapshots().listen((value) {
+    await fireStore
+        .collection(CollectionName.settings)
+        .doc("globalKey")
+        .get()
+        .then((value) {
+      if (value.exists) {
+        Constant.mapAPIKey = value.data()!["googleMapKey"];
+      }
+    });
+
+    log("Fetching notification settings...");
+    await fireStore
+        .collection(CollectionName.settings)
+        .doc("notification_setting")
+        .get()
+        .then((value) {
+      if (value.exists) {
+        log("Notification settings found: ${value.data()}");
+        if (value.data() != null) {
+          Constant.senderId = value.data()!['senderId'].toString();
+          Constant.jsonNotificationFileURL =
+              value.data()!['serviceJson'].toString();
+          log("Loaded senderId: ${Constant.senderId}");
+          log("Loaded serviceJson: ${Constant.jsonNotificationFileURL}");
+        }
+      } else {
+        log("Notification settings document NOT FOUND!");
+      }
+    }).catchError((error) {
+      log("Error fetching notification settings: $error");
+    });
+
+    await fireStore
+        .collection(CollectionName.settings)
+        .doc("global")
+        .get()
+        .then((value) {
+      if (value.exists) {
+        if (value.data()!["privacyPolicy"] != null) {
+          Constant.privacyPolicy = <LanguagePrivacyPolicy>[];
+          value.data()!["privacyPolicy"].forEach((v) {
+            Constant.privacyPolicy.add(LanguagePrivacyPolicy.fromJson(v));
+          });
+        }
+
+        if (value.data()!["termsAndConditions"] != null) {
+          Constant.termsAndConditions = <LanguageTermsCondition>[];
+          value.data()!["termsAndConditions"].forEach((v) {
+            Constant.termsAndConditions.add(LanguageTermsCondition.fromJson(v));
+          });
+        }
+
+        Constant.appVersion = value.data()!["appVersion"];
+        // Constant.globalUrl = value.data()!["websiteUrl"] ?? '';
+      }
+    });
+
+    fireStore
+        .collection(CollectionName.settings)
+        .doc("adminCommission")
+        .snapshots()
+        .listen((value) {
       if (value.data() != null) {
-        AdminCommission adminCommission = AdminCommission.fromJson(value.data()!);
+        AdminCommission adminCommission =
+            AdminCommission.fromJson(value.data()!);
         if (adminCommission.isEnabled == true) {
           Constant.adminCommission = adminCommission;
         }
+      }
+    });
+
+    await fireStore
+        .collection(CollectionName.settings)
+        .doc("referral")
+        .get()
+        .then((value) {
+      if (value.exists) {
+        Constant.referralCustomerAmount = value.data()!["referralAmount"];
+        Constant.referralDriverAmount = value.data()!["referralAmountDriver"];
+      }
+    });
+
+    await fireStore
+        .collection(CollectionName.settings)
+        .doc("contact_us")
+        .get()
+        .then((value) {
+      if (value.exists) {
+        Constant.supportURL = value.data()!["supportURL"];
       }
     });
   }
@@ -527,6 +577,8 @@ class FireStoreUtils {
   }
 
   static Future<DriverUserModel?> getDriver(String uuid) async {
+    debugPrint("FireStoreUtils.getDriver started for uuid: $uuid");
+    Stopwatch stopwatch = Stopwatch()..start();
     DriverUserModel? driverUserModel;
     await fireStore
         .collection(CollectionName.driverUsers)
@@ -535,8 +587,12 @@ class FireStoreUtils {
         .then((value) {
       if (value.exists) {
         driverUserModel = DriverUserModel.fromJson(value.data()!);
+        debugPrint("FireStoreUtils.getDriver success for uuid: $uuid. Time taken: ${stopwatch.elapsedMilliseconds}ms");
+      } else {
+        debugPrint("FireStoreUtils.getDriver: Driver not found for uuid: $uuid. Time taken: ${stopwatch.elapsedMilliseconds}ms");
       }
     }).catchError((error) {
+      debugPrint("FireStoreUtils.getDriver failed for uuid: $uuid: $error. Time taken: ${stopwatch.elapsedMilliseconds}ms");
       log("Failed to update user: $error");
       driverUserModel = null;
     });

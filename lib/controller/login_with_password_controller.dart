@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:customer/constant/collection_name.dart';
 import 'package:customer/model/user_model.dart';
@@ -41,21 +40,12 @@ class LoginWithPasswordController extends GetxController {
 
     ShowToastDialog.showLoader("Logging in...".tr);
     try {
-      log("Login params: countryCode='${countryCode.value}', phoneNumber='${phoneNumberController.value.text}', password='$password'");
-      
       final querySnapshot = await FirebaseFirestore.instance
           .collection(CollectionName.users)
           .where('countryCode', isEqualTo: countryCode.value)
-          .where('phoneNumber', isEqualTo: phoneNumberController.value.text.trim())
+          .where('phoneNumber', isEqualTo: phoneNumberController.value.text)
           .where('password', isEqualTo: password)
           .get();
-
-      log("Firestore result count: ${querySnapshot.docs.length}");
-      if (querySnapshot.docs.isEmpty) {
-        log("No user found with matching credentials.");
-      } else {
-        log("User found! docId: ${querySnapshot.docs.first.id}");
-      }
 
       ShowToastDialog.closeLoader();
 

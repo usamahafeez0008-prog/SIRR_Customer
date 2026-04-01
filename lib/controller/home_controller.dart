@@ -89,6 +89,7 @@ class HomeController extends GetxController {
     getPaymentData();
     getContact();
     checkSavedAddresses();
+    selectedPaymentMethod.value = "Cash";
     super.onInit();
   }
 
@@ -551,7 +552,6 @@ class HomeController extends GetxController {
     await FireStoreUtils().getPayment().then((value) {
       if (value != null) {
         paymentModel.value = value;
-        selectedPaymentMethod.value = value.cash?.name ?? "Cash";
       }
     });
 

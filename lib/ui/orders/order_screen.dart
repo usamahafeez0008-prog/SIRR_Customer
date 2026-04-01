@@ -642,6 +642,7 @@ class _OrderScreenState extends State<OrderScreen>
                                                                   Expanded(
                                                                     child: orderModel.status == Constant.rideInProgress || orderModel.status == Constant.ridePlaced || orderModel.status == Constant.rideComplete
                                                                         ? Text(orderModel.status.toString())
+
                                                                         : Row(
                                                                             children: [
                                                                               Text("OTP".tr, style: GoogleFonts.poppins()),
@@ -750,7 +751,8 @@ class _OrderScreenState extends State<OrderScreen>
                                                                                     ),
                                                                                   ],
                                                                                   isVideoCall: false,
-                                                                                  resourceID: "zego_call", // MUST match ZEGOCLOUD console resource exactly
+                                                                                  resourceID: "zego_call",
+                                                                                  // MUST match ZEGOCLOUD console resource exactly
                                                                                   icon: ButtonIcon(icon: const SizedBox.shrink()),
                                                                                   buttonSize: const Size(double.infinity, 44),
                                                                                   verticalLayout: false,
@@ -761,7 +763,7 @@ class _OrderScreenState extends State<OrderScreen>
                                                                                     );
                                                                                   },
                                                                                 ),
-                                                                               /* child: ZegoSendCallInvitationButton(
+                                                                                /* child: ZegoSendCallInvitationButton(
                                                                                   invitees: [
                                                                                     ZegoUIKitUser(
                                                                                       id: snapshot.data!.id!,
@@ -980,7 +982,7 @@ class _OrderScreenState extends State<OrderScreen>
                                                     ],
                                                   ),*/
                                                       const SizedBox(height: 10),
-                                                      Visibility(
+                                                      /*Visibility(
                                                           visible: orderModel.status == Constant.rideComplete && (orderModel.paymentStatus == null || orderModel.paymentStatus == false),
                                                           child: ButtonThem.buildButton(
                                                             context,
@@ -991,7 +993,7 @@ class _OrderScreenState extends State<OrderScreen>
                                                                 "orderModel": orderModel,
                                                               });
                                                             },
-                                                          )),
+                                                          )),*/
                                                     ],
                                                   ),
                                                 ),
@@ -1222,13 +1224,9 @@ class _OrderScreenState extends State<OrderScreen>
                                                             title: "Review".tr,
                                                             btnHeight: 44,
                                                             onPress: () async {
-                                                               Get.to(
-                                                              const ReviewScreen(),
-                                                              arguments: {
-                                                                "type":
-                                                                    "orderModel",
-                                                                "orderModel":
-                                                                    orderModel,
+                                                              Get.to(const ReviewScreen(), arguments: {
+                                                                "type": "orderModel",
+                                                                "orderModel": orderModel,
                                                               });
                                                             },
                                                           )),

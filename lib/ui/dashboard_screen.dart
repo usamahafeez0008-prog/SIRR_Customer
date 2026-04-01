@@ -6,9 +6,10 @@ import 'package:customer/model/user_model.dart';
 import 'package:customer/themes/app_colors.dart';
 import 'package:customer/utils/fire_store_utils.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:customer/controller/global_setting_conroller.dart';
+import 'package:customer/ui/splash_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class DashBoardScreen extends StatelessWidget {
@@ -19,161 +20,177 @@ class DashBoardScreen extends StatelessWidget {
     return GetX<DashBoardController>(
         init: DashBoardController(),
         builder: (controller) {
-          return PopScope(
-            canPop: _getCanPop(controller),
-            onPopInvoked: (didPop) async {
-              if (didPop) return;
-              bool shouldExit = await controller.onWillPop();
-              if (shouldExit) {
-                await SystemChannels.platform
-                    .invokeMethod('SystemNavigator.pop');
-              }
-            },
-            child: Scaffold(
+          return Scaffold(
+            backgroundColor: AppColors.moroccoBackground,
+            drawerEnableOpenDragGesture: false,
+            appBar: AppBar(
               backgroundColor: AppColors.moroccoBackground,
-              drawerEnableOpenDragGesture: false,
-              appBar: AppBar(
-                backgroundColor: AppColors.moroccoBackground,
-                elevation: 0,
-                centerTitle: true,
-                title: controller.selectedDrawerIndex.value != 0 &&
-                        controller.selectedDrawerIndex.value != 6
-                    ? ShaderMask(
-                        shaderCallback: (bounds) => const LinearGradient(
-                          colors: [AppColors.moroccoRed, AppColors.moroccoGreen],
-                        ).createShader(bounds),
-                        child: Text(
-                          controller
-                              .drawerItems[controller.selectedDrawerIndex.value]
-                              .title
-                              .tr,
-                          style: GoogleFonts.outfit(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 22,
-                          ),
-                        ),
-                      )
-                    : Hero(
-                        tag: 'app_logo',
-                        child: Image.asset(
-                          'assets/images/splash_image.png',
-                          height: 90,
+              elevation: 0,
+              centerTitle: true,
+              title: controller.selectedDrawerIndex.value != 0 &&
+                      controller.selectedDrawerIndex.value != 6
+                  ? ShaderMask(
+                      shaderCallback: (bounds) => const LinearGradient(
+                        colors: [AppColors.moroccoRed, AppColors.moroccoGreen],
+                      ).createShader(bounds),
+                      child: Text(
+                        controller
+                            .drawerItems[controller.selectedDrawerIndex.value]
+                            .title
+                            .tr,
+                        style: GoogleFonts.outfit(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 22,
                         ),
                       ),
-                leading: Builder(builder: (context) {
-                  return Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
-                            blurRadius: 10,
-                          )
-                        ],
-                      ),
-                      child: IconButton(
-                        onPressed: () {
-                          Scaffold.of(context).openDrawer();
-                        },
-                        icon: SvgPicture.asset(
-                          'assets/icons/ic_humber.svg',
-                          colorFilter: const ColorFilter.mode(
-                              AppColors.moroccoRed, BlendMode.srcIn),
-                        ),
+                    )
+                  : Hero(
+                      tag: 'app_logo',
+                      child: Image.asset(
+                        'assets/images/splash_image.png',
+                        height: 90,
                       ),
                     ),
-                  );
-                }),
-                actions: [
-                  controller.selectedDrawerIndex.value == 0
-                      ? FutureBuilder<UserModel?>(
-                          future: FireStoreUtils.getUserProfile(
-                              FireStoreUtils.getCurrentUid()),
-                          builder: (context, snapshot) {
-                            switch (snapshot.connectionState) {
-                              case ConnectionState.waiting:
-                                return const Padding(
-                                  padding: EdgeInsets.all(12.0),
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                        AppColors.moroccoRed),
-                                  ),
-                                );
-                              case ConnectionState.done:
-                                if (snapshot.hasError) {
+              leading: Builder(builder: (context) {
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 10,
+                        )
+                      ],
+                    ),
+                    child: IconButton(
+                      onPressed: () {
+                        Scaffold.of(context).openDrawer();
+                      /*  if (controller.selectedDrawerIndex.value == 2) {
+                          controller.selectedDrawerIndex(0);
+                        } else {
+                          controller.selectedDrawerIndex(2);
+                        }*/
+                      },
+                      icon: SvgPicture.asset(
+                        'assets/icons/ic_humber.svg',
+                        colorFilter: const ColorFilter.mode(
+                            AppColors.moroccoRed, BlendMode.srcIn),
+                      ),
+                    ),
+                  ),
+                );
+              }),
+              actions: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 10,
+                        )
+                      ],
+                    ),
+                    child: IconButton(
+                      onPressed: () {
+                        Get.offAll(() => GetBuilder<GlobalSettingController>(
+                              init: GlobalSettingController(),
+                              builder: (controller) => const SplashScreen(),
+                            ));
+                      },
+                      icon: const Icon(
+                        Icons.refresh,
+                        color: AppColors.moroccoRed,
+                      ),
+                    ),
+                  ),
+                ),
+                controller.selectedDrawerIndex.value == 0
+                    ? FutureBuilder<UserModel?>(
+                        future: FireStoreUtils.getUserProfile(
+                            FireStoreUtils.getCurrentUid()),
+                        builder: (context, snapshot) {
+                          switch (snapshot.connectionState) {
+                            case ConnectionState.waiting:
+                              return const Padding(
+                                padding: EdgeInsets.all(12.0),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                      AppColors.moroccoRed),
+                                ),
+                              );
+                            case ConnectionState.done:
+                              if (snapshot.hasError) {
+                                return const SizedBox();
+                              } else {
+                                UserModel? driverModel = snapshot.data;
+                                if (driverModel == null)
                                   return const SizedBox();
-                                } else {
-                                  UserModel? driverModel = snapshot.data;
-                                  if (driverModel == null)
-                                    return const SizedBox();
-                                  return InkWell(
-                                    onTap: () {
-                                      _showLogoutDialog(context, controller);
-                                    },
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          border: Border.all(
-                                              color: AppColors.moroccoGreen,
-                                              width: 1.5),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color:
-                                                  Colors.black.withOpacity(0.1),
-                                              blurRadius: 8,
-                                            )
-                                          ],
-                                        ),
-                                        child: ClipOval(
-                                          child: CachedNetworkImage(
-                                            height: 36,
-                                            width: 36,
-                                            imageUrl: driverModel.profilePic
-                                                .toString(),
+                                return InkWell(
+                                  onTap: () {
+                                    _showLogoutDialog(context, controller);
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        border: Border.all(
+                                            color: AppColors.moroccoGreen,
+                                            width: 1.5),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color:
+                                                Colors.black.withOpacity(0.1),
+                                            blurRadius: 8,
+                                          )
+                                        ],
+                                      ),
+                                      child: ClipOval(
+                                        child: CachedNetworkImage(
+                                          height: 36,
+                                          width: 36,
+                                          imageUrl:
+                                              driverModel.profilePic.toString(),
+                                          fit: BoxFit.cover,
+                                          placeholder: (context, url) =>
+                                              const Center(
+                                                  child:
+                                                      CircularProgressIndicator(
+                                                          strokeWidth: 1)),
+                                          errorWidget: (context, url, error) =>
+                                              Image.network(
+                                            Constant.userPlaceHolder,
                                             fit: BoxFit.cover,
-                                            placeholder: (context, url) =>
-                                                const Center(
-                                                    child:
-                                                        CircularProgressIndicator(
-                                                            strokeWidth: 1)),
-                                            errorWidget:
-                                                (context, url, error) =>
-                                                    Image.network(
-                                              Constant.userPlaceHolder,
-                                              fit: BoxFit.cover,
-                                            ),
                                           ),
                                         ),
                                       ),
                                     ),
-                                  );
-                                }
-                              default:
-                                return const SizedBox();
-                            }
-                          })
-                      : Container(),
-                ],
-              ),
-              drawer: buildAppDrawer(context, controller),
-              body: controller.getDrawerItemWidget(
-                  controller.selectedDrawerIndex.value),
+                                  ),
+                                );
+                              }
+                            default:
+                              return const SizedBox();
+                          }
+                        })
+                    : Container(),
+              ],
             ),
+            drawer: buildAppDrawer(context, controller),
+            body: WillPopScope(
+                onWillPop: controller.onWillPop,
+                child: controller
+                    .getDrawerItemWidget(controller.selectedDrawerIndex.value)),
           );
         });
-  }
-
-  bool _getCanPop(DashBoardController controller) {
-    // If we are not on the Home screen, the guard in onPopInvoked will handle it by setting index to 0.
-    // If we ARE on Home (0 or 1), we don't want to pop until the second press confirms it.
-    return false;
   }
 
   Drawer buildAppDrawer(BuildContext context, DashBoardController controller) {
@@ -216,8 +233,7 @@ class DashBoardScreen extends StatelessWidget {
 
                     if (d.isHeader) {
                       return Padding(
-                        padding:
-                            const EdgeInsets.only(top: 15, bottom: 8, left: 16),
+                        padding: const EdgeInsets.only(top: 15, bottom: 8, left: 16),
                         child: Text(
                           d.title.tr,
                           style: GoogleFonts.outfit(
@@ -289,7 +305,7 @@ class DashBoardScreen extends StatelessWidget {
                   },
                 ),
               ),
-              const SizedBox(height: 30)
+              SizedBox(height: 30)
             ],
           ),
         ],
@@ -297,8 +313,7 @@ class DashBoardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDrawerHeader(
-      BuildContext context, DashBoardController controller) {
+  Widget _buildDrawerHeader(BuildContext context, DashBoardController controller) {
     return FutureBuilder<UserModel?>(
       future: FireStoreUtils.getUserProfile(FireStoreUtils.getCurrentUid()),
       builder: (context, snapshot) {
@@ -324,8 +339,7 @@ class DashBoardScreen extends StatelessWidget {
               Container(
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border:
-                      Border.all(color: Colors.grey.withOpacity(0.2), width: 1),
+                  border: Border.all(color: Colors.grey.withOpacity(0.2), width: 1),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.05),
@@ -342,18 +356,15 @@ class DashBoardScreen extends StatelessWidget {
                           imageUrl: userModel.profilePic.toString(),
                           fit: BoxFit.cover,
                           placeholder: (context, url) => const Center(
-                              child: CircularProgressIndicator(
-                                  strokeWidth: 2, color: AppColors.moroccoRed)),
-                          errorWidget: (context, url, error) => Image.network(
-                              Constant.userPlaceHolder,
-                              fit: BoxFit.cover),
+                              child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.moroccoRed)),
+                          errorWidget: (context, url, error) =>
+                              Image.network(Constant.userPlaceHolder, fit: BoxFit.cover),
                         )
                       : Container(
                           height: 75,
                           width: 75,
                           color: Colors.grey.shade200,
-                          child: Icon(Icons.person,
-                              color: Colors.grey.shade400, size: 40),
+                          child: Icon(Icons.person, color: Colors.grey.shade400, size: 40),
                         ),
                 ),
               ),
@@ -375,20 +386,19 @@ class DashBoardScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Obx(() => Row(
-                          children: [
-                            const Icon(Icons.star,
-                                color: AppColors.moroccoRed, size: 18),
-                            const SizedBox(width: 4),
-                            Text(
-                              controller.userRating.value,
-                              style: GoogleFonts.outfit(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.grey.shade700,
-                              ),
-                            ),
-                          ],
-                        )),
+                      children: [
+                        const Icon(Icons.star, color: AppColors.moroccoRed, size: 18),
+                        const SizedBox(width: 4),
+                        Text(
+                          controller.userRating.value,
+                          style: GoogleFonts.outfit(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey.shade700,
+                          ),
+                        ),
+                      ],
+                    )),
                     const SizedBox(height: 2),
                     Text(
                       "Verified account".tr,

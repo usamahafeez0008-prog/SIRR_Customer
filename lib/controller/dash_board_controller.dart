@@ -205,35 +205,16 @@ class DashBoardController extends GetxController {
     Get.back();
   }*/
 
-  Rx<DateTime> currentBackPressTime =
-      DateTime.now().subtract(const Duration(seconds: 3)).obs;
+  Rx<DateTime> currentBackPressTime = DateTime.now().obs;
 
   Future<bool> onWillPop() {
-    // If we are not on the Home screen (index 0 or 1), navigate back to Home (index 0)
-    if (selectedDrawerIndex.value != 0 && selectedDrawerIndex.value != 1) {
-      selectedDrawerIndex.value = 0;
-      return Future.value(false);
-    }
-
-    // New logic for Home screen (index 0 or 1): Show toast on first press, exit on second
     DateTime now = DateTime.now();
-
-    // 1. If it's the first press after a long time, show toast
     if (now.difference(currentBackPressTime.value) >
         const Duration(seconds: 2)) {
       currentBackPressTime.value = now;
       ShowToastDialog.showToast("Double press to exit");
       return Future.value(false);
     }
-
-    // 2. If it's a second press but TOO FAST (less than 300ms), 
-    // it's likely a duplicate system call. Ignore it.
-    if (now.difference(currentBackPressTime.value) <
-        const Duration(milliseconds: 300)) {
-      return Future.value(false);
-    }
-
-    // 3. Otherwise, it's a deliberate second press within the 2s window. Exit.
     return Future.value(true);
   }
 }

@@ -10,37 +10,26 @@ import 'package:http/http.dart' as http;
 
 class SendNotification {
   static final _scopes = ['https://www.googleapis.com/auth/firebase.messaging'];
-  static String? _cachedAccessToken;
-  static DateTime? _accessTokenExpiry;
-  static Map<String, dynamic>? _cachedServiceAccountJson;
 
-  static Future<Map<String, dynamic>> getServiceAccountJson() async {
-    if (_cachedServiceAccountJson != null) return _cachedServiceAccountJson!;
-    
-    debugPrint("Fetching Service Account from: '${Constant.jsonNotificationFileURL}'");
-    final response = await http.get(Uri.parse(Constant.jsonNotificationFileURL.toString()));
-    if (response.statusCode == 200) {
-      _cachedServiceAccountJson = json.decode(response.body);
-      return _cachedServiceAccountJson!;
-    }
-    throw Exception("Failed to fetch service account credentials");
+  static Future getCharacters() {
+    log("Fetching Service Account from: '${Constant.jsonNotificationFileURL}'");
+    return http.get(Uri.parse(Constant.jsonNotificationFileURL.toString()));
   }
 
   static Future<String> getAccessToken() async {
-    if (_cachedAccessToken != null && _accessTokenExpiry != null && DateTime.now().isBefore(_accessTokenExpiry!)) {
-      debugPrint("Using cached FCM access token.");
-      return _cachedAccessToken!;
-    }
-    
-    debugPrint("Refreshing FCM Access Token...");
-    Map<String, dynamic> jsonData = await getServiceAccountJson();
-    final serviceAccountCredentials = ServiceAccountCredentials.fromJson(jsonData);
+    Map<String, dynamic> jsonData = {};
+    log("Getting Access Token...");
 
-    final client = await clientViaServiceAccount(serviceAccountCredentials, _scopes);
-    _cachedAccessToken = client.credentials.accessToken.data;
-    _accessTokenExpiry = client.credentials.accessToken.expiry;
-    
-    return _cachedAccessToken!;
+    await getCharacters().then((response) {
+      log("Service Account JSON Response: ${response.statusCode}");
+      jsonData = json.decode(response.body);
+    });
+    final serviceAccountCredentials =
+        ServiceAccountCredentials.fromJson(jsonData);
+
+    final client =
+        await clientViaServiceAccount(serviceAccountCredentials, _scopes);
+    return client.credentials.accessToken.data;
   }
 
   static Future<bool> sendOneNotification(
