@@ -206,7 +206,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Future<void>
+  /*Future<void>
       _checkLocationPermissionOnOpen() async {
     if (_locationPermissionHandled) return;
 
@@ -243,8 +243,87 @@ class _HomeScreenState extends State<HomeScreen> {
     } catch (_) {}
   }
 
-  Future<void> _moveCameraToCurrentLocation(
-      HomeController controller) async {
+  Future<void> _moveCameraToCurrentLocation(HomeController controller) async {
+    if (_initialCameraMoved) return;
+
+    _initialCameraMoved = true;
+
+    try {
+      final pos =
+          await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
+      // Default logic was:
+      *//*
+      controller.mapController?.animateCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(
+            target: LatLng(pos.latitude, pos.longitude),
+            zoom: 10.0,
+          ),
+        ),
+      );
+      *//*
+
+      // New logic matching 'locateMeBtn':
+      await controller.mapController
+          ?.animateCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(
+            target: LatLng(
+              pos.latitude,
+              pos.longitude,
+            ),
+            zoom: 15.0,
+          ),
+        ),
+      );
+
+      final screenH =
+          MediaQuery.of(context).size.height;
+      await Future.delayed(
+          const Duration(milliseconds: 300));
+
+      controller.mapController?.animateCamera(
+        CameraUpdate.scrollBy(0, screenH * 0.28),
+      );
+    } catch (_) {}
+  }*/
+  Future<void> _checkLocationPermissionOnOpen() async {
+    if (_locationPermissionHandled) return;
+
+    _locationPermissionHandled = true;
+
+    try {
+      LocationPermission permission = await Geolocator.checkPermission();
+
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        return;
+      }
+
+      await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
+      _locationReady = true;
+
+      if (mounted) {
+        setState(() {});
+
+        final controller = Get.find<HomeController>();
+        if (controller.mapController != null) {
+          _moveCameraToCurrentLocation(controller);
+        }
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _moveCameraToCurrentLocation(HomeController controller) async {
     if (_initialCameraMoved) return;
 
     _initialCameraMoved = true;
@@ -254,26 +333,10 @@ class _HomeScreenState extends State<HomeScreen> {
         desiredAccuracy: LocationAccuracy.high,
       );
 
-      // Default logic was:
-      /*
-      controller.mapController?.animateCamera(
-        CameraUpdate.newCameraPosition(
-          CameraPosition(
-            target: LatLng(pos.latitude, pos.longitude),
-            zoom: 10.0,
-          ),
-        ),
-      );
-      */
-
-      // New logic matching 'locateMeBtn':
       await controller.mapController?.animateCamera(
         CameraUpdate.newCameraPosition(
           CameraPosition(
-            target: LatLng(
-              pos.latitude,
-              pos.longitude,
-            ),
+            target: LatLng(pos.latitude, pos.longitude),
             zoom: 15.0,
           ),
         ),
@@ -625,7 +688,13 @@ Widget _buildBottomBookingCard(
                             vertical: 14),
                         child: Row(
                           children: [
-                            SvgPicture.asset(
+                            Icon(
+                              Icons
+                                  .payments_outlined,
+                              color: AppColors
+                                  .moroccoRed,
+                            ),
+                            /*  SvgPicture.asset(
                               'assets/icons/ic_payment.svg',
                               width: 24,
                               colorFilter:
@@ -635,7 +704,7 @@ Widget _buildBottomBookingCard(
                                           .moroccoRed,
                                       BlendMode
                                           .srcIn),
-                            ),
+                            ),*/
                             const SizedBox(
                                 width: 12),
                             Expanded(

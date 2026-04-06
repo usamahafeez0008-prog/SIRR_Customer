@@ -92,7 +92,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         builder: (context, value, child) {
           return GetMaterialApp(
             navigatorKey: navigatorKey,
-            title: 'SIIR Customer',
+            title: 'SIIR',
             debugShowCheckedModeBanner: false,
             theme: Styles.themeData(
               themeChangeProvider.darkTheme == 0

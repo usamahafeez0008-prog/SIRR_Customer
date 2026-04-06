@@ -34,7 +34,7 @@
     <application
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon"
-        android:label="customer"
+        android:label="Siir"
         android:usesCleartextTraffic="true"
         android:enableOnBackInvokedCallback="true"
         tools:replace="android:label">

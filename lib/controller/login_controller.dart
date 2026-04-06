@@ -1,6 +1,171 @@
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:crypto/crypto.dart';
+import 'package:customer/constant/collection_name.dart';
+import 'package:customer/constant/show_toast_dialog.dart';
+import 'package:customer/ui/auth_screen/otp_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+
+class LoginController extends GetxController {
+  late TextEditingController phoneNumberController;
+  RxString countryCode = "+212".obs;
+
+  Rx<GlobalKey<FormState>> formKey = GlobalKey<FormState>().obs;
+
+  @override
+  void onInit() {
+    phoneNumberController = TextEditingController();
+    super.onInit();
+  }
+
+  @override
+  void onClose() {
+    phoneNumberController.dispose();
+    super.onClose();
+  }
+
+  Future<void> sendCode() async {
+    final String phoneNumber = phoneNumberController.text.trim();
+    final String selectedCountryCode = countryCode.value.trim();
+
+    if (phoneNumber.isEmpty) {
+      ShowToastDialog.showToast("Please enter phone number".tr);
+      return;
+    }
+
+    ShowToastDialog.showLoader("Please wait".tr);
+
+    try {
+      final QuerySnapshot userSnapshot = await FirebaseFirestore.instance
+          .collection(CollectionName.users)
+          .where('countryCode', isEqualTo: selectedCountryCode)
+          .where('phoneNumber', isEqualTo: phoneNumber)
+          .limit(1)
+          .get();
+
+      if (userSnapshot.docs.isNotEmpty) {
+        ShowToastDialog.closeLoader();
+        ShowToastDialog.showToast(
+          "Number already registered, Login With Password".tr,
+        );
+        return;
+      }
+
+      await FirebaseAuth.instance
+          .verifyPhoneNumber(
+        phoneNumber: selectedCountryCode + phoneNumber,
+        verificationCompleted: (PhoneAuthCredential credential) {},
+        verificationFailed: (FirebaseAuthException e) {
+          debugPrint("FirebaseAuthException--->${e.message}");
+          ShowToastDialog.closeLoader();
+          if (e.code == 'invalid-phone-number') {
+            ShowToastDialog.showToast("The provided phone number is not valid.");
+          } else {
+            ShowToastDialog.showToast("Something went wrong.");
+          }
+        },
+        codeSent: (String verificationId, int? resendToken) {
+          ShowToastDialog.closeLoader();
+          Get.to(const OtpScreen(), arguments: {
+            "countryCode": selectedCountryCode,
+            "phoneNumber": phoneNumber,
+            "verificationId": verificationId,
+          });
+        },
+        codeAutoRetrievalTimeout: (String verificationId) {},
+      )
+          .catchError((error) {
+        debugPrint("catchError--->$error");
+        ShowToastDialog.closeLoader();
+        ShowToastDialog.showToast(
+          "You have try many time please send otp after some time",
+        );
+      });
+    } catch (e) {
+      debugPrint("sendCode error ---> $e");
+      ShowToastDialog.closeLoader();
+      ShowToastDialog.showToast("Something went wrong.");
+    }
+  }
+
+  Future<UserCredential?> signInWithGoogle() async {
+    try {
+      final GoogleSignIn googleSignIn = GoogleSignIn.instance;
+
+      await googleSignIn.initialize();
+
+      final GoogleSignInAccount googleUser = await googleSignIn.authenticate();
+      if (googleUser.id.isEmpty) return null;
+
+      final GoogleSignInAuthentication googleAuth = googleUser.authentication;
+
+      final credential = GoogleAuthProvider.credential(
+        idToken: googleAuth.idToken,
+      );
+      final userCredential =
+      await FirebaseAuth.instance.signInWithCredential(credential);
+
+      return userCredential;
+    } catch (e) {
+      print("Google Sign-In Error: $e");
+      return null;
+    }
+  }
+
+  Future<Map<String, dynamic>?> signInWithApple() async {
+    try {
+      AuthorizationCredentialAppleID appleCredential =
+      await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+      );
+      print(appleCredential);
+
+      final oauthCredential = OAuthProvider("apple.com").credential(
+        idToken: appleCredential.identityToken,
+        accessToken: appleCredential.authorizationCode,
+      );
+
+      UserCredential userCredential =
+      await FirebaseAuth.instance.signInWithCredential(oauthCredential);
+      return {
+        "appleCredential": appleCredential,
+        "userCredential": userCredential
+      };
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+    return null;
+  }
+
+  String generateNonce([int length = 32]) {
+    const charset =
+        '0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._';
+    final random = Random.secure();
+    return List.generate(length, (_) => charset[random.nextInt(charset.length)])
+        .join();
+  }
+
+  String sha256ofString(String input) {
+    final bytes = utf8.encode(input);
+    final digest = sha256.convert(bytes);
+    return digest.toString();
+  }
+}
+
+
+/*
+import 'dart:convert';
+import 'dart:math';
+
 import 'package:crypto/crypto.dart';
 import 'package:customer/constant/show_toast_dialog.dart';
 import 'package:customer/ui/auth_screen/otp_screen.dart';
@@ -131,3 +296,4 @@ class LoginController extends GetxController {
     return digest.toString();
   }
 }
+*/
