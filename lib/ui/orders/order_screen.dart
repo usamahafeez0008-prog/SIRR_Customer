@@ -324,36 +324,17 @@ class _OrderScreenState extends State<OrderScreen>
                             QuerySnapshot>(
                           stream: FirebaseFirestore
                               .instance
-                              .collection(
-                                  CollectionName
-                                      .orders)
-                              .where("userId",
-                                  isEqualTo:
-                                      FireStoreUtils
-                                          .getCurrentUid())
-                              .where("status",
-                                  whereIn: [
-                                    Constant
-                                        .ridePlaced,
-                                    Constant
-                                        .rideInProgress,
-                                    Constant
-                                        .rideComplete,
-                                    Constant
-                                        .rideActive,
-                                    Constant
-                                        .rideHoldAccepted,
-                                    Constant
-                                        .rideHold,
-                                  ])
-                              .where(
-                                  "paymentStatus",
-                                  isEqualTo:
-                                      false)
-                              .orderBy(
-                                  "createdDate",
-                                  descending:
-                                      true)
+                              .collection(CollectionName.orders)
+                              .where("userId", isEqualTo: FireStoreUtils.getCurrentUid())
+                              .where("status", whereIn: [
+                                Constant.ridePlaced,
+                                Constant.rideActive,
+                                Constant.rideInProgress,
+                                Constant.rideHold,
+                                Constant.rideHoldAccepted,
+                              ])
+                              .where("paymentStatus", isEqualTo: false)
+                              .orderBy("createdDate", descending: true)
                               .snapshots(),
                           builder: (BuildContext
                                   context,
@@ -558,7 +539,7 @@ class _OrderScreenState extends State<OrderScreen>
                                                                 const Icon(Icons.money, size: 16, color: AppColors.moroccoGreen),
                                                                 const SizedBox(width: 4),
                                                                 Text(
-                                                                  orderModel.status == Constant.ridePlaced ? Constant.amountShow(amount: double.parse(orderModel.offerRate.toString()).toStringAsFixed(Constant.currencyModel!.decimalDigits!)) : Constant.amountShow(amount: double.parse(orderModel.finalRate.toString()).toStringAsFixed(Constant.currencyModel!.decimalDigits!)),
+                                                                  orderModel.status == Constant.ridePlaced ? Constant.amountShow(amount: (double.tryParse(orderModel.offerRate.toString()) ?? 0.0).toStringAsFixed(Constant.currencyModel!.decimalDigits!)) : Constant.amountShow(amount: (double.tryParse(orderModel.finalRate.toString()) ?? 0.0).toStringAsFixed(Constant.currencyModel!.decimalDigits!)),
                                                                   style: GoogleFonts.outfit(
                                                                     color: AppColors.moroccoGreen,
                                                                     fontWeight: FontWeight.bold,
@@ -629,32 +610,7 @@ class _OrderScreenState extends State<OrderScreen>
                                                           orderId: orderModel.id!,
                                                           orderModel: orderModel,
                                                         ),
-                                                      Padding(
-                                                        padding: const EdgeInsets.symmetric(vertical: 10),
-                                                        child: Container(
-                                                          decoration: BoxDecoration(color: themeChange.getThem() ? AppColors.darkGray : AppColors.gray, borderRadius: const BorderRadius.all(Radius.circular(10))),
-                                                          child: Padding(
-                                                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                                                              child: Row(
-                                                                mainAxisAlignment: MainAxisAlignment.center,
-                                                                crossAxisAlignment: CrossAxisAlignment.center,
-                                                                children: [
-                                                                  Expanded(
-                                                                    child: orderModel.status == Constant.rideInProgress || orderModel.status == Constant.ridePlaced || orderModel.status == Constant.rideComplete
-                                                                        ? Text(orderModel.status.toString())
-
-                                                                        : Row(
-                                                                            children: [
-                                                                              Text("OTP".tr, style: GoogleFonts.poppins()),
-                                                                              Text(" : ${orderModel.otp}", style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 12)),
-                                                                            ],
-                                                                          ),
-                                                                  ),
-                                                                  Text(Constant().formatTimestamp(orderModel.createdDate), style: GoogleFonts.poppins(fontSize: 12)),
-                                                                ],
-                                                              )),
-                                                        ),
-                                                      ),
+                                                      const SizedBox(height: 10),
                                                       Visibility(
                                                           visible: orderModel.status == Constant.ridePlaced,
                                                           child: ButtonThem.buildButton(
@@ -666,6 +622,55 @@ class _OrderScreenState extends State<OrderScreen>
                                                                 "orderModel": orderModel,
                                                               });
                                                             },
+                                                          )),
+                                                      Visibility(
+                                                          visible: orderModel.status != Constant.ridePlaced,
+                                                          child: Column(
+                                                            children: [
+                                                              // Live Map Tracking Button shown above Contact Driver as per screenshot
+                                                              if (orderModel.status == Constant.rideActive || orderModel.status == Constant.rideInProgress) ...[
+                                                                InkWell(
+                                                                  onTap: () {
+                                                                    if (Constant.mapType == "inappmap") {
+                                                                      Get.to(const LiveTrackingScreen(), arguments: {
+                                                                        "orderModel": orderModel,
+                                                                        "type": "orderModel",
+                                                                      });
+                                                                    } else {
+                                                                      Utils.redirectMap(
+                                                                          latitude: orderModel.destinationLocationLAtLng!.latitude!,
+                                                                          longLatitude: orderModel.destinationLocationLAtLng!.longitude!,
+                                                                          name: orderModel.destinationLocationName.toString());
+                                                                    }
+                                                                  },
+                                                                  child: Container(
+                                                                    height: 44,
+                                                                    width: double.infinity,
+                                                                    decoration: BoxDecoration(
+                                                                      color: Colors.white,
+                                                                      border: Border.all(color: AppColors.moroccoGreen, width: 1),
+                                                                      borderRadius: BorderRadius.circular(8),
+                                                                    ),
+                                                                    child: Row(
+                                                                      mainAxisAlignment: MainAxisAlignment.center,
+                                                                      children: [
+                                                                        const Icon(Icons.map_outlined, color: AppColors.moroccoGreen, size: 20),
+                                                                        const SizedBox(width: 10),
+                                                                        Text(
+                                                                          "Live Map Tracking".tr,
+                                                                          style: GoogleFonts.outfit(
+                                                                            color: AppColors.moroccoGreen,
+                                                                            fontWeight: FontWeight.w600,
+                                                                            fontSize: 14,
+                                                                          ),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                                const SizedBox(height: 10),
+                                                              ],
+                                                            ],
                                                           )),
                                                       Visibility(
                                                           visible: orderModel.status != Constant.ridePlaced,
@@ -791,7 +796,7 @@ class _OrderScreenState extends State<OrderScreen>
                                                                       }),
                                                                 ),
                                                                 const PopupMenuDivider(height: 1),
-                                                                PopupMenuItem(
+                                                                /*PopupMenuItem(
                                                                   value: 3,
                                                                   child: Row(
                                                                     children: [
@@ -800,7 +805,7 @@ class _OrderScreenState extends State<OrderScreen>
                                                                       Text("Live Map Tracking".tr, style: GoogleFonts.outfit(fontSize: 14)),
                                                                     ],
                                                                   ),
-                                                                ),
+                                                                ),*/
                                                               ],
                                                               child: Container(
                                                                 height: 44,
@@ -982,18 +987,26 @@ class _OrderScreenState extends State<OrderScreen>
                                                     ],
                                                   ),*/
                                                       const SizedBox(height: 10),
-                                                      /*Visibility(
-                                                          visible: orderModel.status == Constant.rideComplete && (orderModel.paymentStatus == null || orderModel.paymentStatus == false),
-                                                          child: ButtonThem.buildButton(
-                                                            context,
-                                                            title: "Pay".tr,
-                                                            btnHeight: 44,
-                                                            onPress: () async {
-                                                              Get.to(const PaymentOrderScreen(), arguments: {
-                                                                "orderModel": orderModel,
-                                                              });
-                                                            },
-                                                          )),*/
+                                                      // OTP Section moved to bottom as per latest request
+                                                      if (orderModel.status == Constant.rideActive || orderModel.status == Constant.rideInProgress)
+                                                        Container(
+                                                          width: double.infinity,
+                                                          padding: const EdgeInsets.symmetric(vertical: 10),
+                                                          decoration: BoxDecoration(
+                                                            color: themeChange.getThem() ? Colors.white10 : Colors.grey[200],
+                                                            borderRadius: BorderRadius.circular(25),
+                                                          ),
+                                                          child: Center(
+                                                            child: Text(
+                                                              "${"OTP".tr} : ${orderModel.otp}",
+                                                              style: GoogleFonts.outfit(
+                                                                fontWeight: FontWeight.bold,
+                                                                fontSize: 14,
+                                                                letterSpacing: 1,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ),
                                                     ],
                                                   ),
                                                 ),
@@ -1182,7 +1195,7 @@ class _OrderScreenState extends State<OrderScreen>
                                                                 const Icon(Icons.money, size: 16, color: AppColors.moroccoGreen),
                                                                 const SizedBox(width: 4),
                                                                 Text(
-                                                                  Constant.amountShow(amount: double.parse(orderModel.finalRate.toString()).toStringAsFixed(Constant.currencyModel!.decimalDigits!)),
+                                                                  Constant.amountShow(amount: (double.tryParse(orderModel.finalRate.toString()) ?? 0.0).toStringAsFixed(Constant.currencyModel!.decimalDigits!)),
                                                                   style: GoogleFonts.outfit(
                                                                     color: AppColors.moroccoGreen,
                                                                     fontWeight: FontWeight.bold,
@@ -1388,7 +1401,7 @@ class _OrderScreenState extends State<OrderScreen>
                                                               const Icon(Icons.money, size: 16, color: AppColors.moroccoGreen),
                                                               const SizedBox(width: 4),
                                                               Text(
-                                                                Constant.amountShow(amount: double.parse(orderModel.offerRate.toString()).toStringAsFixed(Constant.currencyModel!.decimalDigits!)),
+                                                                Constant.amountShow(amount: (double.tryParse(orderModel.offerRate.toString()) ?? 0.0).toStringAsFixed(Constant.currencyModel!.decimalDigits!)),
                                                                 style: GoogleFonts.outfit(
                                                                   color: AppColors.moroccoGreen,
                                                                   fontWeight: FontWeight.bold,

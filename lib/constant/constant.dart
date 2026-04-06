@@ -299,11 +299,12 @@ class Constant {
     return taxAmount;
   }
 
-  static String amountShow({required String? amount}) {
+  static String amountShow({required String? amount, int? decimalOverride}) {
+    int decimalDigits = decimalOverride ?? 0;
     if (Constant.currencyModel!.symbolAtRight == true) {
-      return "${double.parse(amount.toString()).toStringAsFixed(Constant.currencyModel!.decimalDigits!)}${Constant.currencyModel!.symbol.toString()}";
+      return "${double.parse(amount.toString()).toStringAsFixed(decimalDigits)}${Constant.currencyModel!.symbol.toString()}";
     } else {
-      return "${Constant.currencyModel!.symbol.toString()}${double.parse(amount.toString()).toStringAsFixed(Constant.currencyModel!.decimalDigits!)}";
+      return "${Constant.currencyModel!.symbol.toString()}${double.parse(amount.toString()).toStringAsFixed(decimalDigits)}";
     }
   }
 

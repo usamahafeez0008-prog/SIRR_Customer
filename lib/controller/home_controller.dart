@@ -252,10 +252,10 @@ class HomeController extends GetxController {
           duration.value = '$hours hours $minutes minutes'.trim();
           if (Constant.distanceType == "Km") {
             distance.value =
-                (value['routes'].first['distance'] / 1000).toString();
+                (value['routes'].first['distance'] / 1000).toStringAsFixed(1);
           } else {
             distance.value =
-                (value['routes'].first['distance'] / 1609.34).toString();
+                (value['routes'].first['distance'] / 1609.34).toStringAsFixed(1);
           }
         }
       } else {
@@ -271,12 +271,12 @@ class HomeController extends GetxController {
             distance.value =
                 (value.rows!.first.elements!.first.distance!.value!.toInt() /
                         1000)
-                    .toString();
+                    .toStringAsFixed(1);
           } else {
             distance.value =
                 (value.rows!.first.elements!.first.distance!.value!.toInt() /
                         1609.34)
-                    .toString();
+                    .toStringAsFixed(1);
           }
         }
       }
@@ -451,8 +451,7 @@ class HomeController extends GetxController {
     acCharge.value = selectedType.value.prices?.first.acCharge ?? '0.0';
     nonAcCharge.value = selectedType.value.prices?.first.nonAcCharge ?? '0.0';
     basicFare.value = selectedType.value.prices?.first.basicFare ?? '0.0';
-    basicFareCharge.value =
-        selectedType.value.prices?.first.basicFareCharge ?? '0.0';
+    basicFareCharge.value = selectedType.value.prices?.first.basicFareCharge ?? '0.0';
     isAcNonAc.value = selectedType.value.prices?.first.isAcNonAc ?? false;
     String formatTime(String? time) {
       if (time == null || !time.contains(":")) {
@@ -463,55 +462,48 @@ class HomeController extends GetxController {
       return "${parts[0].padLeft(2, '0')}:${parts[1].padLeft(2, '0')}";
     }
 
-    startNightTime =
-        formatTime(selectedType.value.prices?.first.startNightTime);
+    startNightTime = formatTime(selectedType.value.prices?.first.startNightTime);
     endNightTime = formatTime(selectedType.value.prices?.first.endNightTime);
 
     List<String> startParts = startNightTime!.split(':');
     List<String> endParts = endNightTime!.split(':');
 
-    startNightTimeString = DateTime(currentDate.year, currentDate.month,
-        currentDate.day, int.parse(startParts[0]), int.parse(startParts[1]));
-    endNightTimeString = DateTime(currentDate.year, currentDate.month,
-        currentDate.day, int.parse(endParts[0]), int.parse(endParts[1]));
+    startNightTimeString = DateTime(currentDate.year, currentDate.month, currentDate.day, int.parse(startParts[0]), int.parse(startParts[1]));
+    endNightTimeString = DateTime(currentDate.year, currentDate.month, currentDate.day, int.parse(endParts[0]), int.parse(endParts[1]));
 
     nightCharge.value = selectedType.value.prices?.first.nightCharge ?? '0.0';
     if (sourceLocationLAtLng.value.latitude != null &&
         destinationLocationLAtLng.value.latitude != null) {
       double durationValueInMinutes = convertToMinutes(duration.toString());
       if (double.parse(distance.value) <= double.parse(basicFare.value)) {
-        amount.value = ((double.parse(basicFareCharge.value.toString())) +
+        double calculatedBaseAmount = ((double.parse(basicFareCharge.value.toString())) +
                 (double.parse(durationValueInMinutes.toString()) *
                     double.parse(
                         selectedType.value.prices?.first.perMinuteCharge ??
-                            '0.0')))
-            .toStringAsFixed(Constant.currencyModel!.decimalDigits!);
+                            '0.0')));
+        amount.value = calculatedBaseAmount.ceil().toString();
 
         totalNightFare.value = double.parse(amount.value);
         if (currentTime.isAfter(startNightTimeString) &&
             currentTime.isBefore(endNightTimeString)) {
           amount.value = (totalNightFare.value *
                   double.parse(nightCharge.value.toString()))
-              .toStringAsFixed(2);
+              .ceil().toString();
         }
       } else {
         double distanceValue = double.tryParse(distance.value) ?? 0.0;
         double basicFareValue = double.tryParse(basicFare.value) ?? 0.0;
         double extraDist = distanceValue - basicFareValue;
         extraDistance.value = extraDist;
-        double nonAcChargeValue =
-            double.tryParse(nonAcCharge.value.toString()) ?? 0.0;
-        double acChargeValue =
-            double.tryParse(acCharge.value.toString()) ?? 0.0;
+        double nonAcChargeValue = double.tryParse(nonAcCharge.value.toString()) ?? 0.0;
+        double acChargeValue = double.tryParse(acCharge.value.toString()) ?? 0.0;
         double perKmCharge = isAcNonAc.value == true
             ? isAcSelected.value == false
                 ? nonAcChargeValue
                 : acChargeValue
             : double.parse(selectedType.value.prices?.first.kmCharge ?? '0.0');
-        double perMinuteCharge = double.parse(
-            selectedType.value.prices?.first.perMinuteCharge ?? '0.0');
-        double durationInMinutes =
-            double.parse(durationValueInMinutes.toString());
+        double perMinuteCharge = double.parse(selectedType.value.prices?.first.perMinuteCharge ?? '0.0');
+        double durationInMinutes = double.parse(durationValueInMinutes.toString());
         double basicFareChargeValue =
             double.parse(basicFareCharge.value.toString());
         totalAmount.value = (perKmCharge * extraDist) +
@@ -519,13 +511,13 @@ class HomeController extends GetxController {
             basicFareChargeValue;
 
         totalNightFare.value = totalAmount.value;
-        amount.value = totalNightFare.value.toStringAsFixed(2);
+        amount.value = totalNightFare.value.ceil().toString();
 
         if (currentTime.isAfter(startNightTimeString) &&
             currentTime.isBefore(endNightTimeString)) {
           amount.value = (totalNightFare.value *
                   double.parse(nightCharge.value.toString()))
-              .toStringAsFixed(2);
+              .ceil().toString();
         }
       }
       offerYourRateController.value.text = amount.value;

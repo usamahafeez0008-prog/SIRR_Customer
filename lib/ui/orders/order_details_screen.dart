@@ -18,6 +18,8 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
+import '../../constant/show_toast_dialog.dart';
+
 class OrderDetailsScreen extends StatelessWidget {
   const OrderDetailsScreen({super.key});
 
@@ -151,15 +153,12 @@ class OrderDetailsScreen extends StatelessWidget {
                                                   orderModel.status ==
                                                           Constant.ridePlaced
                                                       ? Constant.amountShow(
-                                                          amount: double.parse(orderModel.offerRate.toString())
+                                                          amount: (double.tryParse(orderModel.offerRate.toString()) ?? 0.0)
                                                               .toStringAsFixed(Constant
                                                                   .currencyModel!
                                                                   .decimalDigits!))
                                                       : Constant.amountShow(
-                                                          amount: double.parse(
-                                                                  orderModel
-                                                                      .finalRate
-                                                                      .toString())
+                                                          amount: (double.tryParse(orderModel.finalRate.toString()) ?? 0.0)
                                                               .toStringAsFixed(Constant
                                                                   .currencyModel!
                                                                   .decimalDigits!)),
@@ -233,6 +232,7 @@ class OrderDetailsScreen extends StatelessWidget {
                                         title: "Cancel".tr,
                                         btnHeight: 44,
                                         onPress: () async {
+                                                        ShowToastDialog.showLoader('Please wait...');
                                           List<dynamic> acceptDriverId = [];
 
                                           orderModel.status =
@@ -450,20 +450,19 @@ class OrderDetailsScreen extends StatelessWidget {
                                                                                 crossAxisAlignment: CrossAxisAlignment.center,
                                                                                 children: [
                                                                                   if (orderModel.service?.image != null)
-
-                                                                                  Expanded(
-                                                                                    flex: 1,
-                                                                                    child: Column(
-                                                                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                                                                      children: [
-                                                                                        _vehicleInfoItem(Icons.directions_car_outlined, Constant.localizationTitle(driverModel.serviceName)),
-                                                                                        const SizedBox(height: 4),
-                                                                                        _vehicleInfoItem(Icons.color_lens_outlined, driverModel.vehicleInformation!.vehicleColor.toString()),
-                                                                                        const SizedBox(height: 4),
-                                                                                        _vehicleInfoItem(Icons.badge_outlined, driverModel.vehicleInformation!.vehicleNumber.toString()),
-                                                                                      ],
+                                                                                    Expanded(
+                                                                                      flex: 1,
+                                                                                      child: Column(
+                                                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                                                        children: [
+                                                                                          _vehicleInfoItem(Icons.directions_car_outlined, Constant.localizationTitle(driverModel.serviceName)),
+                                                                                          const SizedBox(height: 4),
+                                                                                          _vehicleInfoItem(Icons.color_lens_outlined, driverModel.vehicleInformation!.vehicleColor.toString()),
+                                                                                          const SizedBox(height: 4),
+                                                                                          _vehicleInfoItem(Icons.badge_outlined, driverModel.vehicleInformation!.vehicleNumber.toString()),
+                                                                                        ],
+                                                                                      ),
                                                                                     ),
-                                                                                  ),
                                                                                   Expanded(
                                                                                     flex: 1,
                                                                                     child: CachedNetworkImage(
@@ -509,8 +508,9 @@ class OrderDetailsScreen extends StatelessWidget {
                                                                                     context,
                                                                                     title: "Confirm ${driverModel.fullName} ->",
                                                                                     btnHeight: 50,
-
                                                                                     onPress: () async {
+
+                                                                                      ShowToastDialog.showLoader('Please wait...');
                                                                                       controller.orderModel.value.acceptedDriverId = [];
                                                                                       controller.orderModel.value.driverId = driverIdAcceptReject.driverId.toString();
                                                                                       controller.orderModel.value.status = Constant.rideActive;
@@ -520,7 +520,9 @@ class OrderDetailsScreen extends StatelessWidget {
                                                                                         controller.orderModel.value.ownerId = driverModel.ownerId;
                                                                                       }
                                                                                       await FireStoreUtils.setOrder(controller.orderModel.value);
-                                                                                      await SendNotification.sendOneNotification(token: driverModel.fcmToken.toString(), title: 'Ride Confirmed'.tr, body: 'Your ride request has been accepted by the passenger. Please proceed to the pickup location.'.tr, payload: {});
+
+                                                                                      ShowToastDialog.closeLoader();
+                                                                                      SendNotification.sendOneNotification(token: driverModel.fcmToken.toString(), title: "Ride Confirmed".tr, body: "Your ride request has been accepted by the passenger. Please proceed to the pickup location.".tr, payload: {});
                                                                                       Get.back();
                                                                                     },
                                                                                   ),
@@ -535,6 +537,8 @@ class OrderDetailsScreen extends StatelessWidget {
                                                                                       controller.orderModel.value.acceptedDriverId = acceptDriverId;
                                                                                       await SendNotification.sendOneNotification(token: driverModel.fcmToken.toString(), title: 'Ride Canceled'.tr, body: 'The passenger has canceled the ride.'.tr, payload: {});
                                                                                       await FireStoreUtils.setOrder(controller.orderModel.value);
+
+                                                                                      ShowToastDialog.closeLoader();
                                                                                     },
                                                                                     child: Text(
                                                                                       "Reject Bid".tr,

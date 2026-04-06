@@ -9,6 +9,7 @@ import '../../utils/Preferences.dart';
 import '../../controller/login_with_password_controller.dart';
 import '../../themes/app_colors.dart';
 import '../../utils/DarkThemeProvider.dart';
+import 'forgot_password_screen.dart';
 import 'login_screen.dart';
 
 class LoginWithPasswordScreen extends StatefulWidget {
@@ -234,6 +235,23 @@ class _LoginWithPasswordScreenState extends State<LoginWithPasswordScreen>
           const SizedBox(height: 16),
           _buildPasswordField(isDark),
           const SizedBox(height: 24),
+          Align(
+            alignment: Alignment.centerRight,
+            child: InkWell(
+              onTap: () {
+                Get.to(() => const ForgotPasswordScreen());
+              },
+              child: Text(
+                "Forgot Password?".tr,
+                style: GoogleFonts.outfit(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.moroccoRed,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
           _buildPrimaryButton(context, controller),
           const SizedBox(height: 12),
           InkWell(

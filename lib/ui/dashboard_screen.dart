@@ -112,76 +112,51 @@ class DashBoardScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                controller.selectedDrawerIndex.value == 0
-                    ? FutureBuilder<UserModel?>(
-                        future: FireStoreUtils.getUserProfile(
-                            FireStoreUtils.getCurrentUid()),
-                        builder: (context, snapshot) {
-                          switch (snapshot.connectionState) {
-                            case ConnectionState.waiting:
-                              return const Padding(
-                                padding: EdgeInsets.all(12.0),
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                      AppColors.moroccoRed),
-                                ),
-                              );
-                            case ConnectionState.done:
-                              if (snapshot.hasError) {
-                                return const SizedBox();
-                              } else {
-                                UserModel? driverModel = snapshot.data;
-                                if (driverModel == null)
-                                  return const SizedBox();
-                                return InkWell(
-                                  onTap: () {
-                                    _showLogoutDialog(context, controller);
-                                  },
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        border: Border.all(
-                                            color: AppColors.moroccoGreen,
-                                            width: 1.5),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color:
-                                                Colors.black.withOpacity(0.1),
-                                            blurRadius: 8,
-                                          )
-                                        ],
-                                      ),
-                                      child: ClipOval(
-                                        child: CachedNetworkImage(
-                                          height: 36,
-                                          width: 36,
-                                          imageUrl:
-                                              driverModel.profilePic.toString(),
-                                          fit: BoxFit.cover,
-                                          placeholder: (context, url) =>
-                                              const Center(
-                                                  child:
-                                                      CircularProgressIndicator(
-                                                          strokeWidth: 1)),
-                                          errorWidget: (context, url, error) =>
-                                              Image.network(
-                                            Constant.userPlaceHolder,
-                                            fit: BoxFit.cover,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              }
-                            default:
-                              return const SizedBox();
-                          }
-                        })
-                    : Container(),
+                Obx(() {
+                  UserModel driverModel = controller.driverUser.value;
+                  if (driverModel.id == null) {
+                    return const Padding(
+                      padding: EdgeInsets.all(12.0),
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(AppColors.moroccoRed),
+                      ),
+                    );
+                  }
+                  return InkWell(
+                    onTap: () {
+                      _showLogoutDialog(context, controller);
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(color: AppColors.moroccoGreen, width: 1.5),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 8,
+                            )
+                          ],
+                        ),
+                        child: ClipOval(
+                          child: CachedNetworkImage(
+                            height: 36,
+                            width: 36,
+                            imageUrl: driverModel.profilePic.toString(),
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => const Center(child: CircularProgressIndicator(strokeWidth: 1)),
+                            errorWidget: (context, url, error) => Image.network(
+                              Constant.userPlaceHolder,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                })
               ],
             ),
             drawer: buildAppDrawer(context, controller),
@@ -314,108 +289,103 @@ class DashBoardScreen extends StatelessWidget {
   }
 
   Widget _buildDrawerHeader(BuildContext context, DashBoardController controller) {
-    return FutureBuilder<UserModel?>(
-      future: FireStoreUtils.getUserProfile(FireStoreUtils.getCurrentUid()),
-      builder: (context, snapshot) {
-        UserModel? userModel = snapshot.data;
-
-        return Container(
-          padding: EdgeInsets.only(
-            top: MediaQuery.of(context).padding.top + 24,
-            bottom: 24,
-            left: 20,
-            right: 20,
+    return Obx(() {
+      UserModel userModel = controller.driverUser.value;
+      return Container(
+        padding: EdgeInsets.only(
+          top: MediaQuery.of(context).padding.top + 24,
+          bottom: 24,
+          left: 20,
+          right: 20,
+        ),
+        width: double.infinity,
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            bottomLeft: Radius.circular(30),
+            bottomRight: Radius.circular(30),
           ),
-          width: double.infinity,
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(30),
-              bottomRight: Radius.circular(30),
+        ),
+        child: Row(
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.grey.withOpacity(0.2), width: 1),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                  )
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(50),
+                child: userModel.id != null
+                    ? CachedNetworkImage(
+                        height: 75,
+                        width: 75,
+                        imageUrl: userModel.profilePic.toString(),
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => const Center(
+                            child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.moroccoRed)),
+                        errorWidget: (context, url, error) => Image.network(Constant.userPlaceHolder, fit: BoxFit.cover),
+                      )
+                    : Container(
+                        height: 75,
+                        width: 75,
+                        color: Colors.grey.shade200,
+                        child: Icon(Icons.person, color: Colors.grey.shade400, size: 40),
+                      ),
+              ),
             ),
-          ),
-          child: Row(
-            children: [
-              Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.grey.withOpacity(0.2), width: 1),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 10,
-                    )
-                  ],
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(50),
-                  child: userModel != null
-                      ? CachedNetworkImage(
-                          height: 75,
-                          width: 75,
-                          imageUrl: userModel.profilePic.toString(),
-                          fit: BoxFit.cover,
-                          placeholder: (context, url) => const Center(
-                              child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.moroccoRed)),
-                          errorWidget: (context, url, error) =>
-                              Image.network(Constant.userPlaceHolder, fit: BoxFit.cover),
-                        )
-                      : Container(
-                          height: 75,
-                          width: 75,
-                          color: Colors.grey.shade200,
-                          child: Icon(Icons.person, color: Colors.grey.shade400, size: 40),
-                        ),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      userModel?.fullName.toString() ?? "Loading...".tr,
-                      style: GoogleFonts.outfit(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.moroccoRed, // Dark Morocco Red/Brown
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    userModel.fullName.toString().isEmpty ? "Loading...".tr : userModel.fullName.toString(),
+                    style: GoogleFonts.outfit(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.moroccoRed, // Dark Morocco Red/Brown
                     ),
-                    const SizedBox(height: 4),
-                    Obx(() => Row(
-                      children: [
-                        const Icon(Icons.star, color: AppColors.moroccoRed, size: 18),
-                        const SizedBox(width: 4),
-                        Text(
-                          controller.userRating.value,
-                          style: GoogleFonts.outfit(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.grey.shade700,
-                          ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      const Icon(Icons.star, color: AppColors.moroccoRed, size: 18),
+                      const SizedBox(width: 4),
+                      Text(
+                        controller.userRating.value,
+                        style: GoogleFonts.outfit(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey.shade700,
                         ),
-                      ],
-                    )),
-                    const SizedBox(height: 2),
-                    Text(
-                      "Verified account".tr,
-                      style: GoogleFonts.outfit(
-                        fontSize: 16,
-                        color: Colors.grey.shade600,
-                        fontWeight: FontWeight.w400,
                       ),
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    "Verified account".tr,
+                    style: GoogleFonts.outfit(
+                      fontSize: 16,
+                      color: Colors.grey.shade600,
+                      fontWeight: FontWeight.w400,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
-          ),
-        );
-      },
-    );
+            ),
+          ],
+        ),
+      );
+    });
   }
 
   void _showLogoutDialog(BuildContext context, DashBoardController controller) {

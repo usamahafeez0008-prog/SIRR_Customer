@@ -299,9 +299,9 @@ class PaymentOrderScreen extends StatelessWidget {
                                                   "Ride Amount".tr,
                                                   Constant.amountShow(
                                                       amount: controller
-                                                          .amount.value
+                                                          .orderModel.value.finalRate
                                                           .toString())),
-                                              _buildSummaryRow(
+                                              /*_buildSummaryRow(
                                                   "Minute charge".tr,
                                                   Constant.amountShow(
                                                       amount: controller
@@ -337,6 +337,8 @@ class PaymentOrderScreen extends StatelessWidget {
                                                                     taxModel:
                                                                         tax)
                                                                 .toString()))),
+                                             */
+
                                               _buildSummaryRow("Discount".tr,
                                                   "-${Constant.amountShow(amount: controller.couponAmount.value)}",
                                                   isDiscount: true),

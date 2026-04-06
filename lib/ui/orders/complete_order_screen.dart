@@ -410,12 +410,12 @@ class CompleteOrderScreen extends StatelessWidget {
                                                         ),
                                                       ),
                                                       Text(
-                                                        Constant.amountShow(amount: controller.amount.value.toString()),
+                                                        Constant.amountShow(amount: controller.orderModel.value.finalRate.toString()),
                                                         style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
                                                       ),
                                                     ],
                                                   ),
-                                                  Row(
+                                              /*    Row(
                                                     children: [
                                                       Expanded(
                                                         child: Text(
@@ -497,7 +497,9 @@ class CompleteOrderScreen extends StatelessWidget {
                                                               ],
                                                             );
                                                           },
-                                                        ),
+                                                        ),*/
+
+
                                                   Row(
                                                     children: [
                                                       Expanded(

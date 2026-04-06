@@ -255,7 +255,7 @@ class _HomeScreenState extends State<HomeScreen> {
       );
 
       // Default logic was:
-      *//*
+      */ /*
       controller.mapController?.animateCamera(
         CameraUpdate.newCameraPosition(
           CameraPosition(
@@ -264,7 +264,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       );
-      *//*
+      */ /*
 
       // New logic matching 'locateMeBtn':
       await controller.mapController
@@ -290,19 +290,24 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     } catch (_) {}
   }*/
-  Future<void> _checkLocationPermissionOnOpen() async {
+  Future<void>
+      _checkLocationPermissionOnOpen() async {
     if (_locationPermissionHandled) return;
 
     _locationPermissionHandled = true;
 
     try {
-      LocationPermission permission = await Geolocator.checkPermission();
+      LocationPermission permission =
+          await Geolocator.checkPermission();
 
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
+      if (permission ==
+          LocationPermission.denied) {
+        permission =
+            await Geolocator.requestPermission();
       }
 
-      if (permission == LocationPermission.deniedForever) {
+      if (permission ==
+          LocationPermission.deniedForever) {
         return;
       }
 
@@ -315,35 +320,43 @@ class _HomeScreenState extends State<HomeScreen> {
       if (mounted) {
         setState(() {});
 
-        final controller = Get.find<HomeController>();
+        final controller =
+            Get.find<HomeController>();
         if (controller.mapController != null) {
-          _moveCameraToCurrentLocation(controller);
+          _moveCameraToCurrentLocation(
+              controller);
         }
       }
     } catch (_) {}
   }
 
-  Future<void> _moveCameraToCurrentLocation(HomeController controller) async {
+  Future<void> _moveCameraToCurrentLocation(
+      HomeController controller) async {
     if (_initialCameraMoved) return;
 
     _initialCameraMoved = true;
 
     try {
-      final pos = await Geolocator.getCurrentPosition(
+      final pos =
+          await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       );
 
-      await controller.mapController?.animateCamera(
+      await controller.mapController
+          ?.animateCamera(
         CameraUpdate.newCameraPosition(
           CameraPosition(
-            target: LatLng(pos.latitude, pos.longitude),
+            target: LatLng(
+                pos.latitude, pos.longitude),
             zoom: 15.0,
           ),
         ),
       );
 
-      final screenH = MediaQuery.of(context).size.height;
-      await Future.delayed(const Duration(milliseconds: 300));
+      final screenH =
+          MediaQuery.of(context).size.height;
+      await Future.delayed(
+          const Duration(milliseconds: 300));
 
       controller.mapController?.animateCamera(
         CameraUpdate.scrollBy(0, screenH * 0.28),
@@ -842,8 +855,9 @@ Widget _buildBottomBookingCard(
                               .destinationLocationLAtLng
                               .value;
                       orderModel.distance =
-                          controller
-                              .distance.value;
+                          double.parse(controller
+                                  .distance.value)
+                              .toStringAsFixed(1);
                       orderModel.acNonAcCharges =
                           '';
                       orderModel.duration =
@@ -856,12 +870,8 @@ Widget _buildBottomBookingCard(
                                   .value
                                   .offerRate ==
                               true
-                          ? controller
-                              .offerYourRateController
-                              .value
-                              .text
-                          : controller
-                              .amount.value;
+                          ? double.parse(controller.offerYourRateController.value.text).ceil().toString()
+                          : controller.amount.value;
                       orderModel.serviceId =
                           controller.selectedType
                               .value.id;
@@ -1011,18 +1021,10 @@ Widget _buildBottomBookingCard(
                                 "orderId":
                                     orderModel.id
                               };
-                              await SendNotification.sendOneNotification(
-                                  token: driver
-                                      .fcmToken
-                                      .toString(),
-                                  title:
-                                      'New Ride Available'
-                                          .tr,
-                                  body:
-                                      'A customer has placed a ride near your location.'
-                                          .tr,
-                                  payload:
-                                      playLoad);
+                              await SendNotification.sendOneNotification(token: driver.fcmToken.toString(),
+                                  title: 'New Ride Available'.tr,
+                                  body:'A customer has placed a ride near your location.'.tr,
+                                  payload:playLoad);
                             }
                           }
                         });
@@ -1653,7 +1655,7 @@ Widget _buildEstimatedFareCard(
             controller.amount.value == "0"
         ? "---"
         : Constant.amountShow(
-            amount: controller.amount.value);
+            amount: controller.amount.value, decimalOverride: 0);
     return Container(
       padding: const EdgeInsets.symmetric(
           horizontal: 26, vertical: 12),

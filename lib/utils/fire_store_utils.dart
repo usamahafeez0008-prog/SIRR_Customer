@@ -1507,43 +1507,49 @@ class FireStoreUtils {
 
   static Future<bool> paymentStatusCheck() async {
     ShowToastDialog.showLoader("Please wait".tr);
-    bool isFirst = false;
-    await fireStore
-        .collection(CollectionName.orders)
-        .where('userId', isEqualTo: FireStoreUtils.getCurrentUid())
-        .where("status", isEqualTo: Constant.rideComplete)
-        .where("paymentStatus", isEqualTo: false)
-        .get()
-        .then((value) {
+    try {
+      bool isFirst = false;
+      await fireStore
+          .collection(CollectionName.orders)
+          .where('userId', isEqualTo: FireStoreUtils.getCurrentUid())
+          .where("status", isEqualTo: Constant.rideComplete)
+          .where("paymentStatus", isEqualTo: false)
+          .get()
+          .then((value) {
+        if (value.size >= 1) {
+          isFirst = true;
+        } else {
+          isFirst = false;
+        }
+      });
+      return isFirst;
+    } finally {
       ShowToastDialog.closeLoader();
-      if (value.size >= 1) {
-        isFirst = true;
-      } else {
-        isFirst = false;
-      }
-    });
-    return isFirst;
+    }
   }
 
   static Future<bool> paymentStatusCheckIntercity() async {
     ShowToastDialog.showLoader("Please wait".tr);
-    bool isFirst = false;
-    await fireStore
-        .collection(CollectionName.ordersIntercity)
-        .where('userId', isEqualTo: FireStoreUtils.getCurrentUid())
-        .where("status", isEqualTo: Constant.rideComplete)
-        .where("paymentStatus", isEqualTo: false)
-        .get()
-        .then((value) {
+    try {
+      bool isFirst = false;
+      await fireStore
+          .collection(CollectionName.ordersIntercity)
+          .where('userId', isEqualTo: FireStoreUtils.getCurrentUid())
+          .where("status", isEqualTo: Constant.rideComplete)
+          .where("paymentStatus", isEqualTo: false)
+          .get()
+          .then((value) {
+        print(value.size);
+        if (value.size >= 1) {
+          isFirst = true;
+        } else {
+          isFirst = false;
+        }
+      });
+      return isFirst;
+    } finally {
       ShowToastDialog.closeLoader();
-      print(value.size);
-      if (value.size >= 1) {
-        isFirst = true;
-      } else {
-        isFirst = false;
-      }
-    });
-    return isFirst;
+    }
   }
 
   Future<List<ZoneModel>?> getZone() async {

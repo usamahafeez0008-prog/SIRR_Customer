@@ -35,13 +35,13 @@ Future<void> main() async {
 
   await Preferences.initPref();
 
-  // Required so Zego can show incoming-call UI and navigate correctly.
+/*  // Required so Zego can show incoming-call UI and navigate correctly.
   ZegoUIKitPrebuiltCallInvitationService().setNavigatorKey(navigatorKey);
 
   // Required for system calling UI / offline call handling.
   await ZegoUIKitPrebuiltCallInvitationService().useSystemCallingUI(
     [ZegoUIKitSignalingPlugin()],
-  );
+  );*/
 
   EasyLoading.instance
     ..displayDuration = const Duration(seconds: 2)
@@ -105,8 +105,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             localizationsDelegates: const [
               CountryLocalizations.delegate,
             ],
-            locale: LocalizationService.currentLocale,
-            fallbackLocale: LocalizationService.currentLocale,
+            locale: LocalizationService.locale,
+            fallbackLocale: LocalizationService.locale,
             translations: LocalizationService(),
             builder: EasyLoading.init(),
             home: GetBuilder<GlobalSettingController>(

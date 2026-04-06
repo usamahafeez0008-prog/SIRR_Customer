@@ -34,6 +34,12 @@ class LocalizationService extends Translations {
 
   // Gets locale from language, and updates the locale
   void changeLocale(String lang) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Get.updateLocale(Locale(lang));
+    });
+  }
+
+/*  void changeLocale(String lang) {
     Locale? newLocale;
     if (lang.contains('_')) {
       var split = lang.split('_');
@@ -43,5 +49,5 @@ class LocalizationService extends Translations {
     }
     
     Get.updateLocale(newLocale);
-  }
+  }*/
 }
