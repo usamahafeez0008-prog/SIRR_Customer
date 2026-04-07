@@ -988,7 +988,7 @@ class _OrderScreenState extends State<OrderScreen>
                                                   ),*/
                                                       const SizedBox(height: 10),
                                                       // OTP Section moved to bottom as per latest request
-                                                      if (orderModel.status == Constant.rideActive || orderModel.status == Constant.rideInProgress)
+                                                      if (orderModel.status == Constant.rideActive)
                                                         Container(
                                                           width: double.infinity,
                                                           padding: const EdgeInsets.symmetric(vertical: 10),

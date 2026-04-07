@@ -42,6 +42,8 @@ class Constant {
   static String senderId = '';
   static String jsonNotificationFileURL = '';
   static String radius = "10";
+  static String radiusX = "2";
+  static String radiusY = "5";
   static String distanceType = "";
   static CurrencyModel? currencyModel;
   static AdminCommission? adminCommission;

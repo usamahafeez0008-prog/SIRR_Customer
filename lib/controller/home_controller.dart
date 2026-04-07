@@ -26,6 +26,9 @@ import 'package:geocoding/geocoding.dart';
 import 'package:get/get.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:customer/model/order_model.dart';
+import 'package:customer/model/driver_user_model.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 
 class HomeController extends GetxController {
@@ -193,6 +196,8 @@ class HomeController extends GetxController {
 
   RxString duration = "".obs;
   RxString distance = "".obs;
+  RxString tripDuration = "".obs;
+  RxString driverEta = "".obs;
   RxString amount = "".obs;
   RxString acCharge = "".obs;
   RxString nonAcCharge = "".obs;
@@ -280,6 +285,18 @@ class HomeController extends GetxController {
           }
         }
       }
+      // Format the display trip duration concisely
+      double totalMinutes = convertToMinutes(duration.value);
+      int hours = (totalMinutes / 60).floor();
+      int minutes = (totalMinutes % 60).round();
+      if (hours > 0) {
+        tripDuration.value = "$hours hr $minutes min";
+      } else {
+        tripDuration.value = "$minutes min";
+      }
+      
+      // Calculate real driver ETA based on nearest driver
+      await updateDriverEta();
       update();
     } catch (e) {
       log("calculateDurationAndDistance exception: $e");
@@ -579,5 +596,55 @@ class HomeController extends GetxController {
           .map<ContactModel>((item) => ContactModel.fromJson(item))
           .toList();
     }
+  }
+
+  Future<void> updateDriverEta() async {
+    if (sourceLocationLAtLng.value.latitude == null || selectedType.value.id == null) {
+      driverEta.value = "";
+      return;
+    }
+
+    try {
+      OrderModel tempOrder = OrderModel();
+      tempOrder.serviceId = selectedType.value.id;
+      tempOrder.zoneId = selectedZone.value.id;
+      tempOrder.sourceLocationLAtLng = sourceLocationLAtLng.value;
+
+      List<DriverUserModel> drivers = await FireStoreUtils().sendOrderDataFuture(tempOrder);
+      
+      if (drivers.isNotEmpty) {
+        double minDistance = double.infinity;
+        for (var driver in drivers) {
+          if (driver.location != null && driver.location!.latitude != null && driver.location!.longitude != null) {
+            double distanceInMeters = Geolocator.distanceBetween(
+              sourceLocationLAtLng.value.latitude!,
+              sourceLocationLAtLng.value.longitude!,
+              driver.location!.latitude!,
+              driver.location!.longitude!,
+            );
+            if (distanceInMeters < minDistance) {
+              minDistance = distanceInMeters;
+            }
+          }
+        }
+
+        if (minDistance == double.infinity) {
+          driverEta.value = "4 min"; // Fallback if no location data
+        } else {
+          // Calculate ETA based on distance
+          // Average city speed: ~20 km/h (333 meters per minute)
+          double distanceInKm = minDistance / 1000;
+          int estimatedMinutes = (distanceInKm * 3).ceil(); // 3 minutes per km as a rough estimate
+          if (estimatedMinutes < 2) estimatedMinutes = 2; // Minimum 2 mins
+          driverEta.value = "$estimatedMinutes min";
+        }
+      } else {
+        driverEta.value = "N/A";
+      }
+    } catch (e) {
+      log("Error updating driver ETA: $e");
+      driverEta.value = "4 min"; // Fallback
+    }
+    update();
   }
 }

@@ -174,6 +174,18 @@ class FireStoreUtils {
         Constant.supportURL = value.data()!["supportURL"];
       }
     });
+
+    await fireStore
+        .collection(CollectionName.settings)
+        .doc("ride_range")
+        .get()
+        .then((value) {
+      if (value.exists) {
+        log("Ride range settings found: ${value.data()}");
+        Constant.radiusX = (value.data()!["x_range"] ?? "2").toString();
+        Constant.radiusY = (value.data()!["y_range"] ?? "5").toString();
+      }
+    });
   }
 
   static String getCurrentUid() {
@@ -973,7 +985,7 @@ class FireStoreUtils {
   }
 
   Future<List<DriverUserModel>> sendOrderDataFuture(
-      OrderModel orderModel) async {
+      OrderModel orderModel, {double? customRadius}) async {
     List<DriverUserModel> ordersList = [];
 
     Query<Map<String, dynamic>> query = fireStore
@@ -992,7 +1004,7 @@ class FireStoreUtils {
         .collection(collectionRef: query)
         .within(
           center: center,
-          radius: double.parse(Constant.radius),
+          radius: customRadius ?? double.parse(Constant.radius),
           field: 'position',
           strictMode: true,
         )

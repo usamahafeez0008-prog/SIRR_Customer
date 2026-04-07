@@ -9,6 +9,7 @@ import 'package:customer/model/admin_commission.dart';
 import 'package:customer/model/order/location_lat_lng.dart';
 import 'package:customer/model/order/positions.dart';
 import 'package:customer/model/order_model.dart';
+import 'package:customer/model/driver_user_model.dart';
 import 'package:customer/themes/app_colors.dart';
 import 'package:customer/themes/button_them.dart';
 import 'package:customer/utils/DarkThemeProvider.dart';
@@ -543,7 +544,7 @@ Widget _buildBottomBookingCard(
                   }
 
                   return SizedBox(
-                    height: 100,
+                    height: 110,
                     child: ListView.builder(
                       scrollDirection:
                           Axis.horizontal,
@@ -563,12 +564,9 @@ Widget _buildBottomBookingCard(
                                   subService.id;
                           return InkWell(
                             onTap: () {
-                              controller
-                                      .selectedType
-                                      .value =
-                                  subService;
-                              controller
-                                  .calculateAmount();
+                              controller.selectedType.value = subService;
+                              controller.calculateAmount();
+                              controller.updateDriverEta();
                             },
                             child: Container(
                               width: 130,
@@ -655,6 +653,18 @@ Widget _buildBottomBookingCard(
                                         TextOverflow
                                             .ellipsis,
                                   ),
+                                  if (isSelected && controller.driverEta.value.isNotEmpty)
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 2.0),
+                                      child: Text(
+                                        "Arrives in: ${controller.driverEta.value}".tr,
+                                        style: GoogleFonts.poppins(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w600,
+                                          color: AppColors.moroccoRed,
+                                        ),
+                                      ),
+                                    ),
                                 ],
                               ),
                             ),
@@ -1001,33 +1011,57 @@ Widget _buildBottomBookingCard(
                             controller
                                 .selectedZone
                                 .value;
-                        await FireStoreUtils()
-                            .sendOrderDataFuture(
-                                orderModel)
-                            .then(
-                                (eventData) async {
-                          log("Nearby drivers found: ${eventData.length}");
-                          for (var driver
-                              in eventData) {
-                            log("Driver Token: ${driver.fcmToken}");
-                            if (driver.fcmToken !=
-                                null) {
-                              Map<String, dynamic>
-                                  playLoad =
-                                  <String,
-                                      dynamic>{
-                                "type":
-                                    "city_order",
-                                "orderId":
-                                    orderModel.id
-                              };
-                              await SendNotification.sendOneNotification(token: driver.fcmToken.toString(),
-                                  title: 'New Ride Available'.tr,
-                                  body:'A customer has placed a ride near your location.'.tr,
-                                  payload:playLoad);
-                            }
+                        // Initial broadcast: Use radiusX (X range)
+                        double xRange = double.parse(Constant.radiusX);
+                        double yRange = double.parse(Constant.radiusY);
+                        log("--- Ride Search Analysis ---");
+                        log("Ride Total Distance: ${orderModel.distance} ${Constant.distanceType}");
+                        
+                        // Show specific loader message
+                        ShowToastDialog.showLoader("Looking for driver...".tr);
+                        
+                        log("Searching drivers in radius X: $xRange KM");
+                        
+                        List<DriverUserModel> eventData = await FireStoreUtils()
+                            .sendOrderDataFuture(orderModel, customRadius: xRange);
+                        
+                        String searchRadius = Constant.radiusX;
+                        if (eventData.isEmpty) {
+                          // No drivers in X range, expand to Y range
+                          log("No drivers found in radius $xRange KM. Expanding search to radius Y: $yRange KM...");
+                          eventData = await FireStoreUtils()
+                              .sendOrderDataFuture(orderModel, customRadius: yRange);
+                          searchRadius = Constant.radiusY;
+                        }
+
+                        if (eventData.isEmpty) {
+                          log("FAILURE: No online drivers found within both $xRange KM and $yRange KM radii.");
+                          log("---------------------------");
+                          ShowToastDialog.closeLoader();
+                          ShowToastDialog.showToast("No active Driver in your area".tr);
+                          return; // Terminate order placement
+                        }
+
+                        log("SUCCESS: ${eventData.length} online drivers found within $searchRadius KM radius.");
+                        log("---------------------------");
+
+                        for (var driver in eventData) {
+                          log("Driver Token: ${driver.fcmToken}");
+                          if (driver.fcmToken != null) {
+                            Map<String, dynamic> playLoad = <String, dynamic>{
+                              "type": "city_order",
+                              "orderId": orderModel.id
+                            };
+                            await SendNotification.sendOneNotification(
+                              token: driver.fcmToken.toString(),
+                              title: 'New Ride Available'.tr,
+                              body: 'A customer has placed a ride near your location.'.tr,
+                              payload: playLoad,
+                            );
                           }
-                        });
+                        }
+                        
+                        ShowToastDialog.closeLoader();
                         await FireStoreUtils
                                 .setOrder(
                                     orderModel)
@@ -1694,11 +1728,32 @@ Widget _buildEstimatedFareCard(
                 Text(
                   "Based on distance".tr,
                   style: GoogleFonts.poppins(
-                    color: Colors.black
-                        .withOpacity(0.5),
-                    fontSize: 12,
+                    color: Colors.black.withOpacity(0.5),
+                    fontSize: 11,
                   ),
                 ),
+                if (controller.tripDuration.value.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4.0),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.timer_outlined, size: 14, color: AppColors.moroccoGreen),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            "${"Trip Duration".tr}: ${controller.tripDuration.value}",
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.poppins(
+                              color: AppColors.moroccoGreen,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
               ],
             ),
           ),

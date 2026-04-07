@@ -4,28 +4,23 @@ import 'dart:convert';
 import 'package:customer/constant/collection_name.dart';
 import 'package:customer/constant/constant.dart';
 import 'package:customer/constant/show_toast_dialog.dart';
+import 'package:customer/themes/app_colors.dart';
 import 'package:customer/model/driver_user_model.dart';
 import 'package:customer/model/intercity_order_model.dart';
 import 'package:customer/model/order_model.dart';
 import 'package:customer/utils/fire_store_utils.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_map/flutter_map.dart' as flutterMap;
-import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:latlong2/latlong.dart' as location;
+import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:geolocator/geolocator.dart' as geo;
 import 'package:http/http.dart' as http;
 
 class LiveTrackingController extends GetxController {
   GoogleMapController? mapController;
-  final flutterMap.MapController osmMapController = flutterMap.MapController();
   RxString title = 'Map view'.obs;
-
-  Rx<location.LatLng> current = location.LatLng(21.1800, 72.8400).obs;
-  Rx<location.LatLng> source = location.LatLng(21.1702, 72.8311).obs;
-  Rx<location.LatLng> destination = location.LatLng(21.2000, 72.8600).obs;
   RxString distance = "".obs;
+  LatLng? lastDriverLocation;
 
   StreamSubscription? orderSubscription;
   StreamSubscription? driverSubscription;
@@ -53,53 +48,97 @@ class LiveTrackingController extends GetxController {
   }
 
   Future<void> getArgument() async {
-    await addMarkerSetup();
-    if (argumentData != null) {
-      type.value = argumentData['type'];
-      String orderId = "";
-      String? initialDriverId;
+    try {
+      if (argumentData != null) {
+        type.value = argumentData['type'];
+        String orderId = "";
+        String? initialDriverId;
 
-      if (type.value == "orderModel") {
-        OrderModel o = argumentData['orderModel'];
-        orderId = o.id ?? "";
-        initialDriverId = o.driverId;
-        orderModel.value = o;
-      } else {
-        InterCityOrderModel o = argumentData['interCityOrderModel'];
-        orderId = o.id ?? "";
-        initialDriverId = o.driverId;
-        intercityOrderModel.value = o;
-      }
-
-      if (initialDriverId != null) {
-        _listenToDriver(initialDriverId);
-      }
-
-      orderSubscription = FireStoreUtils.fireStore
-          .collection(type.value == "orderModel" ? CollectionName.orders : CollectionName.ordersIntercity)
-          .doc(orderId)
-          .snapshots()
-          .listen((event) {
-        if (event.data() != null) {
-          if (type.value == "orderModel") {
-            orderModel.value = OrderModel.fromJson(event.data()!);
-            if (orderModel.value.status == Constant.rideComplete) Get.back();
-            if (driverSubscription == null && orderModel.value.driverId != null) {
-              _listenToDriver(orderModel.value.driverId!);
-            }
-          } else {
-            intercityOrderModel.value = InterCityOrderModel.fromJson(event.data()!);
-            if (intercityOrderModel.value.status == Constant.rideComplete) Get.back();
-            if (driverSubscription == null && intercityOrderModel.value.driverId != null) {
-              _listenToDriver(intercityOrderModel.value.driverId!);
-            }
-          }
-          _updateTrackingLogic();
+        if (type.value == "orderModel") {
+          OrderModel o = argumentData['orderModel'];
+          orderId = o.id ?? "";
+          initialDriverId = o.driverId;
+          orderModel.value = o;
+        } else {
+          InterCityOrderModel o = argumentData['interCityOrderModel'];
+          orderId = o.id ?? "";
+          initialDriverId = o.driverId;
+          intercityOrderModel.value = o;
         }
-      });
+
+        // Setup base markers (Source/Destination) before waiting for driver
+        await addMarkerSetup();
+        _addBaseMarkers();
+
+        if (initialDriverId != null) {
+          _listenToDriver(initialDriverId);
+        }
+
+        orderSubscription = FireStoreUtils.fireStore
+            .collection(type.value == "orderModel" ? CollectionName.orders : CollectionName.ordersIntercity)
+            .doc(orderId)
+            .snapshots()
+            .listen((event) {
+          if (event.data() != null) {
+            if (type.value == "orderModel") {
+              orderModel.value = OrderModel.fromJson(event.data()!);
+              if (orderModel.value.status == Constant.rideComplete) Get.back();
+              if (driverSubscription == null && orderModel.value.driverId != null) {
+                _listenToDriver(orderModel.value.driverId!);
+              }
+            } else {
+              intercityOrderModel.value = InterCityOrderModel.fromJson(event.data()!);
+              if (intercityOrderModel.value.status == Constant.rideComplete) Get.back();
+              if (driverSubscription == null && intercityOrderModel.value.driverId != null) {
+                _listenToDriver(intercityOrderModel.value.driverId!);
+              }
+            }
+            _addBaseMarkers();
+            _updateTrackingLogic();
+          }
+        });
+      }
+    } catch (e) {
+      debugPrint("Error in getArgument: $e");
+    } finally {
+      isLoading.value = false;
+      update();
     }
-    isLoading.value = false;
-    update();
+  }
+
+  void _addBaseMarkers() {
+    double? lat;
+    double? lon;
+    String status = type.value == "orderModel" ? orderModel.value.status ?? "" : intercityOrderModel.value.status ?? "";
+
+    if (type.value == "orderModel") {
+      if (status == Constant.rideInProgress) {
+        lat = orderModel.value.destinationLocationLAtLng?.latitude;
+        lon = orderModel.value.destinationLocationLAtLng?.longitude;
+        if (lat != null && lon != null) addMarker(latitude: lat, longitude: lon, id: "Destination", descriptor: destinationIcon!, rotation: 0.0);
+      } else {
+        lat = orderModel.value.sourceLocationLAtLng?.latitude;
+        lon = orderModel.value.sourceLocationLAtLng?.longitude;
+        if (lat != null && lon != null) addMarker(latitude: lat, longitude: lon, id: "Departure", descriptor: departureIcon!, rotation: 0.0);
+      }
+    } else {
+      if (status == Constant.rideInProgress) {
+        lat = intercityOrderModel.value.destinationLocationLAtLng?.latitude;
+        lon = intercityOrderModel.value.destinationLocationLAtLng?.longitude;
+        if (lat != null && lon != null) addMarker(latitude: lat, longitude: lon, id: "Destination", descriptor: destinationIcon!, rotation: 0.0);
+      } else {
+        lat = intercityOrderModel.value.sourceLocationLAtLng?.latitude;
+        lon = intercityOrderModel.value.sourceLocationLAtLng?.longitude;
+        if (lat != null && lon != null) addMarker(latitude: lat, longitude: lon, id: "Departure", descriptor: departureIcon!, rotation: 0.0);
+      }
+    }
+
+    // If driver is not yet available, at least center on the target
+    if (driverUserModel.value.location == null && lat != null && lon != null) {
+      if (mapController != null) {
+        mapController!.animateCamera(CameraUpdate.newLatLngZoom(LatLng(lat, lon), 15));
+      }
+    }
   }
 
   void _listenToDriver(String driverId) {
@@ -118,6 +157,17 @@ class LiveTrackingController extends GetxController {
 
     if (driverLat == null || driverLon == null) return;
 
+    // Throttle: Only update if driver has moved significantly (e.g., > 10 meters)
+    if (lastDriverLocation != null) {
+      double moved = geo.Geolocator.distanceBetween(
+        lastDriverLocation!.latitude,
+        lastDriverLocation!.longitude,
+        driverLat,
+        driverLon,
+      );
+      if (moved < 10) return; // Ignore small movements to save API calls and reduce blink
+    }
+    lastDriverLocation = LatLng(driverLat, driverLon);
     double? targetLat;
     double? targetLon;
 
@@ -142,14 +192,8 @@ class LiveTrackingController extends GetxController {
     }
 
     if (targetLat != null && targetLon != null && targetLat != 0.0) {
-      if (Constant.selectedMapType == 'osm') {
-        current.value = location.LatLng(driverLat, driverLon);
-        source.value = location.LatLng(driverLat, driverLon);
-        destination.value = location.LatLng(targetLat, targetLon);
-        fetchRoute(source.value, destination.value);
-      } else {
-        getPolyline(sourceLatitude: driverLat, sourceLongitude: driverLon, destinationLatitude: targetLat, destinationLongitude: targetLon);
-      }
+      updateCameraLocation(LatLng(driverLat, driverLon), LatLng(targetLat, targetLon), mapController);
+      getPolyline(sourceLatitude: driverLat, sourceLongitude: driverLon, destinationLatitude: targetLat, destinationLongitude: targetLon);
     }
   }
 
@@ -171,15 +215,13 @@ class LiveTrackingController extends GetxController {
         serviceMarkerIcon.value = service.markerIcon ?? "";
       }
 
-      if (Constant.selectedMapType != 'osm') {
-        final Uint8List departure = await Constant().getBytesFromAsset('assets/images/pickup.png', 120);
-        final Uint8List destination = await Constant().getBytesFromAsset('assets/images/dropoff.png', 120);
-        final Uint8List driver =
-            serviceMarkerIcon.value == '' ? await Constant().getBytesFromAsset('assets/images/ic_cab.png', 50) : await Constant().getBytesFromUrl(serviceMarkerIcon.value, width: 120);
-        departureIcon = BitmapDescriptor.fromBytes(departure);
-        destinationIcon = BitmapDescriptor.fromBytes(destination);
-        driverIcon = BitmapDescriptor.fromBytes(driver);
-      }
+      final Uint8List departure = await Constant().getBytesFromAsset('assets/images/pickup.png', 120);
+      final Uint8List destination = await Constant().getBytesFromAsset('assets/images/dropoff.png', 120);
+      final Uint8List driver =
+          serviceMarkerIcon.value == '' ? await Constant().getBytesFromAsset('assets/images/ic_cab.png', 50) : await Constant().getBytesFromUrl(serviceMarkerIcon.value, width: 120);
+      departureIcon = BitmapDescriptor.fromBytes(departure);
+      destinationIcon = BitmapDescriptor.fromBytes(destination);
+      driverIcon = BitmapDescriptor.fromBytes(driver);
     }
   }
 
@@ -188,33 +230,45 @@ class LiveTrackingController extends GetxController {
 
   void getPolyline({required double? sourceLatitude, required double? sourceLongitude, required double? destinationLatitude, required double? destinationLongitude}) async {
     if (sourceLatitude != null && sourceLongitude != null && destinationLatitude != null && destinationLongitude != null) {
-      List<LatLng> polylineCoordinates = [];
-      PolylineRequest polylineRequest = PolylineRequest(
-        origin: PointLatLng(sourceLatitude, sourceLongitude),
-        destination: PointLatLng(destinationLatitude, destinationLongitude),
-        mode: TravelMode.driving,
-      );
+      // Step 1: Calculate straight-line distance immediately as a placeholder 
+      // This ensures the "Heading to destination" / "Driver is arriving" card shows up instantly
+      double directDistance = geo.Geolocator.distanceBetween(sourceLatitude, sourceLongitude, destinationLatitude, destinationLongitude);
+      distance.value = (directDistance / 1000).toStringAsFixed(2);
 
-      PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(request: polylineRequest);
-      if (result.points.isNotEmpty) {
-        for (var point in result.points) {
-          polylineCoordinates.add(LatLng(point.latitude, point.longitude));
+      try {
+        final url = Uri.parse('https://maps.googleapis.com/maps/api/directions/json?origin=$sourceLatitude,$sourceLongitude&destination=$destinationLatitude,$destinationLongitude&key=${Constant.mapAPIKey}');
+        final response = await http.get(url);
+        
+        if (response.statusCode == 200) {
+          final decoded = json.decode(response.body);
+          if (decoded['status'] == 'OK') {
+            final route = decoded['routes'][0];
+            final points = route['overview_polyline']['points'];
+            List<LatLng> polylineCoordinates = _decodeEncodedPolyline(points);
+            
+            // Get distance from legs
+            String distText = route['legs'][0]['distance']['text'];
+            distance.value = distText.replaceAll(RegExp(r'[^0-9.]'), '');
+
+            markers.clear();
+            polyLines.clear();
+            String status = type.value == "orderModel" ? orderModel.value.status ?? "" : intercityOrderModel.value.status ?? "";
+
+            if (status == Constant.rideActive) {
+              addMarker(latitude: destinationLatitude, longitude: destinationLongitude, id: "Departure", descriptor: departureIcon!, rotation: 0.0);
+            } else {
+              addMarker(latitude: destinationLatitude, longitude: destinationLongitude, id: "Destination", descriptor: destinationIcon!, rotation: 0.0);
+            }
+            
+            addMarker(latitude: sourceLatitude, longitude: sourceLongitude, id: "Driver", descriptor: driverIcon!, rotation: driverUserModel.value.rotation);
+            _addPolyLine(polylineCoordinates);
+          } else {
+            debugPrint("Google Directions API error: ${decoded['status']}");
+          }
         }
-        double totalDistance = geo.Geolocator.distanceBetween(sourceLatitude, sourceLongitude, destinationLatitude, destinationLongitude);
-        distance.value = (totalDistance / 1000).toStringAsFixed(2);
+      } catch (e) {
+        debugPrint("Error fetching polyline using Google HTTP: $e");
       }
-      
-      markers.clear();
-      String status = type.value == "orderModel" ? orderModel.value.status ?? "" : intercityOrderModel.value.status ?? "";
-
-      if (status == Constant.rideActive) {
-        addMarker(latitude: destinationLatitude, longitude: destinationLongitude, id: "Departure", descriptor: departureIcon!, rotation: 0.0);
-      } else {
-        addMarker(latitude: destinationLatitude, longitude: destinationLongitude, id: "Destination", descriptor: destinationIcon!, rotation: 0.0);
-      }
-      
-      addMarker(latitude: sourceLatitude, longitude: sourceLongitude, id: "Driver", descriptor: driverIcon!, rotation: driverUserModel.value.rotation);
-      _addPolyLine(polylineCoordinates);
     }
   }
 
@@ -227,9 +281,20 @@ class LiveTrackingController extends GetxController {
   }
 
   void _addPolyLine(List<LatLng> polylineCoordinates) {
+    if (polylineCoordinates.isEmpty) return;
     PolylineId id = const PolylineId("poly");
-    Polyline polyline = Polyline(polylineId: id, points: polylineCoordinates, consumeTapEvents: true, startCap: Cap.roundCap, width: 6);
+    Polyline polyline = Polyline(
+      polylineId: id,
+      points: polylineCoordinates,
+      consumeTapEvents: true,
+      startCap: Cap.roundCap,
+      endCap: Cap.roundCap,
+      width: 6,
+      color: AppColors.moroccoGreen,
+    );
     polyLines[id] = polyline;
+    // We already moved to source/destination in _updateTrackingLogic, 
+    // but the actual polyline might have slightly different bounds.
     updateCameraLocation(polylineCoordinates.first, polylineCoordinates.last, mapController);
   }
 
@@ -245,7 +310,9 @@ class LiveTrackingController extends GetxController {
     } else {
       bounds = LatLngBounds(southwest: source, northeast: destination);
     }
-    CameraUpdate cameraUpdate = CameraUpdate.newLatLngBounds(bounds, 10);
+
+    // Add a bit of extra padding for better framing
+    CameraUpdate cameraUpdate = CameraUpdate.newLatLngBounds(bounds, 70);
     return checkCameraLocation(cameraUpdate, mapController);
   }
 
@@ -255,27 +322,34 @@ class LiveTrackingController extends GetxController {
     if (l1.southwest.latitude == -90) return checkCameraLocation(cameraUpdate, mapController);
   }
 
-  RxList<location.LatLng> routePoints = <location.LatLng>[].obs;
+  List<LatLng> _decodeEncodedPolyline(String encoded) {
+    List<LatLng> poly = [];
+    int index = 0, len = encoded.length;
+    int lat = 0, lng = 0;
 
-  Future<void> fetchRoute(location.LatLng source, location.LatLng destination) async {
-    final url = Uri.parse('https://router.project-osrm.org/route/v1/driving/${source.longitude},${source.latitude};${destination.longitude},${destination.latitude}?overview=full&geometries=geojson');
-    final response = await http.get(url);
-    if (response.statusCode == 200) {
-      final decoded = json.decode(response.body);
-      final geometry = decoded['routes'][0]['geometry']['coordinates'];
-      routePoints.clear();
-      for (var coord in geometry) {
-        routePoints.add(location.LatLng(coord[1], coord[0]));
-      }
-      double distInMeters = decoded['routes'][0]['distance'].toDouble();
-      distance.value = (distInMeters / 1000).toStringAsFixed(2);
-      fitOSMBounds();
-    }
-  }
+    while (index < len) {
+      int b, shift = 0, result = 0;
+      do {
+        b = encoded.codeUnitAt(index++) - 63;
+        result |= (b & 0x1f) << shift;
+        shift += 5;
+      } while (b >= 0x20);
+      int dlat = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+      lat += dlat;
 
-  void fitOSMBounds() {
-    if (routePoints.isNotEmpty) {
-      osmMapController.fitCamera(flutterMap.CameraFit.bounds(bounds: flutterMap.LatLngBounds.fromPoints(routePoints), padding: const EdgeInsets.all(50)));
+      shift = 0;
+      result = 0;
+      do {
+        b = encoded.codeUnitAt(index++) - 63;
+        result |= (b & 0x1f) << shift;
+        shift += 5;
+      } while (b >= 0x20);
+      int dlng = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+      lng += dlng;
+
+      LatLng p = LatLng(lat / 1E5, lng / 1E5);
+      poly.add(p);
     }
+    return poly;
   }
 }
