@@ -39,6 +39,8 @@ class OrderScreen extends StatefulWidget {
 
 class _OrderScreenState extends State<OrderScreen>
     with SingleTickerProviderStateMixin {
+  final Map<String, Future<DriverUserModel?>>
+      _driverFutureCache = {};
   int _selectedIndex = 0;
 
   @override
@@ -55,6 +57,18 @@ class _OrderScreenState extends State<OrderScreen>
         widget.initialIndex) {
       _selectedIndex = widget.initialIndex;
     }
+  }
+
+  Future<DriverUserModel?> _getDriverFuture(
+      String? driverId) {
+    if (driverId == null || driverId.isEmpty) {
+      return Future.value(null);
+    }
+
+    return _driverFutureCache.putIfAbsent(
+      driverId,
+      () => FireStoreUtils.getDriver(driverId),
+    );
   }
 
   final List<String> _tabs = [
@@ -324,17 +338,34 @@ class _OrderScreenState extends State<OrderScreen>
                             QuerySnapshot>(
                           stream: FirebaseFirestore
                               .instance
-                              .collection(CollectionName.orders)
-                              .where("userId", isEqualTo: FireStoreUtils.getCurrentUid())
-                              .where("status", whereIn: [
-                                Constant.ridePlaced,
-                                Constant.rideActive,
-                                Constant.rideInProgress,
-                                Constant.rideHold,
-                                Constant.rideHoldAccepted,
-                              ])
-                              .where("paymentStatus", isEqualTo: false)
-                              .orderBy("createdDate", descending: true)
+                              .collection(
+                                  CollectionName
+                                      .orders)
+                              .where("userId",
+                                  isEqualTo:
+                                      FireStoreUtils
+                                          .getCurrentUid())
+                              .where("status",
+                                  whereIn: [
+                                    Constant
+                                        .ridePlaced,
+                                    Constant
+                                        .rideActive,
+                                    Constant
+                                        .rideInProgress,
+                                    Constant
+                                        .rideHold,
+                                    Constant
+                                        .rideHoldAccepted,
+                                  ])
+                              .where(
+                                  "paymentStatus",
+                                  isEqualTo:
+                                      false)
+                              .orderBy(
+                                  "createdDate",
+                                  descending:
+                                      true)
                               .snapshots(),
                           builder: (BuildContext
                                   context,
@@ -397,6 +428,7 @@ class _OrderScreenState extends State<OrderScreen>
                                                   const EdgeInsets.all(10),
                                               child:
                                                   Container(
+                                                key: ValueKey(orderModel.id),
                                                 decoration: BoxDecoration(
                                                   color: themeChange.getThem() ? AppColors.darkContainerBackground : Colors.white,
                                                   borderRadius: const BorderRadius.all(Radius.circular(14)),
@@ -416,8 +448,9 @@ class _OrderScreenState extends State<OrderScreen>
                                                   child: Column(
                                                     crossAxisAlignment: CrossAxisAlignment.start,
                                                     children: [
-                                                      FutureBuilder<DriverUserModel?>(
-                                                        future: FireStoreUtils.getDriver(orderModel.driverId.toString()),
+                                                      /*FutureBuilder<DriverUserModel?>(
+                                                        //future: FireStoreUtils.getDriver(orderModel.driverId.toString()),
+                                                        future: _getDriverFuture(orderModel.driverId),
                                                         builder: (context, driverSnapshot) {
                                                           DriverUserModel? driver = driverSnapshot.data;
                                                           return Row(
@@ -455,7 +488,7 @@ class _OrderScreenState extends State<OrderScreen>
                                                                         ),
                                                                       ],
                                                                     ),
-                                                                    /*const SizedBox(
+                                                                    */ /*const SizedBox(
                                                                     height: 12),
                                                                 if (orderModel
                                                                         .status !=
@@ -500,7 +533,7 @@ class _OrderScreenState extends State<OrderScreen>
                                                                           : Colors
                                                                               .black87,
                                                                     ),
-                                                                  ),*/
+                                                                  ),*/ /*
                                                                   ],
                                                                 ),
                                                               ),
@@ -519,7 +552,73 @@ class _OrderScreenState extends State<OrderScreen>
                                                             ],
                                                           );
                                                         },
+                                                      ),*/
+
+                                                      Row(
+                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                        children: [
+                                                          Expanded(
+                                                            child: Column(
+                                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                                              children: [
+                                                                Wrap(
+                                                                  crossAxisAlignment: WrapCrossAlignment.center,
+                                                                  children: [
+                                                                    Container(
+                                                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                                                      decoration: BoxDecoration(
+                                                                        color: AppColors.moroccoGreen.withOpacity(0.12),
+                                                                        borderRadius: BorderRadius.circular(20),
+                                                                      ),
+                                                                      child: Text(
+                                                                        orderModel.status.toString().tr,
+                                                                        style: GoogleFonts.outfit(
+                                                                          color: AppColors.moroccoGreen,
+                                                                          fontSize: 11,
+                                                                          fontWeight: FontWeight.bold,
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                    const SizedBox(width: 8),
+                                                                    Text(
+                                                                      Constant().formatTimestamp(orderModel.createdDate),
+                                                                      style: GoogleFonts.outfit(
+                                                                        color: themeChange.getThem() ? Colors.white54 : Colors.grey[600],
+                                                                        fontSize: 12,
+                                                                      ),
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                          if (orderModel.status != Constant.ridePlaced)
+                                                            FutureBuilder<DriverUserModel?>(
+                                                              future: _getDriverFuture(orderModel.driverId),
+                                                              builder: (context, driverSnapshot) {
+                                                                final driver = driverSnapshot.data;
+                                                                return ClipRRect(
+                                                                  borderRadius: BorderRadius.circular(10),
+                                                                  child: CachedNetworkImage(
+                                                                    height: 55,
+                                                                    width: 55,
+                                                                    imageUrl: driver != null ? driver.profilePic.toString() : Constant.userPlaceHolder,
+                                                                    fit: BoxFit.cover,
+                                                                    placeholder: (context, url) => const SizedBox(
+                                                                      height: 55,
+                                                                      width: 55,
+                                                                      child: Center(
+                                                                        child: CircularProgressIndicator(strokeWidth: 2),
+                                                                      ),
+                                                                    ),
+                                                                    errorWidget: (context, url, error) => Image.network(Constant.userPlaceHolder),
+                                                                  ),
+                                                                );
+                                                              },
+                                                            ),
+                                                        ],
                                                       ),
+
                                                       const SizedBox(height: 10),
                                                       LocationView(
                                                         sourceLocation: orderModel.sourceLocationName.toString(),
@@ -627,7 +726,6 @@ class _OrderScreenState extends State<OrderScreen>
                                                           visible: orderModel.status != Constant.ridePlaced,
                                                           child: Column(
                                                             children: [
-                                                              // Live Map Tracking Button shown above Contact Driver as per screenshot
                                                               if (orderModel.status == Constant.rideActive || orderModel.status == Constant.rideInProgress) ...[
                                                                 InkWell(
                                                                   onTap: () {
@@ -637,10 +735,7 @@ class _OrderScreenState extends State<OrderScreen>
                                                                         "type": "orderModel",
                                                                       });
                                                                     } else {
-                                                                      Utils.redirectMap(
-                                                                          latitude: orderModel.destinationLocationLAtLng!.latitude!,
-                                                                          longLatitude: orderModel.destinationLocationLAtLng!.longitude!,
-                                                                          name: orderModel.destinationLocationName.toString());
+                                                                      Utils.redirectMap(latitude: orderModel.destinationLocationLAtLng!.latitude!, longLatitude: orderModel.destinationLocationLAtLng!.longitude!, name: orderModel.destinationLocationName.toString());
                                                                     }
                                                                   },
                                                                   child: Container(
@@ -734,7 +829,8 @@ class _OrderScreenState extends State<OrderScreen>
                                                                 PopupMenuItem(
                                                                   value: 2,
                                                                   child: FutureBuilder<DriverUserModel?>(
-                                                                      future: FireStoreUtils.getDriver(orderModel.driverId.toString()),
+                                                                      //future: FireStoreUtils.getDriver(orderModel.driverId.toString()),
+                                                                      future: _getDriverFuture(orderModel.driverId),
                                                                       builder: (context, snapshot) {
                                                                         if (snapshot.hasData && snapshot.data != null) {
                                                                           return Stack(
@@ -1120,10 +1216,77 @@ class _OrderScreenState extends State<OrderScreen>
                                                     crossAxisAlignment: CrossAxisAlignment.start,
                                                     children: [
                                                       FutureBuilder<DriverUserModel?>(
-                                                        future: FireStoreUtils.getDriver(orderModel.driverId.toString()),
+                                                        //future: FireStoreUtils.getDriver(orderModel.driverId.toString()),
+                                                        future: _getDriverFuture(orderModel.driverId),
                                                         builder: (context, driverSnapshot) {
                                                           DriverUserModel? driver = driverSnapshot.data;
                                                           return Row(
+                                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                                            children: [
+                                                              Expanded(
+                                                                child: Column(
+                                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                                  children: [
+                                                                    Wrap(
+                                                                      crossAxisAlignment: WrapCrossAlignment.center,
+                                                                      children: [
+                                                                        Container(
+                                                                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                                                          decoration: BoxDecoration(
+                                                                            color: AppColors.moroccoGreen.withOpacity(0.12),
+                                                                            borderRadius: BorderRadius.circular(20),
+                                                                          ),
+                                                                          child: Text(
+                                                                            orderModel.status.toString().tr,
+                                                                            style: GoogleFonts.outfit(
+                                                                              color: AppColors.moroccoGreen,
+                                                                              fontSize: 11,
+                                                                              fontWeight: FontWeight.bold,
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                        const SizedBox(width: 8),
+                                                                        Text(
+                                                                          Constant().formatTimestamp(orderModel.createdDate),
+                                                                          style: GoogleFonts.outfit(
+                                                                            color: themeChange.getThem() ? Colors.white54 : Colors.grey[600],
+                                                                            fontSize: 12,
+                                                                          ),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              ),
+                                                              if (orderModel.status != Constant.ridePlaced)
+                                                                FutureBuilder<DriverUserModel?>(
+                                                                  future: _getDriverFuture(orderModel.driverId),
+                                                                  builder: (context, driverSnapshot) {
+                                                                    final driver = driverSnapshot.data;
+                                                                    return ClipRRect(
+                                                                      borderRadius: BorderRadius.circular(10),
+                                                                      child: CachedNetworkImage(
+                                                                        height: 55,
+                                                                        width: 55,
+                                                                        imageUrl: driver != null ? driver.profilePic.toString() : Constant.userPlaceHolder,
+                                                                        fit: BoxFit.cover,
+                                                                        /*placeholder: (context, url) => Constant.loader(isDarkTheme: themeChange.getThem()),*/
+                                                                        placeholder: (context, url) => const SizedBox(
+                                                                          height: 55,
+                                                                          width: 55,
+                                                                          child: Center(
+                                                                            child: CircularProgressIndicator(strokeWidth: 2),
+                                                                          ),
+                                                                        ),
+                                                                        errorWidget: (context, url, error) => Image.network(Constant.userPlaceHolder),
+                                                                      ),
+                                                                    );
+                                                                  },
+                                                                ),
+                                                            ],
+                                                          );
+
+                                                          /*Row(
                                                             crossAxisAlignment: CrossAxisAlignment.start,
                                                             children: [
                                                               Expanded(
@@ -1168,12 +1331,21 @@ class _OrderScreenState extends State<OrderScreen>
                                                                   width: 55,
                                                                   imageUrl: driver != null ? driver.profilePic.toString() : Constant.userPlaceHolder,
                                                                   fit: BoxFit.cover,
-                                                                  placeholder: (context, url) => Constant.loader(isDarkTheme: themeChange.getThem()),
+                                                                  //placeholder: (context, url) => Constant.loader(isDarkTheme: themeChange.getThem()),
+
+                                                                  placeholder: (context, url) => const SizedBox(
+                                                                    height: 55,
+                                                                    width: 55,
+                                                                    child: Center(
+                                                                      child: CircularProgressIndicator(strokeWidth: 2),
+                                                                    ),
+                                                                  ),
+
                                                                   errorWidget: (context, url, error) => Image.network(Constant.userPlaceHolder),
                                                                 ),
                                                               ),
                                                             ],
-                                                          );
+                                                          );*/
                                                         },
                                                       ),
                                                       const SizedBox(height: 10),

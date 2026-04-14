@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:ui' as ui;
@@ -32,7 +33,8 @@ import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 
 class HomeController extends GetxController {
-  DashBoardController dashboardController = Get.put(DashBoardController());
+  //DashBoardController dashboardController = Get.put(DashBoardController());
+  final DashBoardController dashboardController = Get.find<DashBoardController>();
 
   Rx<TextEditingController> sourceLocationController =
       TextEditingController().obs;
@@ -44,6 +46,10 @@ class HomeController extends GetxController {
 
   Rx<LocationLatLng> sourceLocationLAtLng = LocationLatLng().obs;
   Rx<LocationLatLng> destinationLocationLAtLng = LocationLatLng().obs;
+
+  StreamSubscription<DocumentSnapshot<Map<String, dynamic>>>? _savedAddressDocSub;
+  StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _savedAddressListSub;
+  bool _isInitializing = false;
 
   RxString currentLocation = "".obs;
   RxBool isLoading = true.obs;
@@ -84,7 +90,7 @@ class HomeController extends GetxController {
   RxBool hasSavedAddresses = false.obs;
   RxList<Map<String, dynamic>> savedAddresses = <Map<String, dynamic>>[].obs;
 
-  @override
+/*  @override
   void onInit() {
     // TODO: implement onInit
     getLocation();
@@ -94,9 +100,46 @@ class HomeController extends GetxController {
     checkSavedAddresses();
     selectedPaymentMethod.value = "Cash";
     super.onInit();
+  }*/
+
+  @override
+  void onInit() {
+    super.onInit();
+    initHome();
   }
 
-  void checkSavedAddresses() {
+  Future<void> initHome() async {
+    if (_isInitializing) return;
+    _isInitializing = true;
+    isLoading.value = true;
+
+    final currentUid = FireStoreUtils.getCurrentUid();
+    if (currentUid.isEmpty) {
+      debugPrint('initHome skipped: no logged in user');
+      isLoading.value = false;
+      _isInitializing = false;
+      return;
+    }
+
+    try {
+      selectedPaymentMethod.value = "Cash";
+
+      await getLocation();
+      await getServiceType();
+      await getPaymentData();
+      await getContact();
+
+      checkSavedAddresses();
+    } catch (e, s) {
+      debugPrint('initHome error: $e');
+      debugPrintStack(stackTrace: s);
+      ShowToastDialog.showToast('Something went wrong while loading home data.');
+    } finally {
+      isLoading.value = false;
+      _isInitializing = false;
+    }
+  }
+  /*void checkSavedAddresses() {
     String userId = FireStoreUtils.getCurrentUid();
     FirebaseFirestore.instance
         .collection('saved_addresses')
@@ -125,6 +168,49 @@ class HomeController extends GetxController {
       } else {
         hasSavedAddresses.value = false;
         savedAddresses.clear();
+      }
+    });
+  }*/
+
+  void checkSavedAddresses() {
+    final String userId = FireStoreUtils.getCurrentUid();
+
+    _savedAddressDocSub?.cancel();
+    _savedAddressListSub?.cancel();
+
+    _savedAddressDocSub = FirebaseFirestore.instance
+        .collection('saved_addresses')
+        .doc(userId)
+        .snapshots()
+        .listen((doc) {
+      if (doc.exists && doc.data()?['addressSave'] == true) {
+        hasSavedAddresses.value = true;
+
+        _savedAddressListSub?.cancel();
+        _savedAddressListSub = FirebaseFirestore.instance
+            .collection('saved_addresses')
+            .doc(userId)
+            .collection('addresses')
+            .snapshots()
+            .listen((snapshot) {
+          final List<Map<String, dynamic>> list =
+          snapshot.docs.map((d) => d.data()).toList();
+
+          list.sort((a, b) {
+            Timestamp? tA = a['timestamp'];
+            Timestamp? tB = b['timestamp'];
+            if (tA == null) return 1;
+            if (tB == null) return -1;
+            return tB.compareTo(tA);
+          });
+
+          savedAddresses.value = list;
+        });
+      } else {
+        hasSavedAddresses.value = false;
+        savedAddresses.clear();
+        _savedAddressListSub?.cancel();
+        _savedAddressListSub = null;
       }
     });
   }
@@ -159,7 +245,7 @@ class HomeController extends GetxController {
     });
   }
 
-  Future<void> getServiceType() async {
+  /*Future<void> getServiceType() async {
     await FireStoreUtils.getService().then((value) {
       serviceList.value = value;
       if (serviceList.isNotEmpty) {
@@ -192,6 +278,82 @@ class HomeController extends GetxController {
     });
 
     isLoading.value = false;
+  }*/
+
+  Future<void> getServiceType() async {
+    try {
+
+      final uid = FireStoreUtils.getCurrentUid();
+      if (uid.isEmpty) {
+        debugPrint('getServiceType skipped: no user');
+        return;
+      }
+
+      isServicesLoading.value = true;
+
+      final services = await FireStoreUtils.getService();
+      serviceList.value = services;
+
+      if (serviceList.isNotEmpty) {
+        selectedType.value = serviceList.first;
+      }
+
+      final banners = await FireStoreUtils.getBanner();
+      bannerList.value = banners;
+
+      final airports = await FireStoreUtils().getAirports();
+      if (airports != null) {
+        Constant.airaPortList = airports;
+      }
+
+      final String token = await NotificationService.getToken();
+      //final value = await FireStoreUtils.getUserProfile(FireStoreUtils.getCurrentUid());
+      final value = await FireStoreUtils.getUserProfile(uid);
+      if (value != null) {
+        userModel.value = value;
+        userModel.value.fcmToken = token;
+        await FireStoreUtils.updateUser(userModel.value);
+
+        if ((userModel.value.id ?? '').isNotEmpty &&
+            (userModel.value.fullName ?? '').isNotEmpty) {
+          try {
+            await ZegoCallService().initZego(
+              userModel.value.id!,
+              userModel.value.fullName!,
+            );
+          } catch (e) {
+            debugPrint('Zego init error: $e');
+          }
+        }
+      }
+
+      debugPrint("services start");
+      debugPrint("services loaded");
+      debugPrint("banners loaded");
+      debugPrint("airports loaded");
+      debugPrint("user profile loaded");
+      debugPrint("zego init done");
+
+    } catch (e, s) {
+      debugPrint('getServiceType error: $e');
+      debugPrintStack(stackTrace: s);
+      ShowToastDialog.showToast('Failed to load service data.');
+    } finally {
+      isServicesLoading.value = false;
+    }
+  }
+
+  @override
+  void onClose() {
+    _savedAddressDocSub?.cancel();
+    _savedAddressListSub?.cancel();
+
+    sourceLocationController.value.dispose();
+    destinationLocationController.value.dispose();
+    offerYourRateController.value.dispose();
+    pageController.dispose();
+
+    super.onClose();
   }
 
   RxString duration = "".obs;

@@ -47,6 +47,10 @@ class LiveTrackingScreen extends StatelessWidget {
                         markers: Set<Marker>.of(controller.markers.values),
                         onMapCreated: (GoogleMapController mapController) {
                           controller.mapController = mapController;
+
+                          // Force refresh once map is ready
+                          controller.refreshTrackingNow();
+
                         },
                         initialCameraPosition: CameraPosition(
                           zoom: 15,

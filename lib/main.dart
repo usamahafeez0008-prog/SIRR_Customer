@@ -17,6 +17,9 @@ import 'package:provider/provider.dart';
 import 'package:zego_uikit_prebuilt_call/zego_uikit_prebuilt_call.dart';
 import 'package:zego_uikit_signaling_plugin/zego_uikit_signaling_plugin.dart';
 
+import 'controller/dash_board_controller.dart';
+import 'controller/home_controller.dart';
+
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
@@ -54,6 +57,10 @@ Future<void> main() async {
     ..userInteractions = false
     ..dismissOnTap = false;
 
+  // Register controllers once
+  Get.put(GlobalSettingController(), permanent: true);
+  /*Get.put(DashBoardController(), permanent: true);
+  Get.put(HomeController(), permanent: true);*/
 
   runApp(const MyApp());
 }
@@ -110,12 +117,20 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             fallbackLocale: LocalizationService.locale,
             translations: LocalizationService(),
             builder: EasyLoading.init(),
-            home: GetBuilder<GlobalSettingController>(
+
+           /* home: GetBuilder<GlobalSettingController>(
               init: GlobalSettingController(),
               builder: (context) {
                 return const SplashScreen();
               },
+            ),*/
+
+            home: GetBuilder<GlobalSettingController>(
+              builder: (_) {
+                return const SplashScreen();
+              },
             ),
+
           );
         },
       ),

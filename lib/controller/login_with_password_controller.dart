@@ -8,6 +8,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../constant/show_toast_dialog.dart';
+import 'dash_board_controller.dart';
+import 'global_setting_conroller.dart';
+import 'home_controller.dart';
 
 class LoginWithPasswordController extends GetxController {
   Rx<TextEditingController> phoneNumberController = TextEditingController().obs;
@@ -54,7 +57,7 @@ class LoginWithPasswordController extends GetxController {
         UserModel userModel = UserModel.fromJson(docData);
 
         if (userModel.isActive == true) {
-          Preferences.setString('userId', querySnapshot.docs.first.id);
+         /* Preferences.setString('userId', querySnapshot.docs.first.id);
 
           // Save credentials for autofill next time
           Preferences.setString('savedPhone', phoneNumberController.value.text);
@@ -63,7 +66,35 @@ class LoginWithPasswordController extends GetxController {
 
           ShowToastDialog.showToast("Login Successful".tr);
           Get.offAll(() => const DashBoardScreen(),
-              arguments: {'userModel': userModel});
+              arguments: {'userModel': userModel});*/
+
+          Preferences.setString('userId', querySnapshot.docs.first.id);
+
+// Save credentials for autofill next time
+          Preferences.setString('savedPhone', phoneNumberController.value.text);
+          Preferences.setString('savedCountryCode', countryCode.value);
+          Preferences.setString('savedPassword', password);
+
+// remove any old stale controllers from previous session
+          if (Get.isRegistered<HomeController>()) {
+            Get.delete<HomeController>(force: true);
+          }
+          if (Get.isRegistered<DashBoardController>()) {
+            Get.delete<DashBoardController>(force: true);
+          }
+
+// create fresh controllers for this logged-in user
+          /*Get.put(DashBoardController(), permanent: true);
+          Get.put(HomeController(), permanent: true);*/
+          Get.put(GlobalSettingController(), permanent: true);
+
+          ShowToastDialog.showToast("Login Successful".tr);
+
+          Get.put(DashBoardController());
+          Get.put(HomeController());
+
+          Get.offAll(() => const DashBoardScreen());
+
         } else {
           ShowToastDialog.showToast(
               'This account has been disabled. Please contact administrator.'

@@ -10,8 +10,15 @@ class SplashScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<SplashController>(
+  /*  return GetBuilder<SplashController>(
       init: SplashController(),
+      builder: (controller) {*/
+
+    if (!Get.isRegistered<SplashController>()) {
+      Get.put(SplashController(), permanent: false);
+    }
+
+    return GetBuilder<SplashController>(
       builder: (controller) {
         return Scaffold(
           backgroundColor: const Color(0xFFFAF9F6), // Professional Off-White

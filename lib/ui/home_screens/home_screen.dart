@@ -52,18 +52,164 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final themeChange =
-        Provider.of<DarkThemeProvider>(context);
+    final themeChange = Provider.of<DarkThemeProvider>(context);
+
+    final HomeController controller = Get.isRegistered<HomeController>()
+        ? Get.find<HomeController>()
+        : Get.put(HomeController());
+
+    //final HomeController controller = Get.find<HomeController>();
+    //final HomeController controller = Get.put(HomeController());
 
     return GetX<HomeController>(
-      init: HomeController(),
-      builder: (controller) {
-        return Scaffold(
+      builder: (_) {
+        /*return Scaffold(
           backgroundColor: AppColors.background,
-          drawer: DashBoardScreen()
-              .buildAppDrawer(context,
-                  controller.dashboardController),
-          body: controller.isLoading.value
+          drawer: DashBoardScreen().buildAppDrawer(context, controller.dashboardController),*/
+        return Scaffold(
+            backgroundColor: AppColors.background,
+          body: Stack(
+            children: [
+              Positioned.fill(
+                child: controller.isLoading.value
+                    ? const SizedBox()
+                    : Stack(
+                  children: [
+                    Positioned.fill(
+                      child: Obx(
+                            () => GoogleMap(
+                          onMapCreated: (mapCont) {
+                            controller.mapController = mapCont;
+
+                            if (_locationReady && !_initialCameraMoved) {
+                              _moveCameraToCurrentLocation(controller);
+                            }
+                          },
+                          initialCameraPosition: CameraPosition(
+                            target: LatLng(
+                              controller.sourceLocationLAtLng.value.latitude ?? 31.511750025123046,
+                              controller.sourceLocationLAtLng.value.longitude ?? 74.31415762965483,
+                            ),
+                            zoom: 14.0,
+                          ),
+                          markers: controller.markerSet,
+                          polylines: controller.polylineSet,
+                          myLocationEnabled: _locationReady,
+                          myLocationButtonEnabled: false,
+                          zoomControlsEnabled: false,
+                          mapToolbarEnabled: false,
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      right: 16,
+                      bottom: MediaQuery.of(context).size.height * 0.62,
+                      child: FloatingActionButton.small(
+                        heroTag: 'locateMeBtn',
+                        backgroundColor: Colors.white,
+                        elevation: 4,
+                        onPressed: () async {
+                          try {
+                            if (controller.mapController == null) {
+                              ShowToastDialog.showToast('Map is not ready yet.');
+                              return;
+                            }
+
+                            final serviceEnabled =
+                                await Geolocator.isLocationServiceEnabled();
+                            if (!serviceEnabled) {
+                              ShowToastDialog.showToast(
+                                  'Location services are disabled.');
+                              return;
+                            }
+
+                            var permission =
+                                await Geolocator.checkPermission();
+                            if (permission == LocationPermission.denied) {
+                              permission =
+                                  await Geolocator.requestPermission();
+                            }
+                            if (permission == LocationPermission.denied ||
+                                permission ==
+                                    LocationPermission.deniedForever) {
+                              ShowToastDialog.showToast(
+                                  'Location permission is not granted.');
+                              return;
+                            }
+
+                            if (!_locationReady) {
+                              _locationReady = true;
+                              if (mounted) setState(() {});
+                            }
+
+                            Future<void> animateTo(
+                                double lat, double lng) async {
+                              await controller.mapController?.animateCamera(
+                                CameraUpdate.newCameraPosition(
+                                  CameraPosition(
+                                    target: LatLng(lat, lng),
+                                    zoom: 15.0,
+                                  ),
+                                ),
+                              );
+
+                              final screenH =
+                                  MediaQuery.of(context).size.height;
+                              await Future.delayed(
+                                  const Duration(milliseconds: 300));
+                              controller.mapController?.animateCamera(
+                                CameraUpdate.scrollBy(0, screenH * 0.28),
+                              );
+                            }
+
+                            // Fast feedback: use cached location first (if available),
+                            // then refine with a fresh GPS fix.
+                            final lastKnown =
+                                await Geolocator.getLastKnownPosition();
+                            if (lastKnown != null) {
+                              await animateTo(
+                                lastKnown.latitude,
+                                lastKnown.longitude,
+                              );
+                            }
+
+                            final pos = await Geolocator.getCurrentPosition(
+                              desiredAccuracy: LocationAccuracy.high,
+                              timeLimit: const Duration(seconds: 6),
+                            );
+
+                            await animateTo(pos.latitude, pos.longitude);
+                          } catch (_) {
+                            ShowToastDialog.showToast('Unable to retrieve location.');
+                          }
+                        },
+                        child: const Icon(
+                          Icons.my_location,
+                          color: AppColors.moroccoRed,
+                          size: 20,
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      child: _buildBottomBookingCard(context, controller),
+                    ),
+                  ],
+                ),
+              ),
+
+              if (controller.isLoading.value)
+                Center(
+                  child: Constant.loader(
+                    isDarkTheme: themeChange.getThem(),
+                  ),
+                ),
+            ],
+          ),
+
+          /*body: controller.isLoading.value
               ? Constant.loader(
                   isDarkTheme:
                       themeChange.getThem(),
@@ -201,7 +347,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                   ],
-                ),
+                ),*/
         );
       },
     );

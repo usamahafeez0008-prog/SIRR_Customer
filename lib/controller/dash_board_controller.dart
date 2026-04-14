@@ -19,6 +19,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import 'home_controller.dart';
+
 class DashBoardController extends GetxController {
   RxList<DrawerItem> drawerItems = [
     // Trips Section
@@ -67,12 +69,43 @@ class DashBoardController extends GetxController {
     DrawerItem('FAQs'.tr, "assets/icons/ic_faq.svg"),
     DrawerItem('Log out'.tr, "assets/icons/ic_logout.svg"),
   ].obs;*/
-  @override
+ /* @override
   void onInit() {
     // TODO: implement onInit
     getDriver();
     getUserRating();
     super.onInit();
+  }*/
+
+  late final List<Widget> drawerPages;
+
+  @override
+  void onInit() {
+    super.onInit();
+    drawerPages = [
+      const HomeScreen(),                 // 0 fallback
+      const HomeScreen(),                 // 1
+      const OrderScreen(initialIndex: 0), // 2
+      const OrderScreen(initialIndex: 1), // 3
+      const SavedAddressScreen(),         // 4
+      const WalletScreen(),               // 5
+      const HomeScreen(),                 // 6 header fallback
+      const HomeScreen(),                 // 7
+      const HomeScreen(),                 // 8
+      const HomeScreen(),                 // 9
+      const HomeScreen(),                 // 10 header fallback
+      const FaqScreen(),                  // 11
+      const ContactUsScreen(),            // 12
+      const HomeScreen(),                 // 13
+      const HomeScreen(),                 // 14 header fallback
+      const SettingScreen(),              // 15
+      const HomeScreen(),                 // 16
+      const HomeScreen(),                 // 17
+      const HomeScreen(),                 // 18 logout placeholder
+    ];
+
+    getDriver();
+    getUserRating();
   }
 
   RxString userRating = "0.0".obs;
@@ -100,15 +133,43 @@ class DashBoardController extends GetxController {
 
   Rx<UserModel> driverUser = UserModel().obs;
 
-  Future<void> getDriver() async {
+/*  Future<void> getDriver() async {
     await FireStoreUtils.getUserProfile(FireStoreUtils.getCurrentUid())
         .then((driver) {
       if (driver?.id != null) {
         driverUser.value = driver!;
       }
     });
+  }*/
+  Future<void> getDriver() async {
+    try {
+      final uid = FireStoreUtils.getCurrentUid();
+      if (uid.isEmpty) {
+        driverUser.value = UserModel();
+        return;
+      }
+
+      final driver = await FireStoreUtils.getUserProfile(uid);
+      if (driver?.id != null) {
+        driverUser.value = driver!;
+      } else {
+        driverUser.value = UserModel();
+      }
+    } catch (e) {
+      debugPrint("Error fetching driver: $e");
+      driverUser.value = UserModel();
+    }
   }
 
+
+  Widget getDrawerItemWidget(int pos) {
+    if (pos < 0 || pos >= drawerPages.length) {
+      return const HomeScreen();
+    }
+    return drawerPages[pos];
+  }
+
+/*
   Widget getDrawerItemWidget(int pos) {
     switch (pos) {
       case 1:
@@ -133,6 +194,7 @@ class DashBoardController extends GetxController {
         return const HomeScreen();
     }
   }
+*/
 
   /*Widget getDrawerItemWidget(int pos) {
     switch (pos) {
@@ -178,6 +240,38 @@ class DashBoardController extends GetxController {
 
     if (index == 7 || index == 8 || index == 9 || index == 13 || index == 16 || index == 17) {
       ShowToastDialog.showToast("Coming Soon");
+      return;
+    }
+
+    if (index == 18) {
+      try {
+        ZegoCallService().uninitZego();
+        await FirebaseAuth.instance.signOut();
+        await Preferences.clearKeyData('userId');
+
+        Get.offAll(const LoginScreen());
+
+        if (Get.isRegistered<HomeController>()) {
+          Get.delete<HomeController>(force: true);
+        }
+        if (Get.isRegistered<DashBoardController>()) {
+          Get.delete<DashBoardController>(force: true);
+        }
+      } catch (e) {
+        debugPrint("Logout error: $e");
+        ShowToastDialog.showToast("Logout failed");
+      }
+    } else {
+      selectedDrawerIndex.value = index;
+    }
+  }
+
+
+  /*  Future<void> onSelectItem(int index) async {
+    if (drawerItems[index].isHeader) return;
+
+    if (index == 7 || index == 8 || index == 9 || index == 13 || index == 16 || index == 17) {
+      ShowToastDialog.showToast("Coming Soon");
       Get.back();
       return;
     }
@@ -191,7 +285,7 @@ class DashBoardController extends GetxController {
       selectedDrawerIndex.value = index;
     }
     Get.back();
-  }
+  }*/
 
 
   /*Future<void> onSelectItem(int index) async {

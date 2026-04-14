@@ -17,163 +17,233 @@ class DashBoardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetX<DashBoardController>(
+    /*return GetX<DashBoardController>(
         init: DashBoardController(),
-        builder: (controller) {
-          return Scaffold(
-            backgroundColor: AppColors.moroccoBackground,
-            drawerEnableOpenDragGesture: false,
-            appBar: AppBar(
-              backgroundColor: AppColors.moroccoBackground,
-              elevation: 0,
-              centerTitle: true,
-              title: controller.selectedDrawerIndex.value != 0 &&
-                      controller.selectedDrawerIndex.value != 6
-                  ? ShaderMask(
-                      shaderCallback: (bounds) => const LinearGradient(
-                        colors: [AppColors.moroccoRed, AppColors.moroccoGreen],
-                      ).createShader(bounds),
-                      child: Text(
-                        controller
-                            .drawerItems[controller.selectedDrawerIndex.value]
-                            .title
-                            .tr,
-                        style: GoogleFonts.outfit(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 22,
-                        ),
-                      ),
-                    )
-                  : Hero(
-                      tag: 'app_logo',
-                      child: Image.asset(
-                        'assets/images/splash_image.png',
-                        height: 90,
-                      ),
-                    ),
-              leading: Builder(builder: (context) {
-                return Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Container(
-                    decoration: BoxDecoration(
+        builder: (controller) {*/
+   // final DashBoardController controller = Get.find<DashBoardController>();
+    final DashBoardController controller = Get.isRegistered<DashBoardController>()
+        ? Get.find<DashBoardController>()
+        : Get.put(DashBoardController());
+
+    return GetX<DashBoardController>(
+        builder: (_) {
+      return Scaffold(
+        backgroundColor:
+            AppColors.moroccoBackground,
+        drawerEnableOpenDragGesture: false,
+        appBar: AppBar(
+          backgroundColor:
+              AppColors.moroccoBackground,
+          elevation: 0,
+          centerTitle: true,
+          title: controller.selectedDrawerIndex
+                          .value !=
+                      0 &&
+                  controller.selectedDrawerIndex
+                          .value !=
+                      6
+              ? ShaderMask(
+                  shaderCallback: (bounds) =>
+                      const LinearGradient(
+                    colors: [
+                      AppColors.moroccoRed,
+                      AppColors.moroccoGreen
+                    ],
+                  ).createShader(bounds),
+                  child: Text(
+                    controller
+                        .drawerItems[controller
+                            .selectedDrawerIndex
+                            .value]
+                        .title
+                        .tr,
+                    style: GoogleFonts.outfit(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 10,
-                        )
-                      ],
+                      fontWeight: FontWeight.bold,
+                      fontSize: 22,
                     ),
-                    child: IconButton(
-                      onPressed: () {
-                        Scaffold.of(context).openDrawer();
-                      /*  if (controller.selectedDrawerIndex.value == 2) {
+                  ),
+                )
+              : Image.asset(
+                  'assets/images/splash_image.png',
+                  height: 90,
+                ),
+
+          /*Hero(
+                    tag: 'app_logo',
+                    child: Image.asset(
+                      'assets/images/splash_image.png',
+                      height: 90,
+                    ),
+                  ),*/
+          leading: Builder(builder: (context) {
+            return Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius:
+                      BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black
+                          .withOpacity(0.05),
+                      blurRadius: 10,
+                    )
+                  ],
+                ),
+                child: IconButton(
+                  onPressed: () {
+                    Scaffold.of(context)
+                        .openDrawer();
+                    /*  if (controller.selectedDrawerIndex.value == 2) {
                           controller.selectedDrawerIndex(0);
                         } else {
                           controller.selectedDrawerIndex(2);
                         }*/
-                      },
-                      icon: SvgPicture.asset(
-                        'assets/icons/ic_humber.svg',
-                        colorFilter: const ColorFilter.mode(
-                            AppColors.moroccoRed, BlendMode.srcIn),
-                      ),
-                    ),
+                  },
+                  icon: SvgPicture.asset(
+                    'assets/icons/ic_humber.svg',
+                    colorFilter:
+                        const ColorFilter.mode(
+                            AppColors.moroccoRed,
+                            BlendMode.srcIn),
+                  ),
+                ),
+              ),
+            );
+          }),
+          actions: [
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                  vertical: 8.0, horizontal: 4.0),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius:
+                      BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black
+                          .withOpacity(0.05),
+                      blurRadius: 10,
+                    )
+                  ],
+                ),
+                child: IconButton(
+                  onPressed: () {
+                    Get.offAll(() => GetBuilder<
+                            GlobalSettingController>(
+                          init:
+                              GlobalSettingController(),
+                          builder: (controller) =>
+                              const SplashScreen(),
+                        ));
+                  },
+                  icon: const Icon(
+                    Icons.refresh,
+                    color: AppColors.moroccoRed,
+                  ),
+                ),
+              ),
+            ),
+            Obx(() {
+              UserModel driverModel =
+                  controller.driverUser.value;
+              if (driverModel.id == null) {
+                return const Padding(
+                  padding: EdgeInsets.all(12.0),
+                  child:
+                      CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor:
+                        AlwaysStoppedAnimation<
+                                Color>(
+                            AppColors.moroccoRed),
                   ),
                 );
-              }),
-              actions: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+              }
+              return InkWell(
+                onTap: () {
+                  _showLogoutDialog(
+                      context, controller);
+                },
+                child: Padding(
+                  padding:
+                      const EdgeInsets.all(8.0),
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                          color: AppColors
+                              .moroccoGreen,
+                          width: 1.5),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 10,
+                          color: Colors.black
+                              .withOpacity(0.1),
+                          blurRadius: 8,
                         )
                       ],
                     ),
-                    child: IconButton(
-                      onPressed: () {
-                        Get.offAll(() => GetBuilder<GlobalSettingController>(
-                              init: GlobalSettingController(),
-                              builder: (controller) => const SplashScreen(),
-                            ));
-                      },
-                      icon: const Icon(
-                        Icons.refresh,
-                        color: AppColors.moroccoRed,
+                    child: ClipOval(
+                      child: CachedNetworkImage(
+                        height: 36,
+                        width: 36,
+                        imageUrl: driverModel
+                            .profilePic
+                            .toString(),
+                        fit: BoxFit.cover,
+                        placeholder: (context,
+                                url) =>
+                            const Center(
+                                child:
+                                    CircularProgressIndicator(
+                                        strokeWidth:
+                                            1)),
+                        errorWidget: (context,
+                                url, error) =>
+                            Image.network(
+                          Constant
+                              .userPlaceHolder,
+                          fit: BoxFit.cover,
+                        ),
                       ),
                     ),
                   ),
                 ),
-                Obx(() {
-                  UserModel driverModel = controller.driverUser.value;
-                  if (driverModel.id == null) {
-                    return const Padding(
-                      padding: EdgeInsets.all(12.0),
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(AppColors.moroccoRed),
-                      ),
-                    );
-                  }
-                  return InkWell(
-                    onTap: () {
-                      _showLogoutDialog(context, controller);
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(color: AppColors.moroccoGreen, width: 1.5),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 8,
-                            )
-                          ],
-                        ),
-                        child: ClipOval(
-                          child: CachedNetworkImage(
-                            height: 36,
-                            width: 36,
-                            imageUrl: driverModel.profilePic.toString(),
-                            fit: BoxFit.cover,
-                            placeholder: (context, url) => const Center(child: CircularProgressIndicator(strokeWidth: 1)),
-                            errorWidget: (context, url, error) => Image.network(
-                              Constant.userPlaceHolder,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  );
-                })
-              ],
-            ),
-            drawer: buildAppDrawer(context, controller),
-            body: WillPopScope(
-                onWillPop: controller.onWillPop,
-                child: controller
-                    .getDrawerItemWidget(controller.selectedDrawerIndex.value)),
-          );
-        });
+              );
+            })
+          ],
+        ),
+        drawer:
+            buildAppDrawer(context, controller),
+        /*body: WillPopScope(
+            onWillPop: controller.onWillPop,
+            child: controller.getDrawerItemWidget(
+                controller
+                    .selectedDrawerIndex.value)),*/
+
+        body: WillPopScope(
+          onWillPop: controller.onWillPop,
+          child: IndexedStack(
+            index: controller
+                .selectedDrawerIndex.value,
+            children: controller.drawerPages,
+          ),
+        ),
+      );
+    });
   }
 
-  Drawer buildAppDrawer(BuildContext context, DashBoardController controller) {
+  Drawer buildAppDrawer(BuildContext context,
+      DashBoardController controller) {
     // Use drawerItems from the controller
     var drawerItems = controller.drawerItems;
 
     return Drawer(
-      backgroundColor: AppColors.moroccoBackground,
+      backgroundColor:
+          AppColors.moroccoBackground,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
           topRight: Radius.circular(30),
@@ -194,26 +264,40 @@ class DashBoardScreen extends StatelessWidget {
           Column(
             children: [
               // Drawer Header
-              _buildDrawerHeader(context, controller),
+              _buildDrawerHeader(
+                  context, controller),
 
               // Drawer Items
               Expanded(
                 child: ListView.builder(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8),
                   itemCount: drawerItems.length,
                   itemBuilder: (context, i) {
                     var d = drawerItems[i];
-                    bool isSelected = i == controller.selectedDrawerIndex.value;
+                    bool isSelected = i ==
+                        controller
+                            .selectedDrawerIndex
+                            .value;
 
                     if (d.isHeader) {
                       return Padding(
-                        padding: const EdgeInsets.only(top: 15, bottom: 8, left: 16),
+                        padding:
+                            const EdgeInsets.only(
+                                top: 15,
+                                bottom: 8,
+                                left: 16),
                         child: Text(
                           d.title.tr,
-                          style: GoogleFonts.outfit(
-                            color: AppColors.moroccoRed.withOpacity(0.8),
-                            fontWeight: FontWeight.bold,
+                          style:
+                              GoogleFonts.outfit(
+                            color: AppColors
+                                .moroccoRed
+                                .withOpacity(0.8),
+                            fontWeight:
+                                FontWeight.bold,
                             fontSize: 14,
                             letterSpacing: 1.2,
                           ),
@@ -222,54 +306,88 @@ class DashBoardScreen extends StatelessWidget {
                     }
 
                     return Padding(
-                      padding: const EdgeInsets.only(bottom: 4),
+                      padding:
+                          const EdgeInsets.only(
+                              bottom: 4),
                       child: InkWell(
-                        onTap: () {
+                        /*  onTap: () {
                           Navigator.pop(context); // Close drawer
                           controller.onSelectItem(i);
+                        },*/
+
+                        onTap: () async {
+                          Navigator.pop(context);
+                          await controller
+                              .onSelectItem(i);
                         },
                         child: Container(
-                          decoration: BoxDecoration(
+                          decoration:
+                              BoxDecoration(
                             color: isSelected
-                                ? AppColors.moroccoRed.withOpacity(0.1)
-                                : Colors.transparent,
-                            borderRadius: BorderRadius.circular(15),
+                                ? AppColors
+                                    .moroccoRed
+                                    .withOpacity(
+                                        0.1)
+                                : Colors
+                                    .transparent,
+                            borderRadius:
+                                BorderRadius
+                                    .circular(15),
                           ),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 12),
+                          padding:
+                              const EdgeInsets
+                                  .symmetric(
+                                  horizontal: 16,
+                                  vertical: 12),
                           child: Row(
                             children: [
                               SvgPicture.asset(
                                 d.icon,
                                 width: 22,
-                                colorFilter: ColorFilter.mode(
+                                colorFilter:
+                                    ColorFilter
+                                        .mode(
                                   isSelected
-                                      ? AppColors.moroccoRed
-                                      : Colors.grey.shade500,
+                                      ? AppColors
+                                          .moroccoRed
+                                      : Colors
+                                          .grey
+                                          .shade500,
                                   BlendMode.srcIn,
                                 ),
                               ),
-                              const SizedBox(width: 16),
+                              const SizedBox(
+                                  width: 16),
                               Text(
                                 d.title.tr,
-                                style: GoogleFonts.outfit(
+                                style: GoogleFonts
+                                    .outfit(
                                   color: isSelected
-                                      ? AppColors.moroccoRed
-                                      : Colors.grey.shade700,
+                                      ? AppColors
+                                          .moroccoRed
+                                      : Colors
+                                          .grey
+                                          .shade700,
                                   fontWeight: isSelected
-                                      ? FontWeight.bold
-                                      : FontWeight.w500,
+                                      ? FontWeight
+                                          .bold
+                                      : FontWeight
+                                          .w500,
                                   fontSize: 16,
                                 ),
                               ),
-                              if (isSelected) const Spacer(),
+                              if (isSelected)
+                                const Spacer(),
                               if (isSelected)
                                 Container(
                                   width: 6,
                                   height: 6,
-                                  decoration: const BoxDecoration(
-                                    color: AppColors.moroccoRed,
-                                    shape: BoxShape.circle,
+                                  decoration:
+                                      const BoxDecoration(
+                                    color: AppColors
+                                        .moroccoRed,
+                                    shape: BoxShape
+                                        .circle,
                                   ),
                                 ),
                             ],
@@ -288,12 +406,16 @@ class DashBoardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDrawerHeader(BuildContext context, DashBoardController controller) {
+  Widget _buildDrawerHeader(BuildContext context,
+      DashBoardController controller) {
     return Obx(() {
-      UserModel userModel = controller.driverUser.value;
+      UserModel userModel =
+          controller.driverUser.value;
       return Container(
         padding: EdgeInsets.only(
-          top: MediaQuery.of(context).padding.top + 24,
+          top:
+              MediaQuery.of(context).padding.top +
+                  24,
           bottom: 24,
           left: 20,
           right: 20,
@@ -311,61 +433,98 @@ class DashBoardScreen extends StatelessWidget {
             Container(
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(color: Colors.grey.withOpacity(0.2), width: 1),
+                border: Border.all(
+                    color: Colors.grey
+                        .withOpacity(0.2),
+                    width: 1),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black
+                        .withOpacity(0.05),
                     blurRadius: 10,
                   )
                 ],
               ),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(50),
+                borderRadius:
+                    BorderRadius.circular(50),
                 child: userModel.id != null
                     ? CachedNetworkImage(
                         height: 75,
                         width: 75,
-                        imageUrl: userModel.profilePic.toString(),
+                        imageUrl: userModel
+                            .profilePic
+                            .toString(),
                         fit: BoxFit.cover,
-                        placeholder: (context, url) => const Center(
-                            child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.moroccoRed)),
-                        errorWidget: (context, url, error) => Image.network(Constant.userPlaceHolder, fit: BoxFit.cover),
+                        placeholder: (context,
+                                url) =>
+                            const Center(
+                                child: CircularProgressIndicator(
+                                    strokeWidth:
+                                        2,
+                                    color: AppColors
+                                        .moroccoRed)),
+                        errorWidget: (context,
+                                url, error) =>
+                            Image.network(
+                                Constant
+                                    .userPlaceHolder,
+                                fit:
+                                    BoxFit.cover),
                       )
                     : Container(
                         height: 75,
                         width: 75,
-                        color: Colors.grey.shade200,
-                        child: Icon(Icons.person, color: Colors.grey.shade400, size: 40),
+                        color:
+                            Colors.grey.shade200,
+                        child: Icon(Icons.person,
+                            color: Colors
+                                .grey.shade400,
+                            size: 40),
                       ),
               ),
             ),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment:
+                    CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    userModel.fullName.toString().isEmpty ? "Loading...".tr : userModel.fullName.toString(),
+                    userModel.fullName
+                            .toString()
+                            .isEmpty
+                        ? "Loading...".tr
+                        : userModel.fullName
+                            .toString(),
                     style: GoogleFonts.outfit(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.moroccoRed, // Dark Morocco Red/Brown
+                      color: AppColors
+                          .moroccoRed, // Dark Morocco Red/Brown
                     ),
                     maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                    overflow:
+                        TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      const Icon(Icons.star, color: AppColors.moroccoRed, size: 18),
+                      const Icon(Icons.star,
+                          color: AppColors
+                              .moroccoRed,
+                          size: 18),
                       const SizedBox(width: 4),
                       Text(
-                        controller.userRating.value,
+                        controller
+                            .userRating.value,
                         style: GoogleFonts.outfit(
                           fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.grey.shade700,
+                          fontWeight:
+                              FontWeight.w600,
+                          color: Colors
+                              .grey.shade700,
                         ),
                       ),
                     ],
@@ -388,20 +547,24 @@ class DashBoardScreen extends StatelessWidget {
     });
   }
 
-  void _showLogoutDialog(BuildContext context, DashBoardController controller) {
+  void _showLogoutDialog(BuildContext context,
+      DashBoardController controller) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape: RoundedRectangleBorder(
+              borderRadius:
+                  BorderRadius.circular(20)),
           title: Text(
             "Log out".tr,
             style: GoogleFonts.outfit(
-                fontWeight: FontWeight.bold, color: AppColors.moroccoRed),
+                fontWeight: FontWeight.bold,
+                color: AppColors.moroccoRed),
           ),
           content: Text(
-            "Are you sure you want to log out?".tr,
+            "Are you sure you want to log out?"
+                .tr,
             style: GoogleFonts.outfit(),
           ),
           actions: [
@@ -409,17 +572,20 @@ class DashBoardScreen extends StatelessWidget {
               onPressed: () => Get.back(),
               child: Text(
                 "No".tr,
-                style: GoogleFonts.outfit(color: Colors.grey),
+                style: GoogleFonts.outfit(
+                    color: Colors.grey),
               ),
             ),
             TextButton(
               onPressed: () {
-                controller.onSelectItem(17);
+                Get.back();
+                controller.onSelectItem(18);
               },
               child: Text(
                 "Yes".tr,
                 style: GoogleFonts.outfit(
-                    color: AppColors.moroccoRed, fontWeight: FontWeight.bold),
+                    color: AppColors.moroccoRed,
+                    fontWeight: FontWeight.bold),
               ),
             ),
           ],
@@ -429,30 +595,39 @@ class DashBoardScreen extends StatelessWidget {
   }
 }
 
-class MoroccanPatternPainter extends CustomPainter {
+class MoroccanPatternPainter
+    extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = AppColors.moroccoRed.withOpacity(0.2)
+      ..color =
+          AppColors.moroccoRed.withOpacity(0.2)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 0.8;
 
     const double patternSize = 80.0;
 
-    for (double x = 0; x < size.width + patternSize; x += patternSize) {
-      for (double y = 0; y < size.height + patternSize; y += patternSize) {
-        _drawEightPointStar(canvas, Offset(x, y), patternSize * 0.4, paint);
+    for (double x = 0;
+        x < size.width + patternSize;
+        x += patternSize) {
+      for (double y = 0;
+          y < size.height + patternSize;
+          y += patternSize) {
+        _drawEightPointStar(canvas, Offset(x, y),
+            patternSize * 0.4, paint);
       }
     }
   }
 
-  void _drawEightPointStar(
-      Canvas canvas, Offset center, double radius, Paint paint) {
+  void _drawEightPointStar(Canvas canvas,
+      Offset center, double radius, Paint paint) {
     Path path = Path();
     for (int i = 0; i < 8; i++) {
       double angle = i * math.pi / 4;
-      double x = center.dx + radius * math.cos(angle);
-      double y = center.dy + radius * math.sin(angle);
+      double x =
+          center.dx + radius * math.cos(angle);
+      double y =
+          center.dy + radius * math.sin(angle);
       if (i == 0) {
         path.moveTo(x, y);
       } else {
@@ -460,8 +635,10 @@ class MoroccanPatternPainter extends CustomPainter {
       }
 
       double nextAngle = (i + 0.5) * math.pi / 4;
-      double nextX = center.dx + (radius * 0.7) * math.cos(nextAngle);
-      double nextY = center.dy + (radius * 0.7) * math.sin(nextAngle);
+      double nextX = center.dx +
+          (radius * 0.7) * math.cos(nextAngle);
+      double nextY = center.dy +
+          (radius * 0.7) * math.sin(nextAngle);
       path.lineTo(nextX, nextY);
     }
     path.close();
@@ -469,5 +646,7 @@ class MoroccanPatternPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(
+          covariant CustomPainter oldDelegate) =>
+      false;
 }
