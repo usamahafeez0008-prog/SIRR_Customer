@@ -110,75 +110,26 @@ class _HomeScreenState extends State<HomeScreen> {
                         elevation: 4,
                         onPressed: () async {
                           try {
-                            if (controller.mapController == null) {
-                              ShowToastDialog.showToast('Map is not ready yet.');
-                              return;
-                            }
-
-                            final serviceEnabled =
-                                await Geolocator.isLocationServiceEnabled();
-                            if (!serviceEnabled) {
-                              ShowToastDialog.showToast(
-                                  'Location services are disabled.');
-                              return;
-                            }
-
-                            var permission =
-                                await Geolocator.checkPermission();
-                            if (permission == LocationPermission.denied) {
-                              permission =
-                                  await Geolocator.requestPermission();
-                            }
-                            if (permission == LocationPermission.denied ||
-                                permission ==
-                                    LocationPermission.deniedForever) {
-                              ShowToastDialog.showToast(
-                                  'Location permission is not granted.');
-                              return;
-                            }
-
-                            if (!_locationReady) {
-                              _locationReady = true;
-                              if (mounted) setState(() {});
-                            }
-
-                            Future<void> animateTo(
-                                double lat, double lng) async {
-                              await controller.mapController?.animateCamera(
-                                CameraUpdate.newCameraPosition(
-                                  CameraPosition(
-                                    target: LatLng(lat, lng),
-                                    zoom: 15.0,
-                                  ),
-                                ),
-                              );
-
-                              final screenH =
-                                  MediaQuery.of(context).size.height;
-                              await Future.delayed(
-                                  const Duration(milliseconds: 300));
-                              controller.mapController?.animateCamera(
-                                CameraUpdate.scrollBy(0, screenH * 0.28),
-                              );
-                            }
-
-                            // Fast feedback: use cached location first (if available),
-                            // then refine with a fresh GPS fix.
-                            final lastKnown =
-                                await Geolocator.getLastKnownPosition();
-                            if (lastKnown != null) {
-                              await animateTo(
-                                lastKnown.latitude,
-                                lastKnown.longitude,
-                              );
-                            }
-
                             final pos = await Geolocator.getCurrentPosition(
                               desiredAccuracy: LocationAccuracy.high,
-                              timeLimit: const Duration(seconds: 6),
                             );
 
-                            await animateTo(pos.latitude, pos.longitude);
+                            await controller.mapController?.animateCamera(
+                              CameraUpdate.newCameraPosition(
+                                CameraPosition(
+                                  target: LatLng(pos.latitude, pos.longitude),
+                                  zoom: 15.0,
+                                ),
+                              ),
+                            );
+
+                            final screenH = MediaQuery.of(context).size.height;
+
+                            await Future.delayed(const Duration(milliseconds: 300));
+
+                            controller.mapController?.animateCamera(
+                              CameraUpdate.scrollBy(0, screenH * 0.28),
+                            );
                           } catch (_) {
                             ShowToastDialog.showToast('Unable to retrieve location.');
                           }
