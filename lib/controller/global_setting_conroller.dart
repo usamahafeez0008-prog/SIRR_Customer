@@ -28,21 +28,35 @@ class GlobalSettingController extends GetxController {
       LanguageModel languageModel = Constant.getLanguage();
       LocalizationService().changeLocale(languageModel.code.toString());
     } else {
-      await FireStoreUtils.getLanguage().then((value) {
-        if (value != null) {
-          List<LanguageModel> languageList = value;
+      // Old behavior (kept for reference): use Firestore-configured default language.
+      // This was overriding the desired first-time default when Preferences had no language saved.
+      //
+      // await FireStoreUtils.getLanguage().then((value) {
+      //   if (value != null) {
+      //     List<LanguageModel> languageList = value;
+      //
+      //     if (languageList.where((element) => element.isDefault == true).isNotEmpty) {
+      //       LanguageModel languageModel =
+      //           languageList.firstWhere((element) => element.isDefault == true);
+      //       Preferences.setString(Preferences.languageCodeKey, jsonEncode(languageModel));
+      //       LocalizationService().changeLocale(languageModel.code.toString());
+      //     }
+      //   }
+      // });
 
-          if (languageList
-              .where((element) => element.isDefault == true)
-              .isNotEmpty) {
-            LanguageModel languageModel =
-            languageList.firstWhere((element) => element.isDefault == true);
-            Preferences.setString(
-                Preferences.languageCodeKey, jsonEncode(languageModel));
-            LocalizationService().changeLocale(languageModel.code.toString());
-          }
-        }
-      });
+      // New behavior (2026-04-15): default language for first-time users is French.
+      final LanguageModel languageModel = LanguageModel(
+        code: 'fr',
+        name: 'French',
+        isRtl: false,
+        enable: true,
+        isDefault: true,
+      );
+      Preferences.setString(
+        Preferences.languageCodeKey,
+        jsonEncode(languageModel),
+      );
+      LocalizationService().changeLocale(languageModel.code.toString());
     }
 
     await FireStoreUtils().getCurrency().then((value) {

@@ -34,7 +34,20 @@ import 'package:http/http.dart' as http;
 
 class HomeController extends GetxController {
   //DashBoardController dashboardController = Get.put(DashBoardController());
-  final DashBoardController dashboardController = Get.find<DashBoardController>();
+  // NOTE (2026-04-15): This used to be `Get.find<DashBoardController>()`.
+  // After logout/login, GetX registrations can be cleared and `HomeController`
+  // may get created before `DashBoardController`, causing:
+  // "DashBoardController not found..."
+  //
+  // Keeping this guarded ensures Home still works without changing behavior
+  // in the normal (already-registered) case.
+  //
+  // Old (kept for reference):
+  // final DashBoardController dashboardController = Get.find<DashBoardController>();
+  final DashBoardController dashboardController =
+      Get.isRegistered<DashBoardController>()
+          ? Get.find<DashBoardController>()
+          : Get.put(DashBoardController());
 
   Rx<TextEditingController> sourceLocationController =
       TextEditingController().obs;

@@ -123,6 +123,7 @@ const Map<String, String> enUS = {
   "Please select date and time": "Please select date and time",
   // "Services are currently unavailable on the selected location. Please reach out to the administrator for assistance.":"Services are currently unavailable on the selected location. Please reach out to the administrator for assistance.",
   "Select Payment Method": "Select Payment Method",
+  "Cash": "Cash",
   // "You are not able book new ride please complete previous ride payment":"You are not able book new ride please complete previous ride payment",
   'Add your parcel image.': 'Add your parcel image.',
   "Which vehicle is suitable for your cargo?": "Which vehicle is suitable for your cargo?",
@@ -137,6 +138,7 @@ const Map<String, String> enUS = {
   "No driver Found": "No driver Found",
   "Reject": "Reject",
   'Ride Canceled': 'Ride Canceled',
+  "Ride Completed": "Ride Completed",
   'The passenger has canceled the ride. No action is required from your end.': 'The passenger has canceled the ride. No action is required from your end.',
   "Accept": "Accept",
   'Ride Confirmed': 'Ride Confirmed',
@@ -155,6 +157,8 @@ const Map<String, String> enUS = {
   "Active Rides": "Active Rides",
   "Completed Rides": "Completed Rides",
   "Canceled Rides": "Canceled Rides",
+  "Completed": "Completed",
+  "Cancelled": "Cancelled",
   "No active rides Found": "No active rides Found",
   "View bids": "View bids",
   'Ride Booked': 'Ride Booked',
@@ -227,7 +231,7 @@ const Map<String, String> enUS = {
   'Settings': 'Settings',
   'Referral a friends': 'Referral a friends',
   'Inbox': 'Inbox',
-  'Profile': 'Profile',
+  'My Profile': 'Profile',
   'Log out': 'Log out',
   'Select A/C OR Non A/C': 'Select A/C OR Non A/C',
   'A/C': 'A/C',
@@ -286,5 +290,19 @@ const Map<String, String> enUS = {
   "Enter the code sent to\n": "Enter the code sent to\n",
   "Didn't receive code?": "Didn't receive code?",
   "6/7 XX XX XX XX": "6/7 XX XX XX XX",
-  "Required": "Required"
+  "Required": "Required",
+  "Phone Number": "Phone Number",
+  "Forgot Password?": "Forgot Password?",
+  "Forgot Password": "Forgot Password",
+  "Send OTP": "Send OTP",
+  "How can we help you?":"How can we help you?",
+  "Our Address": "Our Address",
+  "Delete Address" : "Delete Address",
+  "Are you sure you want to delete this address?": "Are you sure you want to delete this address?",
+  "Delete": "Delete",
+  "Address deleted successfully":"Address deleted successfully"
+
+
+
+
 };

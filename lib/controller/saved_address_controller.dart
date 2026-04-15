@@ -52,7 +52,7 @@ class SavedAddressController extends GetxController {
           .then((value) {
         addressList.removeWhere((element) => element.id == addressId);
         ShowToastDialog.closeLoader();
-        ShowToastDialog.showToast("Address deleted successfully");
+        ShowToastDialog.showToast("Address deleted successfully".tr);
         
         // If address list becomes empty, we should ideally mark addressSave as false in parent doc
         if (addressList.isEmpty) {

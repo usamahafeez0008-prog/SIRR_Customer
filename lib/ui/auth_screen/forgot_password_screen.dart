@@ -65,7 +65,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
                 ),*/
 
                 // Back Button
-                SafeArea(
+             /*   SafeArea(
                   child: Padding(
                     padding: const EdgeInsets.only(left: 24.0, top: 20),
                     child: IconButton(
@@ -76,7 +76,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
                       ),
                     ),
                   ),
-                ),
+                ),*/
 
                 // Main Content
                 SafeArea(

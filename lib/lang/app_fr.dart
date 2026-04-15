@@ -1,5 +1,5 @@
 const Map<String, String> frFR = {
-  'GoRide': 'GoRide',
+
   "Sign up": "S'inscrire",
   "Create your account to start using GoRide": "Créez votre compte pour commencer à utiliser GoRide",
   "Full name": "Nom complet",
@@ -126,6 +126,7 @@ const Map<String, String> frFR = {
   "No driver Found": "Aucun chauffeur trouvé",
   "Reject": "Rejeter",
   'Ride Canceled': 'Course annulée',
+  "Ride Completed": "Course terminée",
   'The passenger has canceled the ride. No action is required from your end.': 'Le passager a annulé la course. Aucune action requise de votre part.',
   "Accept": "Accepter",
   'Ride Confirmed': 'Course confirmée',
@@ -143,9 +144,12 @@ const Map<String, String> frFR = {
   "Active Rides": "Courses actives",
   "Completed Rides": "Courses terminées",
   "Canceled Rides": "Courses annulées",
+  "Completed": "Terminée",
+  "Cancelled": "Annulée",
   "No active rides Found": "Aucune course active trouvée",
   "View bids": "Voir les offres",
   'Ride Booked': 'Course réservée',
+  'Cash': 'Espèces',
   'Your ride is booked. and you enjoy this ride and here is a otp to conform this ride': 'Votre course est réservée. Profitez de votre trajet et voici un code OTP pour confirmer cette course',
   "SOS": "SOS",
   "Your request is": "Votre demande est",
@@ -214,7 +218,7 @@ const Map<String, String> frFR = {
   'Settings': 'Paramètres',
   'Referral a friends': 'Parrainer des amis',
   'Inbox': 'Boîte de réception',
-  'Profile': 'Profil',
+  'My Profile': 'Mon profil',
   'Log out': 'Se déconnecter',
   'Select A/C OR Non A/C': 'Sélectionner A/C ou Non A/C',
   'A/C': 'A/C',
@@ -273,5 +277,22 @@ const Map<String, String> frFR = {
   "Enter the code sent to\n": "Entrez le code envoyé à\n",
   "Didn't receive code?": "Vous n'avez pas reçu le code ?",
   "6/7 XX XX XX XX": "6/7 XX XX XX XX",
-  "Required": "Requis"
+  "Required": "Requis",
+  "Forgot Password?": "Mot de passe oublié ?",
+  "Forgot Password": "Mot de passe oublié",
+  "Phone Number": "Numéro de téléphone",
+  "Send OTP": "Envoyer OTP",
+  "How can we help you?":"Comment pouvons-nous vous aider?",
+  "Our Address": "Notre adresse",
+  "Delete Address" : "Supprimer l'adresse",
+  "Are you sure you want to delete this address?": "Êtes-vous sûr de vouloir supprimer cette adresse?",
+  "Delete": "Supprimer",
+  "Address deleted successfully":"Adresse supprimée avec succès",
+
+
+
+
+
+
+
 };

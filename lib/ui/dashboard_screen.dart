@@ -5,6 +5,7 @@ import 'package:customer/controller/dash_board_controller.dart';
 import 'package:customer/model/user_model.dart';
 import 'package:customer/themes/app_colors.dart';
 import 'package:customer/utils/fire_store_utils.dart';
+import 'package:customer/ui/profile_screen/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
@@ -94,8 +95,7 @@ class DashBoardScreen extends StatelessWidget {
                 ),
                 child: IconButton(
                   onPressed: () {
-                    Scaffold.of(context)
-                        .openDrawer();
+                    Scaffold.of(context).openDrawer();
                     /*  if (controller.selectedDrawerIndex.value == 2) {
                           controller.selectedDrawerIndex(0);
                         } else {
@@ -165,8 +165,8 @@ class DashBoardScreen extends StatelessWidget {
               }
               return InkWell(
                 onTap: () {
-                  _showLogoutDialog(
-                      context, controller);
+                  //_showLogoutDialog(context, controller);
+                  Get.to(() => const ProfileScreen());
                 },
                 child: Padding(
                   padding:
@@ -190,17 +190,13 @@ class DashBoardScreen extends StatelessWidget {
                       child: CachedNetworkImage(
                         height: 36,
                         width: 36,
-                        imageUrl: driverModel
-                            .profilePic
-                            .toString(),
+                        imageUrl: driverModel.profilePic.toString(),
                         fit: BoxFit.cover,
                         placeholder: (context,
                                 url) =>
                             const Center(
                                 child:
-                                    CircularProgressIndicator(
-                                        strokeWidth:
-                                            1)),
+                                    CircularProgressIndicator(strokeWidth: 1)),
                         errorWidget: (context,
                                 url, error) =>
                             Image.network(
@@ -579,7 +575,8 @@ class DashBoardScreen extends StatelessWidget {
             TextButton(
               onPressed: () {
                 Get.back();
-                controller.onSelectItem(18);
+                // Updated logout index after adding "My Profile" drawer item.
+                controller.onSelectItem(19);
               },
               child: Text(
                 "Yes".tr,

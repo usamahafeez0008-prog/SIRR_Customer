@@ -110,36 +110,49 @@ class SettingScreen extends StatelessWidget {
                                     'assets/icons/ic_language.svg',
                                 title:
                                     "Language".tr,
-                                onTap: ()  {ShowToastDialog.showToast("Coming Soon");},
-                                /* trailing: SizedBox(
+                                //onTap: ()  {ShowToastDialog.showToast("Coming Soon");},
+                                trailing:
+                                    SizedBox(
                                   width: 120,
-                                  child: DropdownButtonHideUnderline(
+                                  child:
+                                      DropdownButtonHideUnderline(
                                     child: DropdownButtonFormField(
                                         isExpanded: true,
                                         alignment: Alignment.centerRight,
                                         decoration: const InputDecoration(
-                                          contentPadding: EdgeInsets.zero,
-                                          border: InputBorder.none,
-                                          isDense: true,
+                                          contentPadding:
+                                              EdgeInsets.zero,
+                                          border:
+                                              InputBorder.none,
+                                          isDense:
+                                              true,
                                         ),
                                         icon: Icon(Icons.keyboard_arrow_down_rounded, color: themeChange.getThem() ? Colors.white70 : Colors.black45),
                                         value: controller.selectedLanguage.value.id == null ? null : controller.selectedLanguage.value,
                                         onChanged: (value) {
-                                          controller.selectedLanguage.value = value!;
-                                          LocalizationService().changeLocale(value.code.toString());
-                                          Preferences.setString(Preferences.languageCodeKey, jsonEncode(controller.selectedLanguage.value));
+                                          controller
+                                              .selectedLanguage
+                                              .value = value!;
+                                          LocalizationService().changeLocale(value
+                                              .code
+                                              .toString());
+                                          Preferences.setString(
+                                              Preferences.languageCodeKey,
+                                              jsonEncode(controller.selectedLanguage.value));
                                         },
                                         hint: Text("Select".tr, style: GoogleFonts.outfit(fontSize: 14)),
                                         items: controller.languageList.map((item) {
                                           return DropdownMenuItem(
-                                            value: item,
-                                            child: Text(item.name.toString(),
-                                              textAlign: TextAlign.end,
-                                              style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.w500)),
+                                            value:
+                                                item,
+                                            child: Text(
+                                                item.name.toString(),
+                                                textAlign: TextAlign.end,
+                                                style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.w500)),
                                           );
                                         }).toList()),
                                   ),
-                                ),*/
+                                ),
                               ),
                               const SizedBox(
                                   height: 16),
@@ -229,7 +242,8 @@ class SettingScreen extends StatelessWidget {
                                     'assets/icons/ic_support.svg',
                                 title:
                                     "Support".tr,
-                                onTap: () async {
+                                onTap: () => Constant.makePhoneCall("+1234567890"),
+                               /* onTap: () async {
                                   final Uri url =
                                       Uri.parse(Constant
                                           .supportURL
@@ -240,7 +254,7 @@ class SettingScreen extends StatelessWidget {
                                         'Could not launch ${Constant.supportURL.toString()}'
                                             .tr);
                                   }
-                                },
+                                },*/
                                 trailing: Icon(
                                     Icons
                                         .arrow_forward_ios_rounded,

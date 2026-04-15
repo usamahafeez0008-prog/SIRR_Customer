@@ -8,7 +8,11 @@ import 'package:get/get.dart';
 
 class LocalizationService extends Translations {
   // Default locale
-  static const locale = Locale('en', 'US');
+  // Old default (kept for reference):
+  // static const locale = Locale('en', 'US');
+  //
+  // Default locale for first-time users (no saved language in Preferences).
+  static const locale = Locale('fr');
 
   static Locale get currentLocale {
     if (Preferences.getString(Preferences.languageCodeKey).toString().isNotEmpty) {

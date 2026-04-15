@@ -1,5 +1,4 @@
 const Map<String, String> arAR = {
-  'GoRide': 'جو رايد',
   "Sign up": "إنشاء حساب",
   "Create your account to start using GoRide": "قم بإنشاء حسابك لبدء استخدام جو رايد",
   "Full name": "الاسم الكامل",
@@ -17,6 +16,8 @@ const Map<String, String> arAR = {
   "Welcome Back! We are happy to have \n you back": "مرحبًا بعودتك! نحن سعداء بوجودك مجددًا",
   "Next": "التالي",
   "OR": "أو",
+  'Cash': 'نقدي',
+  'Select Payment type': 'حدد نوع الدفع',
   "Login with google": "تسجيل الدخول باستخدام جوجل",
   "This user is disable please contact administrator": "هذا المستخدم معطل، يرجى التواصل مع المسؤول",
   "Login with apple": "تسجيل الدخول باستخدام أبل",
@@ -70,7 +71,6 @@ const Map<String, String> arAR = {
   "Approx distance": "المسافة التقريبية",
   "Your Price is": "سعرك هو",
   "Enter your offer rate": "أدخل السعر المقترح",
-  "Select Payment type": "اختر طريقة الدفع",
   "Book Ride": "احجز رحلة",
   "Please select Payment Method": "الرجاء اختيار طريقة الدفع",
   "Please select source location": "الرجاء اختيار موقع الانطلاق",
@@ -126,6 +126,7 @@ const Map<String, String> arAR = {
   "No driver Found": "لم يتم العثور على سائق",
   "Reject": "رفض",
   'Ride Canceled': 'تم إلغاء الرحلة',
+  "Ride Completed": "اكتملت الرحلة",
   'The passenger has canceled the ride. No action is required from your end.': 'قام الراكب بإلغاء الرحلة. لا يتطلب الأمر أي إجراء منك.',
   "Accept": "قبول",
   'Ride Confirmed': 'تم تأكيد الرحلة',
@@ -142,6 +143,8 @@ const Map<String, String> arAR = {
   "Active Rides": "الرحلات النشطة",
   "Completed Rides": "الرحلات المكتملة",
   "Canceled Rides": "الرحلات الملغاة",
+  "Completed": "مكتملة",
+  "Cancelled": "ملغاة",
   "No active rides Found": "لم يتم العثور على رحلات نشطة",
   "View bids": "عرض العطاءات",
   'Ride Booked': 'تم حجز الرحلة',
@@ -213,7 +216,7 @@ const Map<String, String> arAR = {
   'Settings': 'الإعدادات',
   'Referral a friends': 'إحالة الأصدقاء',
   'Inbox': 'صندوق الوارد',
-  'Profile': 'الملف الشخصي',
+  'My Profile': 'ملفي الشخصي',
   'Log out': 'تسجيل خروج',
   'Select A/C OR Non A/C': 'اختر مكيف أو غير مكيف',
   'A/C': 'مكيف',
@@ -272,5 +275,22 @@ const Map<String, String> arAR = {
   "Enter the code sent to\n": "أدخل الرمز المرسل إلى\n",
   "Didn't receive code?": "لم تستلم الرمز؟",
   "6/7 XX XX XX XX": "6/7 XX XX XX XX",
-  "Required": "مطلوب"
+  "Required": "مطلوب",
+  "Forgot Password?": "نسيت كلمة المرور؟",
+  "Forgot Password": "نسيت كلمة المرور",
+  "Phone Number": "رقم الهاتف",
+  "Send OTP": "إرسال الرمز",
+  "How can we help you?":"كيف يمكننا مساعدتك؟",
+  "Our Address": "عنواننا",
+  "Delete Address" : "حذف العنوان",
+  "Are you sure you want to delete this address?": "هل أنت متأكد من رغبتك في حذف هذا العنوان؟",
+  "Delete": "يمسح",
+  "Address deleted successfully" : "تم حذف العنوان بنجاح"
+
+
+
+
+
+
+
 };

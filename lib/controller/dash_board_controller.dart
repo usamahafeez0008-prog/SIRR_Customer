@@ -5,6 +5,7 @@ import 'package:customer/ui/contact_us/contact_us_screen.dart';
 import 'package:customer/ui/faq/faq_screen.dart';
 import 'package:customer/ui/home_screens/home_screen.dart';
 import 'package:customer/ui/orders/order_screen.dart';
+import 'package:customer/ui/profile_screen/profile_screen.dart';
 import 'package:customer/ui/settings_screen/setting_screen.dart';
 import 'package:customer/ui/address/saved_address_screen.dart';
 import 'package:customer/ui/wallet/wallet_screen.dart';
@@ -46,6 +47,7 @@ class DashBoardController extends GetxController {
 
     // Application Section
     DrawerItem('Application', '', isHeader: true),
+    DrawerItem('My Profile', "assets/icons/ic_profile.svg"),
     DrawerItem('Settings', "assets/icons/ic_settings.svg"),
     DrawerItem('Notifications', "assets/icons/ic_inbox.svg"),
     DrawerItem('Accessibility', "assets/icons/ic_settings.svg"),
@@ -98,10 +100,11 @@ class DashBoardController extends GetxController {
       const ContactUsScreen(),            // 12
       const HomeScreen(),                 // 13
       const HomeScreen(),                 // 14 header fallback
-      const SettingScreen(),              // 15
-      const HomeScreen(),                 // 16
+      const ProfileScreen(),              // 15
+      const SettingScreen(),              // 16
       const HomeScreen(),                 // 17
-      const HomeScreen(),                 // 18 logout placeholder
+      const HomeScreen(),                 // 18
+      const HomeScreen(),                 // 19 logout placeholder
     ];
 
     getDriver();
@@ -238,12 +241,13 @@ class DashBoardController extends GetxController {
   Future<void> onSelectItem(int index) async {
     if (drawerItems[index].isHeader) return;
 
-    if (index == 7 || index == 8 || index == 9 || index == 13 || index == 16 || index == 17) {
+    // "Coming Soon" routes (keep behavior unchanged, just updated indices after adding My Profile).
+    if (index == 7 || index == 8 || index == 9 || index == 13 || index == 17 || index == 18) {
       ShowToastDialog.showToast("Coming Soon");
       return;
     }
 
-    if (index == 18) {
+    if (index == 19) {
       try {
         ZegoCallService().uninitZego();
         await FirebaseAuth.instance.signOut();

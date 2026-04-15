@@ -34,7 +34,7 @@ class ProfileScreen extends StatelessWidget {
               body: Column(
                 children: [
                   Container(
-                    height: Responsive.width(45, context),
+                    height: Responsive.width(75, context),
                     width: Responsive.width(100, context),
                     color: AppColors.lightprimary,
                     child: Stack(

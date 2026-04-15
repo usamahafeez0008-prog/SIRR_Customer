@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:developer';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -37,8 +38,10 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   bool _locationPermissionHandled = false;
-  bool _locationReady = false;
+  bool _locationReady = true;
   bool _initialCameraMoved = false;
+  final Completer<GoogleMapController> _mapControllerCompleter = Completer();
+
 
   @override
   void initState() {
@@ -78,13 +81,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     Positioned.fill(
                       child: Obx(
                             () => GoogleMap(
-                          onMapCreated: (mapCont) {
-                            controller.mapController = mapCont;
-
-                            if (_locationReady && !_initialCameraMoved) {
-                              _moveCameraToCurrentLocation(controller);
-                            }
-                          },
+                              onMapCreated: (GoogleMapController mapCont) {
+                                if (!_mapControllerCompleter.isCompleted) {
+                                  _mapControllerCompleter.complete(mapCont);
+                                }
+                                controller.mapController = mapCont;
+                              },
                           initialCameraPosition: CameraPosition(
                             target: LatLng(
                               controller.sourceLocationLAtLng.value.latitude ?? 31.511750025123046,
@@ -110,6 +112,49 @@ class _HomeScreenState extends State<HomeScreen> {
                         elevation: 4,
                         onPressed: () async {
                           try {
+                            final GoogleMapController mapController =
+                            await _mapControllerCompleter.future;
+
+                            final pos = await _getUserLocation();
+                            if (pos == null) return;
+
+                            final LatLng latLng =
+                            LatLng(pos.latitude, pos.longitude);
+
+                            final screenH = MediaQuery.of(context).size.height;
+
+                            // STEP 1: Move to location
+                            await mapController.animateCamera(
+                              CameraUpdate.newLatLngZoom(latLng, 17),
+                            );
+
+                            // STEP 2: SHIFT UP (important for center view)
+                            await Future.delayed(const Duration(milliseconds: 300));
+
+                            mapController.animateCamera(
+                              CameraUpdate.scrollBy(0, screenH * 0.25),
+                            );
+
+                            // MARKER
+                            controller.markers.removeWhere(
+                                    (m) => m.markerId.value == "me");
+
+                            controller.markers.add(
+                              Marker(
+                                markerId: const MarkerId("me"),
+                                position: latLng,
+                              ),
+                            );
+
+                            controller.update();
+
+                          } catch (e) {
+                            print("ERROR: $e");
+                          }
+                        },
+
+                        /*onPressed: () async {
+                          try {
                             final pos = await Geolocator.getCurrentPosition(
                               desiredAccuracy: LocationAccuracy.high,
                             );
@@ -122,18 +167,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                               ),
                             );
-
                             final screenH = MediaQuery.of(context).size.height;
-
                             await Future.delayed(const Duration(milliseconds: 300));
-
                             controller.mapController?.animateCamera(
                               CameraUpdate.scrollBy(0, screenH * 0.28),
                             );
                           } catch (_) {
                             ShowToastDialog.showToast('Unable to retrieve location.');
                           }
-                        },
+                        },*/
                         child: const Icon(
                           Icons.my_location,
                           color: AppColors.moroccoRed,
@@ -388,6 +430,36 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     } catch (_) {}
   }*/
+
+
+  Future<Position?> _getUserLocation() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    // Check if location services are enabled
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      ShowToastDialog.showToast("Location services are disabled.");
+      return null;
+    }
+
+    // Check permission
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      ShowToastDialog.showToast("Location permissions are permanently denied.");
+      return null;
+    }
+
+    return await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.high,
+    );
+  }
+
+
   Future<void>
       _checkLocationPermissionOnOpen() async {
     if (_locationPermissionHandled) return;
@@ -836,6 +908,7 @@ Widget _buildBottomBookingCard(
                                     ? controller
                                         .selectedPaymentMethod
                                         .value
+                                        .tr
                                     : "Select Payment type"
                                         .tr,
                                 style: GoogleFonts
