@@ -300,7 +300,10 @@ const Map<String, String> enUS = {
   "Delete Address" : "Delete Address",
   "Are you sure you want to delete this address?": "Are you sure you want to delete this address?",
   "Delete": "Delete",
-  "Address deleted successfully":"Address deleted successfully"
+  "Address deleted successfully":"Address deleted successfully",
+  "Your ride has officially started. Have a safe journey!":"Your ride has officially started. Have a safe journey!",
+
+
 
 
 

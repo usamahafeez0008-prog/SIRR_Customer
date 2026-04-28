@@ -25,6 +25,30 @@ Future<void> firebaseMessageBackgroundHandle(RemoteMessage message) async {
 class NotificationService {
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
+  String _currentLangCode() {
+    // Prefer GetX locale (active in-app language); fallback to device locale if needed.
+    final locale = Get.locale;
+    if (locale != null && locale.languageCode.isNotEmpty) return locale.languageCode;
+    final deviceLocale = Get.deviceLocale;
+    if (deviceLocale != null && deviceLocale.languageCode.isNotEmpty) return deviceLocale.languageCode;
+    return 'en';
+  }
+
+  String? _pickLocalizedFromData(Map<String, dynamic> data, String baseKey) {
+    // Common backend patterns: title_en/title_fr, body_en/body_fr, etc.
+    final lang = _currentLangCode();
+    final candidates = <String>[
+      '${baseKey}_$lang',
+      baseKey,
+    ];
+
+    for (final key in candidates) {
+      final v = data[key];
+      if (v is String && v.trim().isNotEmpty) return v;
+    }
+    return null;
+  }
+
   Future<void> initInfo() async {
     await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
       alert: true,
@@ -135,6 +159,12 @@ class NotificationService {
     try {
       // final id = DateTime.now().millisecondsSinceEpoch ~/ 1000;
 
+      final data = message.data;
+      final localizedTitle = _pickLocalizedFromData(data, 'title');
+      final localizedBody = _pickLocalizedFromData(data, 'body');
+      final titleToShow = localizedTitle ?? message.notification?.title;
+      final bodyToShow = localizedBody ?? message.notification?.body;
+
       AndroidNotificationChannel channel = const AndroidNotificationChannel(
         '0',
         'goRide-customer',
@@ -147,8 +177,8 @@ class NotificationService {
       NotificationDetails notificationDetailsBoth = NotificationDetails(android: notificationDetails, iOS: darwinNotificationDetails);
       await FlutterLocalNotificationsPlugin().show(
         0,
-        message.notification!.title,
-        message.notification!.body,
+        titleToShow,
+        bodyToShow,
         notificationDetailsBoth,
         payload: jsonEncode(message.data),
       );

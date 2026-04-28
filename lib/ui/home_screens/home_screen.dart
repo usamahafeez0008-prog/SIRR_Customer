@@ -89,8 +89,10 @@ class _HomeScreenState extends State<HomeScreen> {
                               },
                           initialCameraPosition: CameraPosition(
                             target: LatLng(
-                              controller.sourceLocationLAtLng.value.latitude ?? 31.511750025123046,
-                              controller.sourceLocationLAtLng.value.longitude ?? 74.31415762965483,
+                              controller.sourceLocationLAtLng.value.latitude ?? 33.58304764570302,
+                              controller.sourceLocationLAtLng.value.longitude ?? -7.593192852741156,
+                              /*controller.sourceLocationLAtLng.value.latitude ?? 31.511750025123046,
+                              controller.sourceLocationLAtLng.value.longitude ?? 74.31415762965483,*/
                             ),
                             zoom: 14.0,
                           ),
@@ -123,7 +125,26 @@ class _HomeScreenState extends State<HomeScreen> {
 
                             final screenH = MediaQuery.of(context).size.height;
 
-                            // STEP 1: Move to location
+                            // STEP 1: FORCE move instantly (no animation queue)
+                            mapController.moveCamera(
+                              CameraUpdate.newCameraPosition(
+                                CameraPosition(
+                                  target: latLng,
+                                  zoom: 17,
+                                ),
+                              ),
+                            );
+
+// STEP 2: small delay for UI settle
+                            await Future.delayed(const Duration(milliseconds: 100));
+
+// STEP 3: shift for bottom card
+                            mapController.moveCamera(
+                              CameraUpdate.scrollBy(0, screenH * 0.25),
+                            );
+
+
+                            /*// STEP 1: Move to location
                             await mapController.animateCamera(
                               CameraUpdate.newLatLngZoom(latLng, 17),
                             );
@@ -133,7 +154,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                             mapController.animateCamera(
                               CameraUpdate.scrollBy(0, screenH * 0.25),
-                            );
+                            );*/
 
                             // MARKER
                             controller.markers.removeWhere(
@@ -674,21 +695,23 @@ Widget _buildBottomBookingCard(
                   var filteredServices =
                       controller.serviceList
                           .where((service) {
-                    String title = Constant
-                        .localizationTitle(
-                            service.title);
+                    final bool isWomenService = (service.title ?? const [])
+                        .any((t) {
+                      final v = (t.title ?? '').trim().toLowerCase();
+                      return v == 'siir women' ||
+                          v == 'siir femmes' ||
+                          v == 'سيير نساء';
+                    });
                     if (controller.userModel.value
                             .userTitle ==
                         "Mr") {
-                      return title !=
-                          "Siir Women";
+                      return !isWomenService;
                     } else if (controller
                             .userModel
                             .value
                             .userTitle ==
                         "Mme") {
-                      return title ==
-                          "Siir Women";
+                      return isWomenService;
                     }
                     return true;
                   }).toList();

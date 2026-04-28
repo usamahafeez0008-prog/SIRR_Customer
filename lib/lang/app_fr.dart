@@ -288,6 +288,8 @@ const Map<String, String> frFR = {
   "Are you sure you want to delete this address?": "Êtes-vous sûr de vouloir supprimer cette adresse?",
   "Delete": "Supprimer",
   "Address deleted successfully":"Adresse supprimée avec succès",
+  "A customer has placed a ride near your location.":"Un client a demandé une course près de votre position.",
+
 
 
 

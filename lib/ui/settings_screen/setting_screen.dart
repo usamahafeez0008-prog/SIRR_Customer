@@ -154,9 +154,8 @@ class SettingScreen extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                              const SizedBox(
-                                  height: 16),
-                              _buildSettingCard(
+                              const SizedBox(height: 16),
+                           /*   _buildSettingCard(
                                 themeChange,
                                 icon:
                                     'assets/icons/ic_light_drak.svg',
@@ -233,9 +232,9 @@ class SettingScreen extends StatelessWidget {
                                         }).toList()),
                                   ),
                                 ),
-                              ),
-                              const SizedBox(
-                                  height: 16),
+                              ),*/
+                              /*const SizedBox(
+                                  height: 16),*/
                               _buildSettingCard(
                                 themeChange,
                                 icon:

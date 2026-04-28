@@ -278,6 +278,12 @@ class DashBoardScreen extends StatelessWidget {
                             .selectedDrawerIndex
                             .value;
 
+                    // Commented out: "My Wallet" drawer item (hide only this entry without
+                    // shifting indices or affecting other drawer functionality).
+                    if (d.title == 'My Wallet') {
+                      return const SizedBox.shrink();
+                    }
+
                     if (d.isHeader) {
                       return Padding(
                         padding:

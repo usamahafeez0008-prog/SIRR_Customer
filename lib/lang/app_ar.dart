@@ -285,7 +285,10 @@ const Map<String, String> arAR = {
   "Delete Address" : "حذف العنوان",
   "Are you sure you want to delete this address?": "هل أنت متأكد من رغبتك في حذف هذا العنوان؟",
   "Delete": "يمسح",
-  "Address deleted successfully" : "تم حذف العنوان بنجاح"
+  "Address deleted successfully" : "تم حذف العنوان بنجاح",
+  "A customer has placed a ride near your location.":"قام عميل بطلب رحلة بالقرب من موقعك.",
+
+
 
 
 
