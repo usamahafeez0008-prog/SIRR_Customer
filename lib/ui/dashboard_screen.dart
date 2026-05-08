@@ -581,8 +581,8 @@ class DashBoardScreen extends StatelessWidget {
             TextButton(
               onPressed: () {
                 Get.back();
-                // Updated logout index after adding "My Profile" drawer item.
-                controller.onSelectItem(19);
+                // Updated logout index after drawer section cleanup.
+                controller.onSelectItem(9);
               },
               child: Text(
                 "Yes".tr,

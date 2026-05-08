@@ -33,24 +33,25 @@ class DashBoardController extends GetxController {
     DrawerItem('My Wallet', "assets/icons/ic_wallet.svg"),
 
 
-    // Safety Section
-    DrawerItem('Safety', '', isHeader: true),
-    DrawerItem('Safety center', "assets/icons/ic_help_support.svg"),
-    DrawerItem('Trusted contacts', "assets/icons/ic_profile.svg"),
-    DrawerItem('Share my trip', "assets/icons/ic_invite.svg"), 
+    // 2026-04-29: Safety Section commented out (was Coming Soon).
+    // DrawerItem('Safety', '', isHeader: true),
+    // DrawerItem('Safety center', "assets/icons/ic_help_support.svg"),
+    // DrawerItem('Trusted contacts', "assets/icons/ic_profile.svg"),
+    // DrawerItem('Share my trip', "assets/icons/ic_invite.svg"),
 
-    // Support Section
-    DrawerItem('Support', '', isHeader: true),
-    DrawerItem('Help / FAQ', "assets/icons/ic_faq.svg"),
-    DrawerItem('Contact us', "assets/icons/ic_contact_us.svg"),
-    DrawerItem('Report a problem', "assets/icons/ic_support.svg"),
+    // 2026-04-29: Support Section commented out (was Coming Soon).
+    // DrawerItem('Support', '', isHeader: true),
+    // DrawerItem('Help / FAQ', "assets/icons/ic_faq.svg"),
+    // DrawerItem('Contact us', "assets/icons/ic_contact_us.svg"),
+    // DrawerItem('Report a problem', "assets/icons/ic_support.svg"),
 
     // Application Section
     DrawerItem('Application', '', isHeader: true),
     DrawerItem('My Profile', "assets/icons/ic_profile.svg"),
     DrawerItem('Settings', "assets/icons/ic_settings.svg"),
-    DrawerItem('Notifications', "assets/icons/ic_inbox.svg"),
-    DrawerItem('Accessibility', "assets/icons/ic_settings.svg"),
+    // 2026-04-29: Commented out (was Coming Soon).
+    // DrawerItem('Notifications', "assets/icons/ic_inbox.svg"),
+    // DrawerItem('Accessibility', "assets/icons/ic_settings.svg"),
 
     // Logout
     DrawerItem('Log out', "assets/icons/ic_logout.svg"),
@@ -91,20 +92,10 @@ class DashBoardController extends GetxController {
       const OrderScreen(initialIndex: 1), // 3
       const SavedAddressScreen(),         // 4
       const WalletScreen(),               // 5
-      const HomeScreen(),                 // 6 header fallback
-      const HomeScreen(),                 // 7
-      const HomeScreen(),                 // 8
-      const HomeScreen(),                 // 9
-      const HomeScreen(),                 // 10 header fallback
-      const FaqScreen(),                  // 11
-      const ContactUsScreen(),            // 12
-      const HomeScreen(),                 // 13
-      const HomeScreen(),                 // 14 header fallback
-      const ProfileScreen(),              // 15
-      const SettingScreen(),              // 16
-      const HomeScreen(),                 // 17
-      const HomeScreen(),                 // 18
-      const HomeScreen(),                 // 19 logout placeholder
+      const HomeScreen(),                 // 6 header fallback (Application)
+      const ProfileScreen(),              // 7
+      const SettingScreen(),              // 8
+      const HomeScreen(),                 // 9 logout placeholder
     ];
 
     getDriver();
@@ -241,13 +232,7 @@ class DashBoardController extends GetxController {
   Future<void> onSelectItem(int index) async {
     if (drawerItems[index].isHeader) return;
 
-    // "Coming Soon" routes (keep behavior unchanged, just updated indices after adding My Profile).
-    if (index == 7 || index == 8 || index == 9 || index == 13 || index == 17 || index == 18) {
-      ShowToastDialog.showToast("Coming Soon");
-      return;
-    }
-
-    if (index == 19) {
+    if (index == 9) {
       try {
         ZegoCallService().uninitZego();
         await FirebaseAuth.instance.signOut();

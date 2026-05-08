@@ -14,6 +14,7 @@ import 'package:customer/utils/DarkThemeProvider.dart';
 import 'package:customer/utils/fire_store_utils.dart';
 import 'package:customer/widget/location_view.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -508,16 +509,36 @@ class OrderDetailsScreen extends StatelessWidget {
                                                                                 children: [
                                                                                   Icon(Icons.near_me_outlined, size: 14, color: Colors.black),
                                                                                   const SizedBox(width: 4),
-                                                                                  Text(
-                                                                                    "${orderModel.distance} ${Constant.distanceType} away",
-                                                                                    style: GoogleFonts.outfit(color: Colors.black, fontSize: 12, fontWeight: FontWeight.bold),
-                                                                                  ),
+                                                                                  // Old behavior (trip distance). Kept for reference.
+                                                                                  // Text(
+                                                                                  //   "${orderModel.distance} ${Constant.distanceType} away",
+                                                                                  //   style: GoogleFonts.outfit(color: Colors.black, fontSize: 12, fontWeight: FontWeight.bold),
+                                                                                  // ),
+                                                                                  Builder(builder: (context) {
+                                                                                    final pickupLat = orderModel.sourceLocationLAtLng?.latitude;
+                                                                                    final pickupLng = orderModel.sourceLocationLAtLng?.longitude;
+
+                                                                                    final driverGeo = driverModel.position?.geoPoint;
+                                                                                    final driverLat = driverGeo?.latitude ?? driverModel.location?.latitude;
+                                                                                    final driverLng = driverGeo?.longitude ?? driverModel.location?.longitude;
+
+                                                                                    if (pickupLat == null || pickupLng == null || driverLat == null || driverLng == null) {
+                                                                                      return Text(
+                                                                                        "-- ${Constant.distanceType} away",
+                                                                                        style: GoogleFonts.outfit(color: Colors.black, fontSize: 12, fontWeight: FontWeight.bold),
+                                                                                      );
+                                                                                    }
+
+                                                                                    final meters = Geolocator.distanceBetween(driverLat, driverLng, pickupLat, pickupLng);
+                                                                                    final km = meters / 1000.0;
+
+                                                                                    return Text(
+                                                                                      "${km.toStringAsFixed(1)} ${Constant.distanceType} away",
+                                                                                      style: GoogleFonts.outfit(color: Colors.black, fontSize: 12, fontWeight: FontWeight.bold),
+                                                                                    );
+                                                                                  }),
                                                                                 ],
                                                                               ),
-                                                                              // Text(
-                                                                              //   "RECOMMANDE".tr.toUpperCase(),
-                                                                              //   style: GoogleFonts.outfit(color: Colors.blue, fontWeight: FontWeight.bold, fontSize: 10),
-                                                                              // ),
                                                                             ],
                                                                           ),
                                                                         ),

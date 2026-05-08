@@ -52,7 +52,7 @@ class InboxScreen extends StatelessWidget {
                       return InkWell(
                         onTap: () async {
                           DashBoardController dashboardController = Get.put(DashBoardController());
-                          dashboardController.selectedDrawerIndex(10);
+                          dashboardController.selectedDrawerIndex(0);
                         },
                         child: Padding(
                           padding: const EdgeInsets.all(4.0),
